@@ -1,0 +1,36 @@
+{
+  "name": "easy-chat-maker",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=18.14.1"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "record:server": "node scripts/playwright-recorder-server.mjs",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/react": "^4.4.2",
+    "@astrojs/tailwind": "^6.0.2",
+    "astro": "^4.16.0",
+    "autoprefixer": "^10.5.2",
+    "html-to-image": "^1.11.13",
+    "html2canvas": "^1.4.1",
+    "idb-keyval": "^6.2.5",
+    "lucide-react": "^1.23.0",
+    "mp4-muxer": "^5.2.2",
+    "nanoid": "^5.1.16",
+    "postcss": "^8.5.15",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "tailwindcss": "^3.4.19",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "ffmpeg-static": "^5.3.0",
+    "playwright": "^1.61.1"
+  }
+}

@@ -1,0 +1,8 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { ChatEditorApp } from '../components/editor/ChatEditorApp';
+import '../styles/global.css';
+---
+<Layout title="Easy Chat Maker - Chat Mockup Editor">
+  <ChatEditorApp client:only="react" />
+</Layout>
