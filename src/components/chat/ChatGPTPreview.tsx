@@ -138,7 +138,7 @@ export const ChatGPTPreview: React.FC<Props> = ({
                         e.preventDefault();
                         document.execCommand('insertText', false, e.clipboardData.getData('text/plain'));
                       }}
-                      className={`text-[15px] leading-[21px] outline-none ${isEditor ? 'cursor-text' : 'select-none'}`}
+                      className={`text-[14px] leading-[19.5px] outline-none ${isEditor ? 'cursor-text' : 'select-none'}`}
                       style={{ overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}
                     >
                       {msg.kind === 'text' ? msg.text : ''}
@@ -166,7 +166,7 @@ export const ChatGPTPreview: React.FC<Props> = ({
                     e.preventDefault();
                     document.execCommand('insertText', false, e.clipboardData.getData('text/plain'));
                   }}
-                  className={`${textPrimary} text-[15.5px] leading-[24px] outline-none ${isEditor ? 'cursor-text' : 'select-none'}`}
+                  className={`${textPrimary} text-[14.5px] leading-[22px] outline-none ${isEditor ? 'cursor-text' : 'select-none'}`}
                   style={{ overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}
                 >
                   {msg.kind === 'text' ? msg.text : ''}

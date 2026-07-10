@@ -134,7 +134,7 @@ export const ClaudePreview: React.FC<Props> = ({
                   <img src={msg.objectUrl} alt="" className="max-h-[260px] max-w-[210px] rounded-[16px] object-cover" />
                 ) : (
                   <div className={`${bubbleBg} ${textPrimary} max-w-[80%] rounded-[16px] px-3.5 py-2.5`}>
-                    {editableText(msg, 'text-[14.5px] leading-[20px]')}
+                    {editableText(msg, 'text-[13.5px] leading-[19px]')}
                   </div>
                 )}
                 {isEditor && (
@@ -149,7 +149,7 @@ export const ClaudePreview: React.FC<Props> = ({
               {msg.kind === 'image' && msg.objectUrl ? (
                 <img src={msg.objectUrl} alt="" className="max-h-[260px] max-w-[210px] rounded-[16px] object-cover" />
               ) : (
-                editableText(msg, `${textPrimary} text-[16.5px] leading-[25px]`, { fontFamily: SERIF })
+                editableText(msg, `${textPrimary} text-[15.5px] leading-[23px]`, { fontFamily: SERIF })
               )}
               <div className={`${iconColor} mt-3 flex items-center gap-[18px]`}>
                 <Copy size={15} strokeWidth={1.8} />

@@ -165,7 +165,7 @@ export const GeminiPreview: React.FC<Props> = ({
                   <img src={msg.objectUrl} alt="" className="max-h-[260px] max-w-[210px] rounded-[18px] object-cover" />
                 ) : (
                   <div className={`${bubbleBg} ${textPrimary} max-w-[78%] rounded-[20px] rounded-br-[6px] px-4 py-2.5`}>
-                    {editableText(msg, 'text-[15px] leading-[21px]')}
+                    {editableText(msg, 'text-[14px] leading-[19.5px]')}
                   </div>
                 )}
                 {isEditor && (
@@ -180,7 +180,7 @@ export const GeminiPreview: React.FC<Props> = ({
               {msg.kind === 'image' && msg.objectUrl ? (
                 <img src={msg.objectUrl} alt="" className="max-h-[260px] max-w-[210px] rounded-[18px] object-cover" />
               ) : (
-                editableText(msg, `${textPrimary} text-[15.5px] leading-[24px]`)
+                editableText(msg, `${textPrimary} text-[14.5px] leading-[22px]`)
               )}
               <div className={`${iconColor} mt-3 flex items-center gap-[18px]`}>
                 <ThumbsUp size={15} strokeWidth={2} />
