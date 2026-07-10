@@ -122,7 +122,7 @@ export const PhonePreview: React.FC = () => {
       >
         {/* Phone shell */}
         <div
-          className={`absolute inset-0 rounded-[44px] border-[10px] overflow-visible shadow-2xl ${
+          className={`absolute inset-0 rounded-[44px] border-[10px] overflow-hidden shadow-2xl ${
             isDark ? 'border-[#1a1a1a] bg-[#1a1a1a]' : 'border-[#222] bg-[#222]'
           }`}
           style={{ boxShadow: '0 0 0 1px rgba(0,0,0,0.4), 0 30px 80px rgba(0,0,0,0.5)' }}
