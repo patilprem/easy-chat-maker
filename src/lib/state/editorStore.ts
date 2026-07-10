@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid';
 import { parseChatScript, generateInitialsAvatar } from '../parser/parseChatScript';
 import { saveMedia, resolveObjectUrl } from '../media/mediaStore';
 import { PRESETS } from '../templates/presets';
+import { isAiPlatform } from '../parser/types';
 import type { ChatProject, Message, Participant, Reaction } from '../parser/types';
 
 const STORAGE_KEY = 'ecm:v1:project';
@@ -61,6 +62,10 @@ function formatDateChip(date = new Date()): string {
 }
 
 function defaultSubtitleForPlatform(platform: ChatProject['platform'], isGroup: boolean, participantCount: number): string {
+  // AI platforms use the subtitle as the model label
+  if (platform === 'chatgpt') return '';
+  if (platform === 'claude') return 'Opus 4.8';
+  if (platform === 'gemini') return 'Flash';
   if (isGroup) {
     if (platform === 'slack') return `${participantCount} members • 4 tabs`;
     if (platform === 'telegram') return `${participantCount} members, 2 online`;
@@ -112,7 +117,8 @@ export const useEditorStore = create<EditorState>((set, get) => {
     parseAndLoad: (script, selfSpeakerName) => {
       const result = parseChatScript(script, selfSpeakerName);
       if (result.participants.length === 0) return;
-      const isGroup = result.participants.filter((x) => !x.isSelf).length > 1;
+      const isGroup = !isAiPlatform(get().project.platform)
+        && result.participants.filter((x) => !x.isSelf).length > 1;
       const otherParticipant = result.participants.find((x) => !x.isSelf);
       const groupCreatedMessage = result.messages.find((m) => (
         m.kind === 'system' && /created group/i.test(m.text)
@@ -139,11 +145,16 @@ export const useEditorStore = create<EditorState>((set, get) => {
       set({ scriptInput: '', warnings: [] });
     },
 
-    setPlatform: (platform) => update((p) => ({
-      ...p,
-      platform,
-      subtitle: defaultSubtitleForPlatform(platform, p.isGroup, p.participants.length),
-    })),
+    setPlatform: (platform) => update((p) => {
+      // AI assistant platforms are always 1:1 — group chat is disabled
+      const isGroup = isAiPlatform(platform) ? false : p.isGroup;
+      return {
+        ...p,
+        platform,
+        isGroup,
+        subtitle: defaultSubtitleForPlatform(platform, isGroup, p.participants.length),
+      };
+    }),
     setTheme: (theme) => update((p) => ({ ...p, theme })),
     setDeviceOS: (deviceOS) => update((p) => ({ ...p, deviceOS })),
     setTitle: (title) => update((p) => ({ ...p, title })),

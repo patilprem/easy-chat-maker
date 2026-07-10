@@ -5,6 +5,9 @@ import { MessengerPreview } from './MessengerPreview';
 import { SlackPreview } from './SlackPreview';
 import { TelegramPreview } from './TelegramPreview';
 import { DiscordPreview } from './DiscordPreview';
+import { ChatGPTPreview } from './ChatGPTPreview';
+import { ClaudePreview } from './ClaudePreview';
+import { GeminiPreview } from './GeminiPreview';
 import type { ChatProject, Message } from '../../lib/parser/types';
 
 interface Props {
@@ -51,6 +54,12 @@ export const ChatPreview: React.FC<Props> = ({ project, mode, id, feedRef, style
         <TelegramPreview project={project} mode={mode} feedRef={feedRef} {...rest} />
       ) : project.platform === 'discord' ? (
         <DiscordPreview project={project} mode={mode} feedRef={feedRef} {...rest} />
+      ) : project.platform === 'chatgpt' ? (
+        <ChatGPTPreview project={project} mode={mode} feedRef={feedRef} {...rest} />
+      ) : project.platform === 'claude' ? (
+        <ClaudePreview project={project} mode={mode} feedRef={feedRef} {...rest} />
+      ) : project.platform === 'gemini' ? (
+        <GeminiPreview project={project} mode={mode} feedRef={feedRef} {...rest} />
       ) : (
         <MessengerPreview project={project} mode={mode} feedRef={feedRef} {...rest} />
       )}

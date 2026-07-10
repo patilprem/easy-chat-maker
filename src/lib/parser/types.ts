@@ -1,4 +1,10 @@
-export type Platform = 'whatsapp' | 'instagram' | 'messenger' | 'slack' | 'telegram' | 'discord';
+export type Platform = 'whatsapp' | 'instagram' | 'messenger' | 'slack' | 'telegram' | 'discord' | 'chatgpt' | 'claude' | 'gemini';
+
+/** AI assistant platforms: single-user chats, no group mode */
+export const AI_PLATFORMS: Platform[] = ['chatgpt', 'claude', 'gemini'];
+export function isAiPlatform(p: Platform): boolean {
+  return AI_PLATFORMS.includes(p);
+}
 export type Theme = 'light' | 'dark';
 export type DeviceOS = 'ios' | 'android';
 
