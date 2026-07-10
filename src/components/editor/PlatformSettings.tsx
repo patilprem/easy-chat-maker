@@ -84,55 +84,33 @@ const AppleLogoIcon: React.FC = () => (
 export const PlatformSettings: React.FC = () => {
   const { project, setPlatform, setTheme, setDeviceOS, reset } = useEditorStore();
 
-  const platforms: Array<{
-    id: Platform;
-    name: string;
-    icon: React.ReactNode;
+  const platformGroups: Array<{
+    label: string;
+    items: Array<{ id: Platform; name: string; icon: React.ReactNode }>;
   }> = [
     {
-      id: 'whatsapp',
-      name: 'WhatsApp',
-      icon: <WaIcon />,
+      label: 'Messaging',
+      items: [
+        { id: 'whatsapp', name: 'WhatsApp', icon: <WaIcon /> },
+        { id: 'instagram', name: 'Instagram', icon: <InstagramIcon /> },
+        { id: 'messenger', name: 'Messenger', icon: <MessengerIcon /> },
+        { id: 'telegram', name: 'Telegram', icon: <TelegramIcon /> },
+      ],
     },
     {
-      id: 'instagram',
-      name: 'Instagram',
-      icon: <InstagramIcon />,
+      label: 'Team & community',
+      items: [
+        { id: 'slack', name: 'Slack', icon: <SlackIcon /> },
+        { id: 'discord', name: 'Discord', icon: <DiscordIcon /> },
+      ],
     },
     {
-      id: 'messenger',
-      name: 'Messenger',
-      icon: <MessengerIcon />,
-    },
-    {
-      id: 'slack',
-      name: 'Slack',
-      icon: <SlackIcon />,
-    },
-    {
-      id: 'telegram',
-      name: 'Telegram',
-      icon: <TelegramIcon />,
-    },
-    {
-      id: 'discord',
-      name: 'Discord',
-      icon: <DiscordIcon />,
-    },
-    {
-      id: 'chatgpt',
-      name: 'ChatGPT',
-      icon: <ChatGPTIcon />,
-    },
-    {
-      id: 'claude',
-      name: 'Claude',
-      icon: <ClaudeIcon />,
-    },
-    {
-      id: 'gemini',
-      name: 'Gemini',
-      icon: <GeminiIcon />,
+      label: 'AI assistants',
+      items: [
+        { id: 'chatgpt', name: 'ChatGPT', icon: <ChatGPTIcon /> },
+        { id: 'claude', name: 'Claude', icon: <ClaudeIcon /> },
+        { id: 'gemini', name: 'Gemini', icon: <GeminiIcon /> },
+      ],
     },
   ];
 
@@ -150,35 +128,42 @@ export const PlatformSettings: React.FC = () => {
         <span className="text-white font-semibold text-sm">Settings</span>
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-3">
         <label className="text-white/50 text-xs font-medium">Platform</label>
-        <div className="grid grid-cols-2 gap-2">
-          {platforms.map((platform) => {
-            const active = project.platform === platform.id;
-            return (
-              <button
-                key={platform.id}
-                onClick={() => setPlatform(platform.id)}
-                className={`flex min-w-0 items-center gap-2 rounded-xl border px-2.5 py-2 text-left transition-all ${
-                  active
-                    ? 'border-[#60EFFF]/70 bg-gradient-to-r from-[#00FF87]/18 to-[#60EFFF]/18 shadow-[0_0_0_1px_rgba(96,239,255,0.18)]'
-                    : 'border-white/10 bg-white/[0.04] hover:border-white/20 hover:bg-white/[0.07]'
-                }`}
-              >
-                <span className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl ${
-                  active
-                    ? 'bg-gradient-to-r from-[#00FF87] to-[#60EFFF] text-[#061116]'
-                    : 'bg-white/8 text-white/65'
-                }`}>
-                  {platform.icon}
-                </span>
-                <span className={`min-w-0 flex-1 truncate text-[13px] font-semibold ${active ? 'text-white' : 'text-white/75'}`}>
-                  {platform.name}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        {platformGroups.map((group) => (
+          <div key={group.label} className="space-y-1.5">
+            <div className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-white/35">
+              {group.label}
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {group.items.map((platform) => {
+                const active = project.platform === platform.id;
+                return (
+                  <button
+                    key={platform.id}
+                    onClick={() => setPlatform(platform.id)}
+                    className={`flex min-w-0 items-center gap-2 rounded-xl border px-2.5 py-2 text-left transition-all ${
+                      active
+                        ? 'border-[#60EFFF]/70 bg-gradient-to-r from-[#00FF87]/18 to-[#60EFFF]/18 shadow-[0_0_0_1px_rgba(96,239,255,0.18)]'
+                        : 'border-white/10 bg-white/[0.04] hover:border-white/20 hover:bg-white/[0.07]'
+                    }`}
+                  >
+                    <span className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl ${
+                      active
+                        ? 'bg-gradient-to-r from-[#00FF87] to-[#60EFFF] text-[#061116]'
+                        : 'bg-white/8 text-white/65'
+                    }`}>
+                      {platform.icon}
+                    </span>
+                    <span className={`min-w-0 flex-1 truncate text-[13px] font-semibold ${active ? 'text-white' : 'text-white/75'}`}>
+                      {platform.name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="space-y-1.5">
