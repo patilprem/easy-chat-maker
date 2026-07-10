@@ -27,7 +27,7 @@ export async function exportPlaywrightVideo(project: ChatProject, onProgress: Pr
       }),
     });
   } catch {
-    throw new Error('Video exporter is not running. Start it with: npm run record:server');
+    throw new Error('Video exporter is not running. Close the app and start it again with "Run App.bat" (or run: npm run record:server).');
   }
 
   if (!response.ok) {
