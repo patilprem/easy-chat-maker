@@ -13,8 +13,14 @@ export default defineConfig({
     enabled: false,
   },
   output: 'static',
+  server: {
+    host: true,
+    port: 4321,
+  },
   vite: {
     server: {
+      host: true,
+      allowedHosts: true,
       fs: {
         allow: [projectRoot],
       },
