@@ -80,6 +80,22 @@ function defaultSubtitleForPlatform(platform: ChatProject['platform'], isGroup: 
   return 'online';
 }
 
+/**
+ * AI chats always open with the user's prompt: make the sender of the
+ * first chat message the self participant so it renders on the user side.
+ */
+function alignFirstMessageToSelf(p: ChatProject): ChatProject {
+  if (!isAiPlatform(p.platform)) return p;
+  const firstMsg = p.messages.find((m) => m.kind === 'text' || m.kind === 'image');
+  if (!firstMsg || !('participantId' in firstMsg)) return p;
+  const firstPid = firstMsg.participantId;
+  if (p.participants.find((pp) => pp.id === firstPid)?.isSelf) return p;
+  return {
+    ...p,
+    participants: p.participants.map((pp) => ({ ...pp, isSelf: pp.id === firstPid })),
+  };
+}
+
 const defaultProject = (): ChatProject => ({
   ...PRESETS.private,
   id: nanoid(),
@@ -126,7 +142,7 @@ export const useEditorStore = create<EditorState>((set, get) => {
       const groupTitle = groupCreatedMessage?.kind === 'system'
         ? groupCreatedMessage.text.match(/created group\s+["“](.+?)["”]/i)?.[1]
         : undefined;
-      update((p) => ({
+      update((p) => alignFirstMessageToSelf({
         ...p,
         id: nanoid(),
         participants: result.participants,
@@ -148,12 +164,12 @@ export const useEditorStore = create<EditorState>((set, get) => {
     setPlatform: (platform) => update((p) => {
       // AI assistant platforms are always 1:1 — group chat is disabled
       const isGroup = isAiPlatform(platform) ? false : p.isGroup;
-      return {
+      return alignFirstMessageToSelf({
         ...p,
         platform,
         isGroup,
         subtitle: defaultSubtitleForPlatform(platform, isGroup, p.participants.length),
-      };
+      });
     }),
     setTheme: (theme) => update((p) => ({ ...p, theme })),
     setDeviceOS: (deviceOS) => update((p) => ({ ...p, deviceOS })),
@@ -217,10 +233,14 @@ export const useEditorStore = create<EditorState>((set, get) => {
         }
       }
       if (!pid) {
-        pid = project.participants.find((pp) => !pp.isSelf)?.id ?? project.participants[0]?.id;
+        // AI chats always start with the user's message
+        const startWithSelf = isAiPlatform(project.platform) && project.messages.length === 0;
+        pid = startWithSelf
+          ? project.participants.find((pp) => pp.isSelf)?.id ?? project.participants[0]?.id
+          : project.participants.find((pp) => !pp.isSelf)?.id ?? project.participants[0]?.id;
       }
       if (!pid) return;
-      
+
       const now = new Date();
       let hours = now.getHours();
       const minutes = now.getMinutes().toString().padStart(2, '0');
