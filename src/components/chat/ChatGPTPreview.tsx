@@ -36,7 +36,7 @@ export const AiMessageActions: React.FC<{
   onDelete?: (id: string) => void;
 }> = ({ msgId, isSelf, accent, onAddText, onDelete }) => (
   <div
-    className={`absolute top-0 ${isSelf ? 'left-[-58px]' : 'right-[-4px]'} flex items-center gap-1 opacity-0 transition-opacity group-hover/aimsg:opacity-100`}
+    className={`absolute top-0 ${isSelf ? 'left-0' : 'right-0'} z-10 flex items-center gap-1 opacity-0 transition-opacity group-hover/aimsg:opacity-100`}
   >
     <button
       onClick={() => onAddText?.(msgId)}
