@@ -36,10 +36,12 @@ export const ChatEditorApp: React.FC = () => {
         {/* Left — Script */}
         <div className="border-r border-white/5 p-5 overflow-y-auto">
           <div className="mb-6">
-            <h1 className="text-xl font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">
-              Easy Chat Maker
-            </h1>
-            <p className="text-white/40 text-xs mt-1">Create realistic chat mockups</p>
+            <a href="/" className="group inline-block" title="Back to homepage">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent group-hover:brightness-110">
+                Easy Chat Maker
+              </h1>
+              <p className="text-white/40 text-xs mt-1 group-hover:text-white/60 transition-colors">Create realistic chat mockups</p>
+            </a>
           </div>
           <ScriptPanel />
         </div>
@@ -60,9 +62,11 @@ export const ChatEditorApp: React.FC = () => {
       <div className="md:hidden flex flex-col min-h-screen">
         {/* Title */}
         <div className="px-4 pt-5 pb-3">
-          <h1 className="text-lg font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">
-            Easy Chat Maker
-          </h1>
+          <a href="/" title="Back to homepage">
+            <h1 className="text-lg font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">
+              Easy Chat Maker
+            </h1>
+          </a>
         </div>
 
         {/* Tabs */}
