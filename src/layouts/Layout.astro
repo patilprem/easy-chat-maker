@@ -9,6 +9,7 @@ const {
   description = 'Create realistic chat mockups in the style of WhatsApp, Instagram, Slack, Discord and AI chats like ChatGPT, Claude & Gemini. Free, no signup, no watermark. Export PNG or animated clip.',
   ogImage = '/hero-phone.png',
 } = Astro.props;
+const ogImageAbs = new URL(ogImage, Astro.site ?? 'https://easychatmaker.com').href;
 ---
 <!doctype html>
 <html lang="en">
@@ -25,7 +26,7 @@ const {
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={ogImage} />
+    <meta property="og:image" content={ogImageAbs} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />

@@ -18,6 +18,8 @@ interface Props {
   intro: string;
   ctaHref: string;
   ctaLabel: string;
+  bannerSrc?: string;
+  bannerAlt?: string;
   steps: Step[];
   features: Feature[];
   faqs: Faq[];
@@ -26,7 +28,7 @@ interface Props {
 
 const {
   metaTitle, metaDescription, badge, h1Start, h1Accent, intro,
-  ctaHref, ctaLabel, steps, features, faqs, related,
+  ctaHref, ctaLabel, bannerSrc, bannerAlt, steps, features, faqs, related,
 } = Astro.props;
 
 const faqLd = JSON.stringify({
@@ -39,7 +41,7 @@ const faqLd = JSON.stringify({
   })),
 });
 ---
-<Layout title={metaTitle} description={metaDescription}>
+<Layout title={metaTitle} description={metaDescription} ogImage={bannerSrc}>
   <script type="application/ld+json" set:html={faqLd} />
 
   <div class="min-h-screen overflow-x-clip bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
@@ -92,6 +94,20 @@ const faqLd = JSON.stringify({
         <p class="mt-5 text-[12.5px] text-white/35">
           100% free · No signup · No watermark · Runs in your browser
         </p>
+
+        {bannerSrc && (
+          <div class="mt-12">
+            <img
+              src={bannerSrc}
+              alt={bannerAlt}
+              width="1200"
+              height="630"
+              class="mx-auto w-full max-w-3xl rounded-2xl border border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.45)]"
+              loading="eager"
+              fetchpriority="high"
+            />
+          </div>
+        )}
       </div>
     </section>
 
