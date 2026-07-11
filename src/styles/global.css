@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Momo+Trust+Display&display=swap');
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -11,6 +11,17 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   height: 100%;
+}
+
+/* Brand display font for headings (single weight — it is bold by design) */
+h1, h2, h3 {
+  font-family: 'Momo Trust Display', 'Inter', system-ui, sans-serif;
+}
+
+/* Never let the brand font leak into the chat mockups */
+#phone-screen h1, #phone-screen h2, #phone-screen h3,
+#phone-screen-export h1, #phone-screen-export h2, #phone-screen-export h3 {
+  font-family: inherit;
 }
 
 /* Scrollbar styling */
