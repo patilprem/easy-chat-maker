@@ -1,0 +1,49 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteFooter from '../components/site/SiteFooter.astro';
+import '../styles/global.css';
+---
+<Layout title="Page not found — Easy Chat Maker" description="This page doesn't exist. Head back to the free chat mockup editor.">
+  <div class="flex min-h-screen flex-col bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
+    <header class="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-5">
+      <a href="/" class="text-lg font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">
+        Easy Chat Maker
+      </a>
+      <a href="/editor" class="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15">
+        Open the editor
+      </a>
+    </header>
+
+    <main class="flex flex-1 flex-col items-center justify-center px-5 pb-24 text-center">
+      <div class="w-full max-w-sm rounded-3xl bg-[#e5ddd5] p-5 text-left shadow-[0_20px_60px_rgba(0,0,0,0.4)]">
+        <div class="flex justify-start">
+          <span class="rounded-[8px] rounded-tl-none bg-white px-3 py-2 text-[14px] text-[#111] shadow-sm">
+            Hey, where's that page? 🤔
+            <span class="ml-2 align-bottom text-[10px] text-[#9aa0a6]">4:04 pm</span>
+          </span>
+        </div>
+        <div class="mt-3 flex justify-end">
+          <span class="rounded-[8px] rounded-tr-none bg-[#d9fdd3] px-3 py-2 text-[14px] text-[#111] shadow-sm">
+            No idea. It doesn't exist 👻
+            <span class="ml-2 align-bottom text-[10px] text-[#5f9c58]">4:04 pm ✓✓</span>
+          </span>
+        </div>
+      </div>
+
+      <h1 class="mt-10 text-[44px] font-bold leading-none md:text-[56px]">404</h1>
+      <p class="mt-3 max-w-md text-[15.5px] text-white/55">
+        This page was deleted, moved, or never existed — just like the conversations made here.
+      </p>
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <a href="/" class="rounded-2xl bg-gradient-to-r from-[#00FF87] to-[#60EFFF] px-7 py-3.5 text-[14.5px] font-bold text-[#061116] transition-all hover:brightness-110">
+          Back to home
+        </a>
+        <a href="/editor" class="rounded-2xl bg-white/10 px-7 py-3.5 text-[14.5px] font-semibold text-white transition-colors hover:bg-white/15">
+          Make a chat instead
+        </a>
+      </div>
+    </main>
+
+    <SiteFooter />
+  </div>
+</Layout>

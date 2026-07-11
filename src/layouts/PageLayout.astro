@@ -1,0 +1,78 @@
+---
+import Layout from './Layout.astro';
+import SiteFooter from '../components/site/SiteFooter.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  heading: string;
+  updated?: string;
+}
+const { title, description, heading, updated } = Astro.props;
+---
+<Layout title={title} description={description}>
+  <div class="min-h-screen bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
+    <header class="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
+      <a href="/" class="text-lg font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">
+        Easy Chat Maker
+      </a>
+      <a
+        href="/editor"
+        class="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15"
+      >
+        Open the editor
+      </a>
+    </header>
+
+    <main class="mx-auto max-w-3xl px-5 pb-24 pt-8">
+      <h1 class="text-[34px] font-bold leading-tight md:text-[42px]">{heading}</h1>
+      {updated && <p class="mt-2 text-[13px] text-white/40">Last updated: {updated}</p>}
+      <div class="legal-prose mt-8">
+        <slot />
+      </div>
+    </main>
+
+    <SiteFooter />
+  </div>
+
+  <style is:global>
+    .legal-prose h2 {
+      margin-top: 2.2rem;
+      font-size: 20px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.92);
+    }
+    .legal-prose h3 {
+      margin-top: 1.4rem;
+      font-size: 16px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .legal-prose p {
+      margin-top: 0.9rem;
+      font-size: 15px;
+      line-height: 1.75;
+      color: rgba(255, 255, 255, 0.62);
+    }
+    .legal-prose ul {
+      margin-top: 0.9rem;
+      padding-left: 1.4rem;
+      list-style: disc;
+    }
+    .legal-prose li {
+      margin-top: 0.45rem;
+      font-size: 15px;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.62);
+    }
+    .legal-prose a {
+      color: #60efff;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .legal-prose strong {
+      color: rgba(255, 255, 255, 0.85);
+    }
+  </style>
+</Layout>

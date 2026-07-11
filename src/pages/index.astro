@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { HomeHeroPhone } from '../components/home/HomeHeroPhone';
+import SiteFooter from '../components/site/SiteFooter.astro';
 import '../styles/global.css';
 
 const platforms = [
@@ -455,7 +456,7 @@ const faqLd = JSON.stringify({
     </section>
 
     <!-- FAQ -->
-    <section class="border-y border-white/5 bg-white/[0.02] py-24">
+    <section id="faq" class="border-y border-white/5 bg-white/[0.02] py-24">
       <div class="mx-auto max-w-3xl px-5">
         <h2 class="reveal text-center text-[34px] font-bold md:text-[44px]">Frequently asked questions</h2>
         <div class="mt-10 space-y-3">
@@ -484,16 +485,7 @@ const faqLd = JSON.stringify({
       </a>
     </section>
 
-    <!-- Footer -->
-    <footer class="border-t border-white/5 py-8">
-      <p class="mx-auto max-w-3xl px-5 text-center text-[12px] leading-relaxed text-white/35">
-        Easy Chat Maker is an independent tool for creating clearly fictional chat mockups for content,
-        demos, and entertainment. It is not affiliated with, endorsed by, or connected to WhatsApp, Meta,
-        Instagram, Telegram, Slack, Discord, OpenAI, Anthropic, Google, or any other platform. All product
-        names and styles are used for identification purposes only. Please use responsibly — never to
-        deceive, impersonate, or harm.
-      </p>
-    </footer>
+    <SiteFooter />
   </div>
 
   <style>
