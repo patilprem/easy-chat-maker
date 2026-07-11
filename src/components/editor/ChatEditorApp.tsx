@@ -4,8 +4,12 @@ import { PlatformSettings } from './PlatformSettings';
 import { ExportPanel } from './ExportPanel';
 import { PhonePreview } from './PhonePreview';
 import { useEditorStore } from '../../lib/state/editorStore';
+import { AI_PLATFORMS } from '../../lib/parser/types';
+import type { Platform } from '../../lib/parser/types';
 
 type Tab = 'script' | 'preview';
+
+const VALID_PLATFORMS: Platform[] = ['whatsapp', 'instagram', 'messenger', 'slack', 'telegram', 'discord', ...AI_PLATFORMS];
 
 export const ChatEditorApp: React.FC = () => {
   const hydrateFromStorage = useEditorStore((s) => s.hydrateFromStorage);
@@ -13,6 +17,11 @@ export const ChatEditorApp: React.FC = () => {
 
   useEffect(() => {
     hydrateFromStorage();
+    // Deep links from landing pages: /editor?platform=whatsapp
+    const requested = new URLSearchParams(window.location.search).get('platform') as Platform | null;
+    if (requested && VALID_PLATFORMS.includes(requested)) {
+      useEditorStore.getState().setPlatform(requested);
+    }
   }, [hydrateFromStorage]);
 
   const tabCls = (active: boolean) =>
