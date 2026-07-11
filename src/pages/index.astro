@@ -277,60 +277,91 @@ const faqLd = JSON.stringify({
       </div>
     </section>
 
-    <!-- Bubble editing, shown -->
-    <section class="border-y border-white/5 bg-white/[0.02] py-24">
-      <div class="mx-auto grid max-w-6xl items-center gap-12 px-5 md:grid-cols-2">
-        <div class="reveal">
-          <h2 class="text-[34px] font-bold md:text-[44px]">Edit like you're texting</h2>
-          <p class="mt-4 max-w-md text-[15.5px] leading-relaxed text-white/60">
-            Click any bubble and type. Names, avatars, timestamps and reactions —
-            everything is editable right on the phone, and the preview updates as you write.
+        <!-- How it works -->
+    <section class="mx-auto max-w-6xl px-5 py-24">
+      <div class="reveal flex justify-center">
+        <span class="rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 text-[13px] font-semibold text-white/70">How it works</span>
+      </div>
+      <h2 class="reveal mt-5 text-center text-[34px] font-bold md:text-[44px]">
+        3 easy steps to a <span class="bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">realistic chat</span>
+      </h2>
+      <p class="reveal mx-auto mt-4 max-w-xl text-center text-[16.5px] leading-relaxed text-white/55">
+        Write it, style it, ship it — from idea to a share-ready image or clip in under a
+        minute. No design skills, no signup.
+      </p>
+
+      <div class="mt-14 grid gap-5 md:grid-cols-3">
+
+        <!-- Step 1: paste a script -->
+        <div class="reveal rounded-3xl border border-white/10 bg-white/[0.03] p-7">
+          <div class="flex items-start justify-between gap-3">
+            <h3 class="text-[19px] font-bold">Paste a script</h3>
+            <span class="text-[22px] font-extrabold text-white/20">1</span>
+          </div>
+          <p class="mt-2.5 text-[14.5px] leading-relaxed text-white/60">
+            Write your conversation as simple <span class="text-white/80">Name: message</span> lines
+            and the whole thread builds itself — or start empty and add bubbles one by one.
           </p>
+          <div class="mt-6 rounded-2xl border border-white/10 bg-[#0b1220] p-4 font-mono text-[13px] leading-[26px]">
+            <div><span class="text-[#00FF87]">Maria:</span> <span class="text-white/85">Boarding now ✈️</span></div>
+            <div><span class="text-[#60EFFF]">You:</span> <span class="text-white/85">Send pics!!</span></div>
+            <div><span class="text-[#00FF87]">Maria:</span> <span class="text-white/60">[image]</span></div>
+            <div><span class="text-[#60EFFF]">You:</span> <span class="text-white/85">Have the best time ❤️</span><span class="bubble-caret text-[#00FF87]">|</span></div>
+            <div class="mt-3 rounded-lg bg-gradient-to-r from-[#00FF87] to-[#60EFFF] py-2 text-center font-sans text-[12.5px] font-bold text-[#061116]">Generate chat</div>
+          </div>
         </div>
-        <div class="reveal">
-          <div class="mx-auto max-w-sm rounded-3xl bg-[#e5ddd5] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.4)]">
+
+        <!-- Step 2: edit like you're texting -->
+        <div class="reveal rounded-3xl border border-white/10 bg-white/[0.03] p-7" style="transition-delay: 0.1s">
+          <div class="flex items-start justify-between gap-3">
+            <h3 class="text-[19px] font-bold">Edit like you're texting</h3>
+            <span class="text-[22px] font-extrabold text-white/20">2</span>
+          </div>
+          <p class="mt-2.5 text-[14.5px] leading-relaxed text-white/60">
+            Click any bubble and type. Names, avatars, timestamps and reactions — everything
+            is editable right on the phone, and the preview updates as you write.
+          </p>
+          <div class="mt-6 rounded-2xl bg-[#e5ddd5] p-4">
             <div class="flex justify-start">
-              <div class="rounded-[8px] rounded-tl-none bg-white px-3 py-2 text-[14px] text-[#111] shadow-sm">
+              <div class="rounded-[8px] rounded-tl-none bg-white px-3 py-2 text-[13.5px] text-[#111] shadow-sm">
                 Hey, what time works?
                 <span class="ml-2 align-bottom text-[10px] text-[#9aa0a6]">9:41 am</span>
               </div>
             </div>
             <div class="mt-3 flex justify-end">
-              <div class="min-w-[190px] rounded-[8px] rounded-tr-none bg-[#d9fdd3] px-3 py-2 text-[14px] text-[#111] shadow-sm">
+              <div class="min-w-[175px] rounded-[8px] rounded-tr-none bg-[#d9fdd3] px-3 py-2 text-[13.5px] text-[#111] shadow-sm">
                 <span id="bubble-typed"></span><span class="bubble-caret">|</span>
                 <span class="ml-2 align-bottom text-[10px] text-[#5f9c58]">9:42 am ✓✓</span>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- How it works -->
-    <section class="mx-auto max-w-6xl px-5 py-24">
-      <h2 class="reveal text-center text-[34px] font-bold md:text-[44px]">Three steps. That's it.</h2>
-      <div class="mt-12 grid gap-5 md:grid-cols-3">
-        <div class="reveal rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-          <span class="text-[13px] font-bold uppercase tracking-wider text-[#00FF87]">1</span>
-          <h3 class="mt-2 text-lg font-bold">Pick a platform</h3>
-          <p class="mt-2 text-[14.5px] leading-relaxed text-white/60">
-            WhatsApp, Instagram, Telegram, Slack, Discord or an AI chat.
+        <!-- Step 3: export -->
+        <div class="reveal rounded-3xl border border-white/10 bg-white/[0.03] p-7" style="transition-delay: 0.2s">
+          <div class="flex items-start justify-between gap-3">
+            <h3 class="text-[19px] font-bold">Export and share</h3>
+            <span class="text-[22px] font-extrabold text-white/20">3</span>
+          </div>
+          <p class="mt-2.5 text-[14.5px] leading-relaxed text-white/60">
+            One click for a pixel-clean PNG, another for an animated clip where messages
+            appear one by one. No watermark, ready to post.
           </p>
+          <div class="relative mt-6 rounded-2xl border border-white/10 bg-[#0b1220] p-5">
+            <div class="flex gap-2.5">
+              <span class="step-btn-png flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#00FF87] py-2.5 text-[13px] font-semibold text-[#061116]">🖼️ Export PNG</span>
+              <span class="step-btn-vid flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#60EFFF] py-2.5 text-[13px] font-semibold text-[#061116]">🎬 Export Video</span>
+            </div>
+            <div class="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+              <div class="step-progress h-full rounded-full bg-gradient-to-r from-[#00FF87] to-[#60EFFF]"></div>
+            </div>
+            <div class="mt-2 text-[11.5px] text-white/40">chat-mockup.mp4 — rendering…</div>
+            <svg class="step-cursor absolute" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 3l14 8-6.5 1.5L9 19z" fill="#fff" stroke="#000" stroke-width="1.4" />
+            </svg>
+          </div>
         </div>
-        <div class="reveal rounded-2xl border border-white/10 bg-white/[0.03] p-6" style="transition-delay: 0.1s">
-          <span class="text-[13px] font-bold uppercase tracking-wider text-[#00FF87]">2</span>
-          <h3 class="mt-2 text-lg font-bold">Type your conversation</h3>
-          <p class="mt-2 text-[14.5px] leading-relaxed text-white/60">
-            Edit bubbles in place, or paste a script and generate the whole thread.
-          </p>
-        </div>
-        <div class="reveal rounded-2xl border border-white/10 bg-white/[0.03] p-6" style="transition-delay: 0.2s">
-          <span class="text-[13px] font-bold uppercase tracking-wider text-[#00FF87]">3</span>
-          <h3 class="mt-2 text-lg font-bold">Export</h3>
-          <p class="mt-2 text-[14.5px] leading-relaxed text-white/60">
-            A crisp image or an animated clip. No signup, no watermark.
-          </p>
-        </div>
+
       </div>
     </section>
 
@@ -480,6 +511,38 @@ const faqLd = JSON.stringify({
       .ai-demo-welcome { display: none; animation: none; }
       .ai-demo-user, .ai-demo-dot, .ai-demo-resp { animation: none; opacity: 1; }
       .ai-demo-dot { display: none; }
+    }
+
+    /* Step 3 export demo: cursor clicks PNG, then Video */
+    .step-cursor { animation: step-cursor 7s ease-in-out infinite; left: 30%; top: 30%; }
+    .step-btn-png { animation: step-click-png 7s ease-in-out infinite; transform-origin: center; }
+    .step-btn-vid { animation: step-click-vid 7s ease-in-out infinite; transform-origin: center; }
+    .step-progress { width: 0; animation: step-progress 7s linear infinite; }
+    @keyframes step-cursor {
+      0% { left: 62%; top: 78%; }
+      16% { left: 24%; top: 34%; }
+      24% { left: 24%; top: 34%; }
+      48% { left: 68%; top: 34%; }
+      58% { left: 68%; top: 34%; }
+      100% { left: 62%; top: 78%; }
+    }
+    @keyframes step-click-png {
+      0%, 15%, 25%, 100% { transform: scale(1); filter: none; }
+      19% { transform: scale(0.92); filter: brightness(1.25); }
+    }
+    @keyframes step-click-vid {
+      0%, 49%, 60%, 100% { transform: scale(1); filter: none; }
+      53% { transform: scale(0.92); filter: brightness(1.25); }
+    }
+    @keyframes step-progress {
+      0%, 53% { width: 0; }
+      88%, 96% { width: 100%; }
+      100% { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .step-cursor { display: none; animation: none; }
+      .step-btn-png, .step-btn-vid { animation: none; }
+      .step-progress { animation: none; width: 100%; }
     }
     .bubble-caret { animation: caret-blink 0.9s step-end infinite; color: #128c7e; }
     @keyframes caret-blink { 50% { opacity: 0; } }
