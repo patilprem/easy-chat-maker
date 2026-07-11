@@ -2,10 +2,12 @@
 interface Props {
   title?: string;
   description?: string;
+  ogImage?: string;
 }
 const {
-  title = 'Easy Chat Maker - Create Realistic Chat Mockups',
-  description = 'Build beautiful WhatsApp and Instagram DM mockups in seconds. Export as PNG or animated MP4 video.',
+  title = 'Easy Chat Maker — Free Chat Mockup Generator (No Watermark)',
+  description = 'Create realistic chat mockups in the style of WhatsApp, Instagram, Slack, Discord and AI chats like ChatGPT, Claude & Gemini. Free, no signup, no watermark. Export PNG or animated clip.',
+  ogImage = '/hero-phone.png',
 } = Astro.props;
 ---
 <!doctype html>
@@ -16,6 +18,13 @@ const {
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>

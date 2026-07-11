@@ -1,8 +1,297 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { ChatEditorApp } from '../components/editor/ChatEditorApp';
 import '../styles/global.css';
+
+const platforms = [
+  { id: 'whatsapp', name: 'WhatsApp-style', color: '#25D366' },
+  { id: 'instagram', name: 'Instagram DM', color: '#E1306C' },
+  { id: 'messenger', name: 'Messenger', color: '#0084FF' },
+  { id: 'telegram', name: 'Telegram', color: '#2AABEE' },
+  { id: 'slack', name: 'Slack', color: '#E01E5A' },
+  { id: 'discord', name: 'Discord', color: '#5865F2' },
+  { id: 'chatgpt', name: 'ChatGPT', color: '#10A37F' },
+  { id: 'claude', name: 'Claude', color: '#D97757' },
+  { id: 'gemini', name: 'Gemini', color: '#4285F4' },
+];
+
+const faqs = [
+  {
+    q: 'Is it really free?',
+    a: 'Yes. Create and export as many chats as you want, free, with no signup and no watermark.',
+  },
+  {
+    q: 'What platforms can I make?',
+    a: 'Chats styled like WhatsApp, Instagram DMs, Messenger, Telegram, Slack, Discord, and AI assistants (ChatGPT, Claude and Gemini) — as one-on-one or group conversations.',
+  },
+  {
+    q: 'Can I make a fake ChatGPT, Claude or Gemini conversation?',
+    a: 'Yes — pick an AI platform and the editor switches to that assistant’s look, complete with typing animation and response actions. Perfect for demos, decks and content.',
+  },
+  {
+    q: 'Can I use this for testimonials and marketing?',
+    a: 'Absolutely. Slack and Discord-style threads work great for B2B social proof, WhatsApp and Instagram styles for mobile-first proof, and AI-chat mockups for product demos — exported as pixel-clean PNGs with no watermark.',
+  },
+  {
+    q: 'Can I make a group chat?',
+    a: 'Yes — add any number of people with their own names, avatars, and colors, including members joining mid-conversation.',
+  },
+  {
+    q: 'Does it export video?',
+    a: 'You can export a still image or a silent animated clip where messages appear one by one. Add voiceover or captions in your own editor if you need them.',
+  },
+  {
+    q: 'Is this a fake chat generator / chat mockup maker / screenshot creator?',
+    a: 'All the same thing — different names people use for this tool. It makes realistic fictional chat images and clips.',
+  },
+  {
+    q: 'Is this legal? Is it affiliated with WhatsApp, Meta, Slack or others?',
+    a: 'Creating clearly fictional mockups for content, demos and fun is fine. This is an independent tool, not affiliated with or endorsed by any messaging platform or AI company. Don’t use it to deceive, impersonate, or harm anyone.',
+  },
+];
+
+const softwareLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Easy Chat Maker',
+  applicationCategory: 'DesignApplication',
+  operatingSystem: 'Web',
+  description: 'Free chat mockup generator with no watermark. Create fictional WhatsApp-style, Instagram, Slack, Discord and AI chat conversations and export them as images or animated clips.',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+});
+
+const faqLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+});
 ---
-<Layout title="Easy Chat Maker - Chat Mockup Editor">
-  <ChatEditorApp client:only="react" />
+<Layout>
+  <script type="application/ld+json" set:html={softwareLd} />
+  <script type="application/ld+json" set:html={faqLd} />
+
+  <div class="min-h-screen bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
+    <!-- Nav -->
+    <header class="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
+      <span class="text-lg font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">
+        Easy Chat Maker
+      </span>
+      <a
+        href="/editor"
+        class="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15"
+      >
+        Open the editor
+      </a>
+    </header>
+
+    <!-- Hero -->
+    <section class="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-8 md:grid-cols-[1.2fr_1fr] md:pt-14">
+      <div>
+        <h1 class="text-4xl font-extrabold leading-[1.15] md:text-5xl">
+          Create realistic chat mockups —
+          <span class="bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">free, no signup, no watermark</span>
+        </h1>
+        <p class="mt-5 max-w-xl text-[17px] leading-relaxed text-white/70">
+          Build fictional conversations in the style of WhatsApp, Instagram, Telegram, Slack, Discord —
+          even AI chats like ChatGPT, Claude and Gemini. Click any bubble to edit it live, build real
+          group chats, and export a crisp image or an animated clip in seconds.
+        </p>
+        <div class="mt-7 flex flex-wrap items-center gap-4">
+          <a
+            href="/editor"
+            class="rounded-2xl bg-gradient-to-r from-[#00FF87] to-[#60EFFF] px-7 py-3.5 text-[15px] font-bold text-[#061116] transition-all hover:brightness-110"
+          >
+            Make a chat — free
+          </a>
+        </div>
+        <p class="mt-5 max-w-xl text-[12.5px] leading-relaxed text-white/40">
+          No account. No watermark. No ads while you type. Runs in your browser — for mockups, content,
+          and fun. Not affiliated with any messaging app or AI company.
+        </p>
+      </div>
+      <div class="mx-auto w-full max-w-[300px] md:max-w-[330px]">
+        <img
+          src="/hero-phone.png"
+          alt="Phone mockup of a fictional ChatGPT-style conversation made with Easy Chat Maker"
+          width="420"
+          height="861"
+          class="w-full rounded-[36px] shadow-[0_30px_80px_rgba(0,0,0,0.55)]"
+          loading="eager"
+        />
+      </div>
+    </section>
+
+    <!-- Platform strip -->
+    <section class="border-y border-white/5 bg-white/[0.02] py-10">
+      <div class="mx-auto max-w-6xl px-5">
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          {platforms.map((p) => (
+            <a
+              href={`/editor?platform=${p.id}`}
+              class="group flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.04] py-2 pl-2.5 pr-4 transition-all hover:border-white/25 hover:bg-white/[0.08]"
+            >
+              <span
+                class="flex h-7 w-7 items-center justify-center rounded-full text-[13px]"
+                style={`background:${p.color}22;color:${p.color}`}
+              >
+                💬
+              </span>
+              <span class="text-[13.5px] font-semibold text-white/80 group-hover:text-white">{p.name}</span>
+            </a>
+          ))}
+        </div>
+        <p class="mt-5 text-center text-[13px] text-white/40">
+          One editor, every platform. Pick a style and start typing — the preview updates live.
+        </p>
+      </div>
+    </section>
+
+    <!-- Built for -->
+    <section class="mx-auto max-w-6xl px-5 py-16">
+      <h2 class="text-center text-3xl font-bold">Built for the way you'll use it</h2>
+      <div class="mt-10 grid gap-5 md:grid-cols-3">
+        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+          <h3 class="text-lg font-bold text-[#60EFFF]">For marketers &amp; teams</h3>
+          <p class="mt-3 text-[14.5px] leading-relaxed text-white/65">
+            Turn conversations into social proof. Slack and Discord-style threads for B2B testimonials,
+            WhatsApp and Instagram styles for mobile-first proof, AI-chat mockups for product demos and
+            pitch decks — pixel-clean PNGs, no Photoshop.
+          </p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+          <h3 class="text-lg font-bold text-[#00FF87]">For content creators</h3>
+          <p class="mt-3 text-[14.5px] leading-relaxed text-white/65">
+            Make chat-story clips and screenshot memes for TikTok, Reels, and YouTube. Group threads,
+            message-by-message playback, and clean exports with no watermark slapped across your work.
+          </p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+          <h3 class="text-lg font-bold text-white/85">For everyone else</h3>
+          <p class="mt-3 text-[14.5px] leading-relaxed text-white/65">
+            Prank the group chat, settle a joke, or mock up a scene for a story. If you can type a text
+            message, you can make one of these in under a minute.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="border-y border-white/5 bg-white/[0.02] py-16">
+      <div class="mx-auto max-w-6xl px-5">
+        <h2 class="text-center text-3xl font-bold">How it works</h2>
+        <div class="mt-10 grid gap-5 md:grid-cols-3">
+          <div class="rounded-2xl p-6">
+            <span class="text-[13px] font-bold uppercase tracking-wider text-[#00FF87]">Step 1</span>
+            <h3 class="mt-2 text-lg font-bold">Pick a platform</h3>
+            <p class="mt-2 text-[14.5px] leading-relaxed text-white/65">
+              WhatsApp, Instagram, Telegram, Slack, Discord, or an AI chat — the editor loads in that style.
+            </p>
+          </div>
+          <div class="rounded-2xl p-6">
+            <span class="text-[13px] font-bold uppercase tracking-wider text-[#00FF87]">Step 2</span>
+            <h3 class="mt-2 text-lg font-bold">Type right on the phone</h3>
+            <p class="mt-2 text-[14.5px] leading-relaxed text-white/65">
+              Click any message to edit it in place — names, avatars, timestamps, reactions. Watch the
+              preview update as you type. Or paste a whole script and generate the thread at once.
+            </p>
+          </div>
+          <div class="rounded-2xl p-6">
+            <span class="text-[13px] font-bold uppercase tracking-wider text-[#00FF87]">Step 3</span>
+            <h3 class="mt-2 text-lg font-bold">Export</h3>
+            <p class="mt-2 text-[14.5px] leading-relaxed text-white/65">
+              Download a crisp image or an animated clip. No signup, no watermark, ready to share or drop
+              into your editor.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why this one -->
+    <section class="mx-auto max-w-6xl px-5 py-16">
+      <h2 class="text-center text-3xl font-bold">Why this one</h2>
+      <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <h3 class="font-bold">No watermark, ever</h3>
+          <p class="mt-2 text-[14px] leading-relaxed text-white/60">
+            Your export is clean — no logo across the screen like most free tools.
+          </p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <h3 class="font-bold">No ads while you type</h3>
+          <p class="mt-2 text-[14px] leading-relaxed text-white/60">
+            The editing flow is never interrupted. Nothing pops up mid-sentence.
+          </p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <h3 class="font-bold">Platforms others skip</h3>
+          <p class="mt-2 text-[14px] leading-relaxed text-white/60">
+            Slack, Discord, and AI-chat mockups (ChatGPT, Claude, Gemini) — not just the usual
+            WhatsApp-and-Instagram set.
+          </p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <h3 class="font-bold">Edit inline, like a real chat</h3>
+          <p class="mt-2 text-[14px] leading-relaxed text-white/60">
+            No clunky forms — click a bubble and type.
+          </p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <h3 class="font-bold">Real group chats</h3>
+          <p class="mt-2 text-[14px] leading-relaxed text-white/60">
+            Multiple people with names, colors, and avatars, plus members joining mid-thread.
+          </p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <h3 class="font-bold">Nothing to install</h3>
+          <p class="mt-2 text-[14px] leading-relaxed text-white/60">
+            Runs entirely in your browser. No account, no download, nothing stored on a server.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="border-y border-white/5 bg-white/[0.02] py-16">
+      <div class="mx-auto max-w-3xl px-5">
+        <h2 class="text-center text-3xl font-bold">Frequently asked questions</h2>
+        <div class="mt-8 space-y-3">
+          {faqs.map((f) => (
+            <details class="group rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4">
+              <summary class="cursor-pointer list-none text-[15px] font-semibold text-white/85 marker:hidden">
+                {f.q}
+              </summary>
+              <p class="mt-3 text-[14px] leading-relaxed text-white/60">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Closing CTA -->
+    <section class="mx-auto max-w-6xl px-5 py-20 text-center">
+      <h2 class="text-3xl font-bold">Make your first chat now</h2>
+      <p class="mt-3 text-white/60">Free, no signup, no watermark. Pick a platform and start typing.</p>
+      <a
+        href="/editor"
+        class="mt-7 inline-block rounded-2xl bg-gradient-to-r from-[#00FF87] to-[#60EFFF] px-8 py-4 text-[15px] font-bold text-[#061116] transition-all hover:brightness-110"
+      >
+        Open the editor
+      </a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-8">
+      <p class="mx-auto max-w-3xl px-5 text-center text-[12px] leading-relaxed text-white/35">
+        Easy Chat Maker is an independent tool for creating clearly fictional chat mockups for content,
+        demos, and entertainment. It is not affiliated with, endorsed by, or connected to WhatsApp, Meta,
+        Instagram, Telegram, Slack, Discord, OpenAI, Anthropic, Google, or any other platform. All product
+        names and styles are used for identification purposes only. Please use responsibly — never to
+        deceive, impersonate, or harm.
+      </p>
+    </footer>
+  </div>
 </Layout>
