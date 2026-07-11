@@ -37,7 +37,9 @@ const MESSAGES: Message[] = [
   { id: 'm5', kind: 'text', participantId: 'you', text: 'Perfect. Let’s set it up 🎉', time: '9:43 am' },
 ];
 
-const HOLD_FRAMES = Math.round(FPS * 2.2);
+// Playback speed multiplier — the hero demo runs faster than real-time
+const SPEED = 2.5;
+const HOLD_FRAMES = Math.round(FPS * 1.2);
 
 export const HomeHeroPhone: React.FC = () => {
   const [platformIdx, setPlatformIdx] = useState(0);
@@ -74,12 +76,12 @@ export const HomeHeroPhone: React.FC = () => {
       if (lastTimeRef.current === 0) lastTimeRef.current = timestamp;
       if (timestamp - lastTimeRef.current >= 1000 / FPS) {
         lastTimeRef.current = timestamp;
-        frameRef.current += 1;
+        frameRef.current += SPEED;
         if (frameRef.current >= framePlan.length + HOLD_FRAMES) {
           frameRef.current = 0;
           setPlatformIdx((i) => (i + 1) % CYCLE.length);
         }
-        setFrame(frameRef.current);
+        setFrame(Math.floor(frameRef.current));
       }
       rafRef.current = requestAnimationFrame(tick);
     };
@@ -114,8 +116,8 @@ export const HomeHeroPhone: React.FC = () => {
         {PLATFORM_LABEL[platform]}
       </span>
 
-      {/* Phone — watch-only: let mouse/scroll events pass through to the page */}
-      <div style={{ width: 300, height: 650, pointerEvents: 'none' }}>
+      {/* Phone — cropped to the top half, watch-only: mouse/scroll passes through */}
+      <div className="relative" style={{ width: 300, height: 440, overflow: 'hidden', pointerEvents: 'none' }}>
         <div
           className="relative origin-top-left"
           style={{ width: 360, height: 780, transform: 'scale(0.833)' }}
@@ -130,11 +132,16 @@ export const HomeHeroPhone: React.FC = () => {
               mode="video"
               visibleCount={prefersReduced ? MESSAGES.length : plan?.visibleCount}
               typingParticipantId={prefersReduced ? null : plan?.typingParticipantId}
-              activeReactionIds={prefersReduced ? ['m3'] : plan?.activeReactionIds}
+              activeReactionIds={prefersReduced ? ['m4'] : plan?.activeReactionIds}
               feedRef={feedRef}
             />
           </div>
         </div>
+        {/* Soft fade where the phone is cropped */}
+        <div
+          className="absolute inset-x-0 bottom-0 h-20"
+          style={{ background: 'linear-gradient(to bottom, transparent, #0c1322)' }}
+        />
       </div>
 
       <style>{`
