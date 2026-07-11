@@ -110,33 +110,106 @@ const faqLd = JSON.stringify({
 
     <!-- Hero -->
     <section class="relative mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-10 md:grid-cols-[1.15fr_1fr] md:pt-16">
-      <div class="pointer-events-none absolute -left-40 top-10 h-96 w-96 rounded-full bg-[#00FF87]/10 blur-[120px]" />
-      <div class="pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-[#60EFFF]/10 blur-[120px]" />
+      <div class="hero-grid pointer-events-none absolute -inset-x-10 -top-24 bottom-0" />
+      <div class="hero-blob pointer-events-none absolute -left-40 top-10 h-96 w-96 rounded-full bg-[#00FF87]/10 blur-[120px]" />
+      <div class="hero-blob-2 pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-[#60EFFF]/10 blur-[120px]" />
+      <div class="hero-blob-3 pointer-events-none absolute left-1/3 top-1/4 h-80 w-80 rounded-full bg-[#8B5CF6]/[0.08] blur-[130px]" />
 
       <div class="relative">
-        <h1 class="text-[42px] font-extrabold leading-[1.08] md:text-[62px]">
+        <div class="inline-flex items-center gap-2.5 rounded-full border border-[#00FF87]/20 bg-[#00FF87]/[0.06] px-4 py-1.5 text-[12.5px] font-semibold tracking-wide text-[#7DFFC4]">
+          <span class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#00FF87] opacity-60" />
+            <span class="relative inline-flex h-2 w-2 rounded-full bg-[#00FF87]" />
+          </span>
+          Free forever · No signup · No watermark
+        </div>
+
+        <h1 class="mt-6 text-[36px] font-extrabold leading-[1.08] sm:text-[42px] md:text-[62px]">
           Create realistic<br />chat mockups
-          <span class="bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">in seconds</span>
+          <span class="relative inline-block pb-2">
+            <span class="hero-shimmer bg-gradient-to-r from-[#00FF87] via-[#60EFFF] to-[#00FF87] bg-clip-text text-transparent">in seconds</span>
+            <svg class="absolute -bottom-1 left-0 w-full" viewBox="0 0 220 12" height="10" fill="none" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M3 9c40-6 130-8 214-4" stroke="url(#hero-underline)" stroke-width="4" stroke-linecap="round" />
+              <defs>
+                <linearGradient id="hero-underline" x1="0" y1="0" x2="220" y2="0" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#00FF87" stop-opacity="0.85" />
+                  <stop offset="1" stop-color="#60EFFF" stop-opacity="0.85" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </span>
         </h1>
-        <p class="mt-6 max-w-md text-[17px] leading-relaxed text-white/65">
-          A free fake chat generator for WhatsApp, Instagram, Slack, Discord — and AI chats
-          like ChatGPT, Claude and Gemini. No signup. No watermark.
+
+        <p class="mt-7 max-w-md text-[17px] leading-relaxed text-white/60">
+          A free fake chat generator for <span class="font-semibold text-white/90">WhatsApp</span>,
+          <span class="font-semibold text-white/90">Instagram</span>,
+          <span class="font-semibold text-white/90">Slack</span>,
+          <span class="font-semibold text-white/90">Discord</span> — and AI chats like
+          <span class="font-semibold text-white/90">ChatGPT</span>,
+          <span class="font-semibold text-white/90">Claude</span> and
+          <span class="font-semibold text-white/90">Gemini</span>.
         </p>
-        <div class="mt-8">
+
+        <div class="mt-9 flex flex-wrap items-center gap-4">
           <a
             href="/editor"
-            class="inline-block rounded-2xl bg-gradient-to-r from-[#00FF87] to-[#60EFFF] px-8 py-4 text-[15px] font-bold text-[#061116] transition-all hover:brightness-110"
+            class="group inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-[#00FF87] to-[#60EFFF] px-8 py-4 text-[15px] font-bold text-[#061116] shadow-[0_10px_40px_-8px_rgba(0,255,135,0.5)] transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_50px_-8px_rgba(0,255,135,0.65)]"
           >
             Make a chat — free
+            <svg class="transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          </a>
+          <a
+            href="#how-it-works"
+            class="inline-flex items-center gap-2.5 rounded-2xl border border-white/15 bg-white/[0.04] px-6 py-4 text-[15px] font-semibold text-white/80 backdrop-blur transition-colors hover:border-white/30 hover:bg-white/[0.08] hover:text-white"
+          >
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72c0 .84.93 1.35 1.64.9l10.4-6.86a1.07 1.07 0 0 0 0-1.8L9.64 4.24A1.07 1.07 0 0 0 8 5.14Z" /></svg>
+            See how it works
           </a>
         </div>
-        <p class="mt-5 text-[12.5px] text-white/35">
+
+        <div class="mt-9 flex flex-wrap items-center gap-x-4 gap-y-3">
+          <div class="flex -space-x-1.5">
+            {platforms.map((p) => (
+              <span class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#0d1526] shadow-lg" style={`background:${p.color}`} title={p.name}>
+                <svg viewBox={p.viewBox} width="15" height="15" fill="#fff" aria-hidden="true" set:html={p.icon} />
+              </span>
+            ))}
+          </div>
+          <span class="text-[13px] font-medium text-white/45">9 chat styles · one editor</span>
+        </div>
+
+        <p class="mt-6 text-[12px] text-white/30">
           Runs in your browser. For mockups, content and fun — not affiliated with any app.
         </p>
       </div>
 
       <div class="relative mx-auto">
+        <div
+          class="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[480px] w-[480px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style="background: radial-gradient(circle, rgba(0,255,135,0.13) 0%, rgba(96,239,255,0.07) 40%, transparent 70%)"
+        />
         <HomeHeroPhone client:load />
+
+        <!-- Floating accents -->
+        <div class="float-slow pointer-events-none absolute -left-28 top-10 hidden items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.07] px-3.5 py-2 shadow-2xl backdrop-blur-md md:flex">
+          <span class="text-[17px]">❤️</span><span class="text-[17px]">😂</span><span class="text-[17px]">🔥</span>
+          <span class="ml-1 text-[12px] font-bold text-white/70">+12</span>
+        </div>
+        <div class="float-slower pointer-events-none absolute -right-24 top-[58%] hidden items-center gap-2.5 rounded-2xl border border-white/10 bg-[#0d1526]/90 px-4 py-3 shadow-2xl backdrop-blur-md md:flex">
+          <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#00FF87]/15 text-[#00FF87]">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+          </span>
+          <span>
+            <span class="block text-[12.5px] font-bold text-white">chat.png exported</span>
+            <span class="block text-[11px] text-white/45">no watermark · 2.4s</span>
+          </span>
+        </div>
+        <div class="float-slowest pointer-events-none absolute -left-20 bottom-10 hidden items-center gap-2 rounded-2xl border border-white/10 bg-[#0d1526]/90 px-4 py-2.5 shadow-2xl backdrop-blur-md md:flex">
+          <span class="flex h-7 w-7 items-center justify-center rounded-full" style={`background:${platforms[0].color}`}>
+            <svg viewBox={platforms[0].viewBox} width="14" height="14" fill="#fff" aria-hidden="true" set:html={platforms[0].icon} />
+          </span>
+          <span class="text-[12.5px] font-semibold text-white/85">Switch style anytime</span>
+        </div>
       </div>
     </section>
 
@@ -496,7 +569,46 @@ const faqLd = JSON.stringify({
   </div>
 
   <style>
-    .marquee { overflow: hidden; white-space: nowrap; }
+    .marquee {
+      overflow: hidden;
+      white-space: nowrap;
+      mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+      -webkit-mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+    }
+
+    /* Hero decorations */
+    .hero-grid {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity: 0.45;
+      mask-image: radial-gradient(ellipse 75% 65% at 50% 35%, #000 15%, transparent 72%);
+      -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 35%, #000 15%, transparent 72%);
+    }
+    .hero-shimmer {
+      background-size: 200% auto;
+      animation: hero-shimmer 5s linear infinite;
+    }
+    @keyframes hero-shimmer {
+      to { background-position: 200% center; }
+    }
+    .hero-blob { animation: blob-drift 14s ease-in-out infinite alternate; }
+    .hero-blob-2 { animation: blob-drift 18s ease-in-out infinite alternate-reverse; }
+    .hero-blob-3 { animation: blob-drift 22s ease-in-out infinite alternate; }
+    @keyframes blob-drift {
+      from { transform: translate(0, 0) scale(1); }
+      to { transform: translate(36px, -28px) scale(1.12); }
+    }
+    .float-slow { animation: float-y 5.5s ease-in-out infinite; }
+    .float-slower { animation: float-y 7s ease-in-out 0.9s infinite; }
+    .float-slowest { animation: float-y 8s ease-in-out 1.7s infinite; }
+    @keyframes float-y {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-shimmer, .hero-blob, .hero-blob-2, .hero-blob-3,
+      .float-slow, .float-slower, .float-slowest { animation: none; }
+    }
     .marquee-track {
       display: inline-block;
       animation: marquee-scroll 30s linear infinite;
