@@ -18,7 +18,8 @@ html {
 }
 
 /* Brand display font for headings (single weight — it is bold by design) */
-h1, h2, h3 {
+h1, h2, h3,
+.brand-font {
   font-family: 'Momo Trust Display', 'Inter', system-ui, sans-serif;
   letter-spacing: 0.02em;
 }

@@ -42,11 +42,14 @@ export const ChatEditorApp: React.FC = () => {
         {/* Left — Script */}
         <div className="border-r border-white/5 p-5 overflow-y-auto">
           <div className="mb-6">
-            <a href="/" className="group inline-block" title="Back to homepage">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent group-hover:brightness-110">
-                Easy Chat Maker
-              </h1>
-              <p className="text-white/40 text-xs mt-1 group-hover:text-white/60 transition-colors">Create realistic chat mockups</p>
+            <a href="/" className="group flex items-center gap-2.5" title="Back to homepage">
+              <img src="/favicon-96x96.png" alt="" width={36} height={36} className="h-9 w-9 rounded-[10px] shadow-lg" />
+              <span>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent group-hover:brightness-110">
+                  Easy Chat Maker
+                </h1>
+                <p className="text-white/40 text-xs mt-1 group-hover:text-white/60 transition-colors">Create realistic chat mockups</p>
+              </span>
             </a>
           </div>
           <ScriptPanel />
@@ -68,7 +71,8 @@ export const ChatEditorApp: React.FC = () => {
       <div className="md:hidden flex flex-col min-h-screen">
         {/* Title */}
         <div className="px-4 pt-5 pb-3">
-          <a href="/" title="Back to homepage">
+          <a href="/" title="Back to homepage" className="flex items-center gap-2.5">
+            <img src="/favicon-96x96.png" alt="" width={30} height={30} className="h-[30px] w-[30px] rounded-lg shadow-lg" />
             <h1 className="text-lg font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">
               Easy Chat Maker
             </h1>
