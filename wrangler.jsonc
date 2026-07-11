@@ -1,0 +1,9 @@
+{
+  // Cloudflare Workers config — serves the built Astro site as static assets
+  "name": "easy-chat-maker",
+  "compatibility_date": "2026-07-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}
