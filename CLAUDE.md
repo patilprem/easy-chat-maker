@@ -37,6 +37,12 @@
 - Note: this remote container's network policy blocks requests to
   workers.dev / easychatmaker.com, so live-site checks must be done by the
   user in their browser.
+- SEO: sitemap auto-generates at build (`@astrojs/sitemap` pinned to 3.2.1
+  for Astro 4 — newer versions crash the build). robots.txt points to
+  /sitemap-index.xml and disallows /render/. Site is registered in Google
+  Search Console with the sitemap submitted (July 2026). Keep H1 wording
+  ("chat stories") separate from title/meta wording ("chat mockup", "fake
+  chat generator") — intentional split to cover both keyword families.
 
 ## Project shape
 
