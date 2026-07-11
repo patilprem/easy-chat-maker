@@ -156,22 +156,22 @@ const faqLd = JSON.stringify({
       </p>
 
       <div class="mt-16 grid gap-12 md:grid-cols-2" id="tour">
-        <div class="order-2 flex flex-col justify-center gap-24 md:order-1">
-          <div class="tour-beat reveal" data-tour="0">
+        <div class="order-2 flex flex-col justify-center gap-10 md:order-1">
+          <div class="tour-beat reveal md:flex md:min-h-[55vh] md:flex-col md:justify-center" data-tour="0">
             <h3 class="text-xl font-bold text-[#00FF87]">Messaging apps</h3>
             <p class="mt-3 max-w-sm text-[15px] leading-relaxed text-white/60">
               WhatsApp-style, Instagram, Messenger and Telegram chats — bubbles, ticks,
               reactions and real group conversations.
             </p>
           </div>
-          <div class="tour-beat reveal" data-tour="1">
+          <div class="tour-beat reveal md:flex md:min-h-[55vh] md:flex-col md:justify-center" data-tour="1">
             <h3 class="text-xl font-bold text-[#E01E5A]">Team chats</h3>
             <p class="mt-3 max-w-sm text-[15px] leading-relaxed text-white/60">
               Slack and Discord threads — for workplace mockups, launch recaps and
               B2B testimonial screenshots.
             </p>
           </div>
-          <div class="tour-beat reveal" data-tour="2">
+          <div class="tour-beat reveal md:flex md:min-h-[55vh] md:flex-col md:justify-center" data-tour="2">
             <h3 class="text-xl font-bold text-[#60EFFF]">AI assistants</h3>
             <p class="mt-3 max-w-sm text-[15px] leading-relaxed text-white/60">
               ChatGPT, Claude and Gemini conversations — for product demos, pitch decks
@@ -181,11 +181,87 @@ const faqLd = JSON.stringify({
         </div>
 
         <div class="order-1 md:order-2">
-          <div class="sticky top-24 mx-auto w-full max-w-[300px]">
-            <div class="relative aspect-[420/861]">
-              <img src="/tour-messaging.png" alt="WhatsApp-style chat mockup example" width="420" height="861" loading="lazy" class="tour-img absolute inset-0 w-full rounded-[32px] opacity-100 transition-opacity duration-500" data-tour-img="0" />
-              <img src="/tour-team.png" alt="Slack-style chat mockup example" width="420" height="861" loading="lazy" class="tour-img absolute inset-0 w-full rounded-[32px] opacity-0 transition-opacity duration-500" data-tour-img="1" />
-              <img src="/tour-ai.png" alt="ChatGPT-style AI chat mockup example" width="420" height="861" loading="lazy" class="tour-img absolute inset-0 w-full rounded-[32px] opacity-0 transition-opacity duration-500" data-tour-img="2" />
+          <div class="sticky top-24 mx-auto w-full max-w-[400px]">
+            <div class="relative min-h-[420px]">
+
+              <!-- Messaging: the same message as WhatsApp / Instagram / Telegram bubbles -->
+              <div class="tour-img absolute inset-0 flex flex-col justify-center gap-5 opacity-100 transition-opacity duration-500" data-tour-img="0">
+                <div class="rounded-2xl bg-[#efeae2] p-4 shadow-lg" style="transform: rotate(-1.5deg)">
+                  <div class="flex justify-end">
+                    <span class="rounded-lg rounded-tr-none bg-[#d9fdd3] px-3 py-2 text-[14px] text-[#111]">
+                      Instant replies, round the clock ⚡
+                      <span class="ml-1.5 text-[10px] text-[#5f9c58]">9:41 ✓✓</span>
+                    </span>
+                  </div>
+                  <div class="mt-2 text-right text-[11px] font-semibold text-[#5f9c58]">WhatsApp-style</div>
+                </div>
+                <div class="rounded-2xl bg-white p-4 shadow-lg" style="transform: rotate(1deg)">
+                  <div class="flex justify-end">
+                    <span class="rounded-[20px] px-3.5 py-2 text-[14px] text-white" style="background: linear-gradient(90deg, #7638fa, #d300c5)">
+                      Instant replies, round the clock ⚡
+                    </span>
+                  </div>
+                  <div class="mt-2 text-right text-[11px] font-semibold text-[#d300c5]">Instagram DM</div>
+                </div>
+                <div class="rounded-2xl bg-[#172331] p-4 shadow-lg" style="transform: rotate(-0.5deg)">
+                  <div class="flex justify-end">
+                    <span class="rounded-[13px] rounded-br-[4px] bg-[#4c82dc] px-3 py-2 text-[14px] text-white">
+                      Instant replies, round the clock ⚡
+                      <span class="ml-1.5 text-[10px] text-[#91b4d5]">9:41</span>
+                    </span>
+                  </div>
+                  <div class="mt-2 text-right text-[11px] font-semibold text-[#35a8e8]">Telegram</div>
+                </div>
+              </div>
+
+              <!-- Team: Slack / Discord rows -->
+              <div class="tour-img absolute inset-0 flex flex-col justify-center gap-5 opacity-0 transition-opacity duration-500" data-tour-img="1">
+                <div class="rounded-2xl bg-white p-4 shadow-lg" style="transform: rotate(1deg)">
+                  <div class="flex items-start gap-2.5">
+                    <span class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px] bg-[#e01e5a] text-[13px] font-extrabold text-white">A</span>
+                    <div>
+                      <div class="text-[13.5px] font-extrabold text-[#1d1c1d]">Alex <span class="ml-1 text-[11px] font-normal text-[#616061]">9:41 AM</span></div>
+                      <div class="text-[14px] text-[#1d1c1d]">Instant replies, round the clock ⚡</div>
+                    </div>
+                  </div>
+                  <div class="mt-2 text-right text-[11px] font-semibold text-[#e01e5a]">Slack</div>
+                </div>
+                <div class="rounded-2xl bg-[#313338] p-4 shadow-lg" style="transform: rotate(-1deg)">
+                  <div class="flex items-start gap-2.5">
+                    <span class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#5865f2] text-[13px] font-extrabold text-white">A</span>
+                    <div>
+                      <div class="text-[13.5px] font-semibold text-[#f2f3f5]">Alex <span class="ml-1 text-[11px] font-normal text-[#949ba4]">Today at 9:41 AM</span></div>
+                      <div class="text-[14px] text-[#dbdee1]">Instant replies, round the clock ⚡</div>
+                    </div>
+                  </div>
+                  <div class="mt-2 text-right text-[11px] font-semibold text-[#5865f2]">Discord</div>
+                </div>
+              </div>
+
+              <!-- AI: ChatGPT / Gemini rows -->
+              <div class="tour-img absolute inset-0 flex flex-col justify-center gap-5 opacity-0 transition-opacity duration-500" data-tour-img="2">
+                <div class="rounded-2xl bg-black p-4 shadow-lg" style="transform: rotate(-1deg)">
+                  <div class="flex justify-end">
+                    <span class="rounded-[20px] bg-[#303030] px-3.5 py-2 text-[14px] text-[#ececec]">How do I reply faster?</span>
+                  </div>
+                  <div class="mt-3 text-[14px] leading-relaxed text-[#ececec]">Instant replies, round the clock ⚡</div>
+                  <div class="mt-2 flex items-center justify-between">
+                    <span class="text-[12px] tracking-wide text-[#b4b4b4]">⧉ 👍 👎</span>
+                    <span class="text-[11px] font-semibold text-[#10a37f]">ChatGPT</span>
+                  </div>
+                </div>
+                <div class="rounded-2xl bg-[#131314] p-4 shadow-lg" style="transform: rotate(1deg)">
+                  <div class="flex justify-end">
+                    <span class="rounded-[20px] rounded-br-[6px] bg-[#333537] px-3.5 py-2 text-[14px] text-[#e3e3e3]">How do I reply faster?</span>
+                  </div>
+                  <div class="mt-3 text-[14px] leading-relaxed text-[#e3e3e3]">Instant replies, round the clock ⚡</div>
+                  <div class="mt-2 flex items-center justify-between">
+                    <span class="text-[11px] text-[#9aa0a6]">Gemini is AI and can make mistakes.</span>
+                    <span class="bg-clip-text text-[11px] font-semibold text-transparent" style="background-image: linear-gradient(90deg, #4285f4, #9b72cb, #d96570)">Gemini</span>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
