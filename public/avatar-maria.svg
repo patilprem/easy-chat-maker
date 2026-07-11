@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <defs>
+    <clipPath id="c"><circle cx="48" cy="48" r="48"/></clipPath>
+  </defs>
+  <g clip-path="url(#c)">
+    <rect width="96" height="96" fill="#e9edf1"/>
+    <!-- hair back -->
+    <path d="M20 38 Q22 12 48 11 Q75 12 77 40 L78 96 L18 96 Z" fill="#2b2118"/>
+    <!-- neck -->
+    <rect x="41" y="58" width="14" height="14" rx="5" fill="#e8b78e"/>
+    <!-- face -->
+    <ellipse cx="48" cy="42" rx="17.5" ry="19.5" fill="#f2c49b"/>
+    <!-- hair front sweep -->
+    <path d="M29 40 Q28 16 50 14 Q71 16 68 32 Q56 26 46 22 Q42 30 30 44 Z" fill="#332619"/>
+    <!-- brows -->
+    <path d="M37 36 q4 -2.6 8 -0.6" stroke="#3a2a1c" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="M52 35.6 q4 -2 7.6 0" stroke="#3a2a1c" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <!-- eyes -->
+    <ellipse cx="41" cy="41" rx="2" ry="2.4" fill="#31241a"/>
+    <ellipse cx="56" cy="41" rx="2" ry="2.4" fill="#31241a"/>
+    <!-- nose -->
+    <path d="M48 44 q-1.4 4 0.6 5.4" stroke="#d9a074" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+    <!-- smile -->
+    <path d="M41 52 q7 6.5 14 0 q-7 3.4 -14 0 Z" fill="#ffffff" stroke="#c96b5f" stroke-width="1.1"/>
+    <!-- denim jacket -->
+    <path d="M14 96 Q17 72 34 69 L48 74 L62 69 Q79 72 82 96 Z" fill="#7ea6cf"/>
+    <path d="M34 69 L48 74 L44 96 L30 96 Q28 78 34 69 Z" fill="#94b9dd"/>
+    <path d="M62 69 L48 74 L52 96 L66 96 Q68 78 62 69 Z" fill="#94b9dd"/>
+    <!-- collar -->
+    <path d="M40 68 L48 74 L44 80 L37 72 Z" fill="#6b94bf"/>
+    <path d="M56 68 L48 74 L52 80 L59 72 Z" fill="#6b94bf"/>
+  </g>
+</svg>
