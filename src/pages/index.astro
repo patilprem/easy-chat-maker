@@ -79,6 +79,13 @@ const faqLd = JSON.stringify({
   <script type="application/ld+json" set:html={softwareLd} />
   <script type="application/ld+json" set:html={faqLd} />
 
+  <!-- Scroll progress bar -->
+  <div
+    id="scroll-progress"
+    class="fixed left-0 top-0 z-[100] h-[3px] w-0 bg-gradient-to-r from-[#00FF87] to-[#60EFFF]"
+    style="box-shadow: 0 0 12px rgba(0,255,135,0.5)"
+  />
+
   <div class="min-h-screen overflow-x-clip bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
     <!-- Nav -->
     <header class="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
@@ -364,6 +371,16 @@ const faqLd = JSON.stringify({
   </style>
 
   <script>
+    // Scroll progress bar
+    const progressBar = document.getElementById('scroll-progress');
+    const updateProgress = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+      if (progressBar) progressBar.style.width = pct + '%';
+    };
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress();
+
     // Scroll reveals
     const revealEls = document.querySelectorAll('.reveal');
     const io = new IntersectionObserver((entries) => {
