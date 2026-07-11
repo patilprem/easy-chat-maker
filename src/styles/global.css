@@ -16,6 +16,7 @@ html, body {
 /* Brand display font for headings (single weight — it is bold by design) */
 h1, h2, h3 {
   font-family: 'Momo Trust Display', 'Inter', system-ui, sans-serif;
+  letter-spacing: 0.02em;
 }
 
 /* Never let the brand font leak into the chat mockups */

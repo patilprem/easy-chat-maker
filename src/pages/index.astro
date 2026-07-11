@@ -148,32 +148,32 @@ const faqLd = JSON.stringify({
 
     <!-- Platform tour: sticky phone + beats -->
     <section class="mx-auto max-w-6xl px-5 py-24">
-      <h2 class="reveal text-center text-[32px] font-bold md:text-[40px]">
+      <h2 class="reveal text-center text-[34px] font-bold md:text-[44px]">
         One conversation. <span class="bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">Every platform.</span>
       </h2>
-      <p class="reveal mx-auto mt-4 max-w-lg text-center text-[15px] text-white/55">
+      <p class="reveal mx-auto mt-4 max-w-lg text-center text-[16.5px] text-white/55">
         Write it once, then switch the style. The preview redraws instantly.
       </p>
 
       <div class="mt-16 grid gap-12 md:grid-cols-2" id="tour">
         <div class="order-2 flex flex-col justify-center gap-10 md:order-1">
           <div class="tour-beat reveal md:flex md:min-h-[55vh] md:flex-col md:justify-center" data-tour="0">
-            <h3 class="text-xl font-bold text-[#00FF87]">Messaging apps</h3>
-            <p class="mt-3 max-w-sm text-[15px] leading-relaxed text-white/60">
+            <h3 class="text-2xl font-bold text-[#00FF87]">Messaging apps</h3>
+            <p class="mt-3 max-w-sm text-[17px] leading-relaxed text-white/60">
               WhatsApp-style, Instagram, Messenger and Telegram chats — bubbles, ticks,
               reactions and real group conversations.
             </p>
           </div>
           <div class="tour-beat reveal md:flex md:min-h-[55vh] md:flex-col md:justify-center" data-tour="1">
-            <h3 class="text-xl font-bold text-[#E01E5A]">Team chats</h3>
-            <p class="mt-3 max-w-sm text-[15px] leading-relaxed text-white/60">
+            <h3 class="text-2xl font-bold text-[#E01E5A]">Team chats</h3>
+            <p class="mt-3 max-w-sm text-[17px] leading-relaxed text-white/60">
               Slack and Discord threads — for workplace mockups, launch recaps and
               B2B testimonial screenshots.
             </p>
           </div>
           <div class="tour-beat reveal md:flex md:min-h-[55vh] md:flex-col md:justify-center" data-tour="2">
-            <h3 class="text-xl font-bold text-[#60EFFF]">AI assistants</h3>
-            <p class="mt-3 max-w-sm text-[15px] leading-relaxed text-white/60">
+            <h3 class="text-2xl font-bold text-[#60EFFF]">AI assistants</h3>
+            <p class="mt-3 max-w-sm text-[17px] leading-relaxed text-white/60">
               ChatGPT, Claude and Gemini conversations — for product demos, pitch decks
               and content.
             </p>
@@ -187,15 +187,23 @@ const faqLd = JSON.stringify({
               <!-- Messaging: chat with reactions, WhatsApp-style -->
               <div class="tour-img absolute inset-0 opacity-100 transition-opacity duration-500" data-tour-img="0">
                 <div class="relative flex h-full flex-col justify-center rounded-3xl bg-[#efeae2] p-7 shadow-2xl">
-                  <div class="space-y-6">
+                  <div class="space-y-5">
                     <div class="flex justify-start">
                       <span class="rounded-xl rounded-tl-none bg-white px-4 py-3 text-[16.5px] text-[#111] shadow-sm">
                         Trip photos? 📸 <span class="ml-2 text-[11.5px] text-[#9aa0a6]">9:41</span>
                       </span>
                     </div>
                     <div class="flex justify-end pb-2">
-                      <span class="relative rounded-xl rounded-tr-none bg-[#d9fdd3] px-4 py-3 text-[16.5px] text-[#111] shadow-sm">
+                      <span class="rounded-xl rounded-tr-none bg-[#d9fdd3] px-4 py-3 text-[16.5px] text-[#111] shadow-sm">
                         Uploading now 🚀 <span class="ml-2 text-[11.5px] text-[#5f9c58]">9:42 ✓✓</span>
+                      </span>
+                    </div>
+                    <div class="flex justify-end pb-3">
+                      <span class="relative rounded-xl rounded-tr-none bg-[#d9fdd3] p-1.5 shadow-sm">
+                        <span class="relative flex h-[120px] w-[190px] items-center justify-center overflow-hidden rounded-lg text-[40px]" style="background: linear-gradient(135deg, #fbc667 0%, #f39060 45%, #3e8b9c 100%)">
+                          🌄
+                          <span class="absolute bottom-1 right-1.5 text-[10.5px] font-medium text-white/95">9:42 ✓✓</span>
+                        </span>
                         <span class="absolute -bottom-[18px] right-1 rounded-full border border-black/5 bg-white px-2 py-1 text-[14px] shadow-sm">❤️</span>
                       </span>
                     </div>
@@ -203,11 +211,6 @@ const faqLd = JSON.stringify({
                       <span class="relative rounded-xl rounded-tl-none bg-white px-4 py-3 text-[16.5px] text-[#111] shadow-sm">
                         You're the best 😭
                         <span class="absolute -bottom-[18px] left-1 rounded-full border border-black/5 bg-white px-2 py-1 text-[14px] shadow-sm">😂 2</span>
-                      </span>
-                    </div>
-                    <div class="flex justify-end">
-                      <span class="rounded-xl rounded-tr-none bg-[#d9fdd3] px-4 py-3 text-[16.5px] text-[#111] shadow-sm">
-                        Anytime 😎 <span class="ml-2 text-[11.5px] text-[#5f9c58]">9:43 ✓✓</span>
                       </span>
                     </div>
                   </div>
@@ -247,23 +250,24 @@ const faqLd = JSON.stringify({
 
               <!-- AI: welcome screen, then a short animated exchange -->
               <div class="tour-img absolute inset-0 opacity-0 transition-opacity duration-500" data-tour-img="2">
-                <div class="relative flex h-full flex-col overflow-hidden rounded-3xl bg-black p-6 shadow-2xl">
-                  <div class="ai-demo-welcome absolute inset-0 flex items-center justify-center">
-                    <span class="text-[26px] font-semibold text-[#ececec]">What can I help with?</span>
+                <div class="relative flex h-full flex-col overflow-hidden rounded-3xl bg-[#262624] p-7 shadow-2xl">
+                  <div class="ai-demo-welcome absolute inset-0 flex flex-col items-center justify-center gap-4">
+                    <svg viewBox="0 0 24 24" width="34" height="34" fill="#d97757" aria-hidden="true"><path d="M11.16 2.06c.24-.05.5-.06.74-.01.24.05.42.24.5.47l.86 5.4c.03.2.3.24.4.06l2.71-4.74a.9.9 0 0 1 1.24-.32c.4.23.55.72.36 1.14l-2.28 5.02c-.08.18.11.36.28.27l4.9-2.53a.9.9 0 0 1 1.2.42c.2.42.05.92-.35 1.15l-4.7 2.87c-.17.1-.1.36.1.37l5.46.34c.47.03.83.42.83.89s-.36.86-.83.89l-5.45.34c-.2.01-.27.27-.1.37l4.69 2.86c.4.24.55.74.35 1.16a.9.9 0 0 1-1.2.42l-4.9-2.54c-.17-.09-.36.1-.28.28l2.28 5.02a.9.9 0 0 1-.36 1.14.9.9 0 0 1-1.24-.32l-2.7-4.74c-.1-.18-.38-.13-.41.07l-.86 5.39a.87.87 0 0 1-.87.74.87.87 0 0 1-.87-.74l-.86-5.4c-.03-.2-.3-.24-.4-.06l-2.71 4.74a.9.9 0 0 1-1.24.32.9.9 0 0 1-.36-1.14l2.28-5.02c.08-.18-.11-.37-.28-.28l-4.9 2.54a.9.9 0 0 1-1.2-.42.92.92 0 0 1 .35-1.16l4.69-2.86c.17-.1.1-.36-.1-.37l-5.45-.34a.89.89 0 0 1-.83-.89c0-.47.36-.86.83-.89l5.45-.34c.2-.01.28-.27.1-.37L3.35 8.39a.92.92 0 0 1-.35-1.15.9.9 0 0 1 1.2-.42l4.9 2.53c.17.09.36-.09.28-.27L7.1 4.06a.9.9 0 0 1 .36-1.14.9.9 0 0 1 1.24.32l2.7 4.74c.11.18.38.14.41-.06l.86-5.4a.87.87 0 0 1 .5-.46z" /></svg>
+                    <span class="text-[24px] text-[#f5f4ef]" style="font-family: Georgia, 'Times New Roman', serif">Good evening, Raj</span>
                   </div>
                   <div class="flex h-full flex-col justify-center gap-7">
                     <div class="ai-demo-user flex justify-end">
-                      <span class="rounded-[24px] bg-[#303030] px-5 py-3 text-[16.5px] text-[#ececec]">Plan my launch day ✨</span>
+                      <span class="rounded-[18px] bg-[#3a3a37] px-5 py-3 text-[16.5px] text-[#f5f4ef]">Plan my launch day ✨</span>
                     </div>
-                    <div class="ai-demo-dot h-4 w-4 rounded-full bg-white"></div>
+                    <svg class="ai-demo-dot" viewBox="0 0 24 24" width="22" height="22" fill="#d97757" aria-hidden="true"><path d="M11.16 2.06c.24-.05.5-.06.74-.01.24.05.42.24.5.47l.86 5.4c.03.2.3.24.4.06l2.71-4.74a.9.9 0 0 1 1.24-.32c.4.23.55.72.36 1.14l-2.28 5.02c-.08.18.11.36.28.27l4.9-2.53a.9.9 0 0 1 1.2.42c.2.42.05.92-.35 1.15l-4.7 2.87c-.17.1-.1.36.1.37l5.46.34c.47.03.83.42.83.89s-.36.86-.83.89l-5.45.34c-.2.01-.27.27-.1.37l4.69 2.86c.4.24.55.74.35 1.16a.9.9 0 0 1-1.2.42l-4.9-2.54c-.17-.09-.36.1-.28.28l2.28 5.02a.9.9 0 0 1-.36 1.14.9.9 0 0 1-1.24-.32l-2.7-4.74c-.1-.18-.38-.13-.41.07l-.86 5.39a.87.87 0 0 1-.87.74.87.87 0 0 1-.87-.74l-.86-5.4c-.03-.2-.3-.24-.4-.06l-2.71 4.74a.9.9 0 0 1-1.24.32.9.9 0 0 1-.36-1.14l2.28-5.02c.08-.18-.11-.37-.28-.28l-4.9 2.54a.9.9 0 0 1-1.2-.42.92.92 0 0 1 .35-1.16l4.69-2.86c.17-.1.1-.36-.1-.37l-5.45-.34a.89.89 0 0 1-.83-.89c0-.47.36-.86.83-.89l5.45-.34c.2-.01.28-.27.1-.37L3.35 8.39a.92.92 0 0 1-.35-1.15.9.9 0 0 1 1.2-.42l4.9 2.53c.17.09.36-.09.28-.27L7.1 4.06a.9.9 0 0 1 .36-1.14.9.9 0 0 1 1.24.32l2.7 4.74c.11.18.38.14.41-.06l.86-5.4a.87.87 0 0 1 .5-.46z" /></svg>
                     <div class="ai-demo-resp">
-                      <div class="text-[16.5px] leading-relaxed text-[#ececec]">
+                      <div class="text-[17px] leading-relaxed text-[#f5f4ef]" style="font-family: Georgia, 'Times New Roman', serif">
                         Easy. Announce at 9, demo clip at noon, recap thread at 5. I'll draft all three ✍️
                       </div>
-                      <div class="mt-3.5 text-[14px] tracking-widest text-[#b4b4b4]">⧉ 👍 👎 🔊</div>
+                      <div class="mt-3.5 text-[14px] tracking-widest text-[#b8b5ac]">⧉ ↗ ▷ 👍 👎 ↻</div>
                     </div>
                   </div>
-                  <div class="absolute bottom-5 right-7 text-[12.5px] font-semibold text-[#10a37f]">ChatGPT</div>
+                  <div class="absolute bottom-5 right-7 text-[12.5px] font-semibold text-[#d97757]">Claude</div>
                 </div>
               </div>
 
@@ -277,7 +281,7 @@ const faqLd = JSON.stringify({
     <section class="border-y border-white/5 bg-white/[0.02] py-24">
       <div class="mx-auto grid max-w-6xl items-center gap-12 px-5 md:grid-cols-2">
         <div class="reveal">
-          <h2 class="text-[32px] font-bold md:text-[40px]">Edit like you're texting</h2>
+          <h2 class="text-[34px] font-bold md:text-[44px]">Edit like you're texting</h2>
           <p class="mt-4 max-w-md text-[15.5px] leading-relaxed text-white/60">
             Click any bubble and type. Names, avatars, timestamps and reactions —
             everything is editable right on the phone, and the preview updates as you write.
@@ -304,7 +308,7 @@ const faqLd = JSON.stringify({
 
     <!-- How it works -->
     <section class="mx-auto max-w-6xl px-5 py-24">
-      <h2 class="reveal text-center text-[32px] font-bold md:text-[40px]">Three steps. That's it.</h2>
+      <h2 class="reveal text-center text-[34px] font-bold md:text-[44px]">Three steps. That's it.</h2>
       <div class="mt-12 grid gap-5 md:grid-cols-3">
         <div class="reveal rounded-2xl border border-white/10 bg-white/[0.03] p-6">
           <span class="text-[13px] font-bold uppercase tracking-wider text-[#00FF87]">1</span>
@@ -357,7 +361,7 @@ const faqLd = JSON.stringify({
 
     <!-- Why this one -->
     <section class="mx-auto max-w-6xl px-5 py-24">
-      <h2 class="reveal text-center text-[32px] font-bold md:text-[40px]">Why this one</h2>
+      <h2 class="reveal text-center text-[34px] font-bold md:text-[44px]">Why this one</h2>
       <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         <div class="reveal rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-[#00FF87]/30">
           <h3 class="font-bold">No watermark, ever</h3>
@@ -389,7 +393,7 @@ const faqLd = JSON.stringify({
     <!-- FAQ -->
     <section class="border-y border-white/5 bg-white/[0.02] py-24">
       <div class="mx-auto max-w-3xl px-5">
-        <h2 class="reveal text-center text-[32px] font-bold md:text-[40px]">Frequently asked questions</h2>
+        <h2 class="reveal text-center text-[34px] font-bold md:text-[44px]">Frequently asked questions</h2>
         <div class="mt-10 space-y-3">
           {faqs.map((f) => (
             <details class="group rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4">
@@ -405,7 +409,7 @@ const faqLd = JSON.stringify({
 
     <!-- Closing CTA -->
     <section class="mx-auto max-w-6xl px-5 py-24 text-center">
-      <h2 class="reveal text-[32px] font-bold md:text-[40px]">Make your first chat now</h2>
+      <h2 class="reveal text-[34px] font-bold md:text-[44px]">Make your first chat now</h2>
       <p class="reveal mt-3 text-white/55">Free, no signup, no watermark.</p>
       <a
         href="/editor"
