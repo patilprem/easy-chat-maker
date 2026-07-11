@@ -17,7 +17,7 @@ git config user.email >nul 2>&1 || git config user.email "photos@local"
 
 git checkout main
 git pull origin main
-git add *.png *.jpg *.jpeg *.webp 2>nul
+for %%f in (*.png *.jpg *.jpeg *.webp) do git add "%%f"
 git commit -m "Add photos from my machine"
 git push origin main
 
