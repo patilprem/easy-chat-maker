@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { HomeHeroPhone } from '../components/home/HomeHeroPhone';
 import '../styles/global.css';
 
 const platforms = [
@@ -49,6 +50,11 @@ const faqs = [
   },
 ];
 
+const marquee = [
+  'chat memes', 'testimonial screenshots', 'product demos', 'chat story videos',
+  'pranks', 'tutorials', 'pitch decks', 'social proof', 'storyboards',
+];
+
 const softwareLd = JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
@@ -73,7 +79,7 @@ const faqLd = JSON.stringify({
   <script type="application/ld+json" set:html={softwareLd} />
   <script type="application/ld+json" set:html={faqLd} />
 
-  <div class="min-h-screen bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
+  <div class="min-h-screen overflow-x-clip bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
     <!-- Nav -->
     <header class="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
       <span class="text-lg font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">
@@ -88,44 +94,156 @@ const faqLd = JSON.stringify({
     </header>
 
     <!-- Hero -->
-    <section class="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-8 md:grid-cols-[1.2fr_1fr] md:pt-14">
-      <div>
-        <h1 class="text-4xl font-extrabold leading-[1.15] md:text-5xl">
-          Create realistic chat mockups —
-          <span class="bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">free, no signup, no watermark</span>
+    <section class="relative mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-10 md:grid-cols-[1.15fr_1fr] md:pt-16">
+      <div class="pointer-events-none absolute -left-40 top-10 h-96 w-96 rounded-full bg-[#00FF87]/10 blur-[120px]" />
+      <div class="pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-[#60EFFF]/10 blur-[120px]" />
+
+      <div class="relative">
+        <h1 class="text-[42px] font-extrabold leading-[1.08] md:text-[62px]">
+          Create realistic<br />chat mockups
+          <span class="bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">in seconds</span>
         </h1>
-        <p class="mt-5 max-w-xl text-[17px] leading-relaxed text-white/70">
-          Build fictional conversations in the style of WhatsApp, Instagram, Telegram, Slack, Discord —
-          even AI chats like ChatGPT, Claude and Gemini. Click any bubble to edit it live, build real
-          group chats, and export a crisp image or an animated clip in seconds.
+        <p class="mt-6 max-w-md text-[17px] leading-relaxed text-white/65">
+          A free fake chat generator for WhatsApp, Instagram, Slack, Discord — and AI chats
+          like ChatGPT, Claude and Gemini. No signup. No watermark.
         </p>
-        <div class="mt-7 flex flex-wrap items-center gap-4">
+        <div class="mt-8">
           <a
             href="/editor"
-            class="rounded-2xl bg-gradient-to-r from-[#00FF87] to-[#60EFFF] px-7 py-3.5 text-[15px] font-bold text-[#061116] transition-all hover:brightness-110"
+            class="inline-block rounded-2xl bg-gradient-to-r from-[#00FF87] to-[#60EFFF] px-8 py-4 text-[15px] font-bold text-[#061116] transition-all hover:brightness-110"
           >
             Make a chat — free
           </a>
         </div>
-        <p class="mt-5 max-w-xl text-[12.5px] leading-relaxed text-white/40">
-          No account. No watermark. No ads while you type. Runs in your browser — for mockups, content,
-          and fun. Not affiliated with any messaging app or AI company.
+        <p class="mt-5 text-[12.5px] text-white/35">
+          Runs in your browser. For mockups, content and fun — not affiliated with any app.
         </p>
       </div>
-      <div class="mx-auto w-full max-w-[300px] md:max-w-[330px]">
-        <img
-          src="/hero-phone.png"
-          alt="Phone mockup of a fictional ChatGPT-style conversation made with Easy Chat Maker"
-          width="420"
-          height="861"
-          class="w-full rounded-[36px] shadow-[0_30px_80px_rgba(0,0,0,0.55)]"
-          loading="eager"
-        />
+
+      <div class="relative mx-auto">
+        <HomeHeroPhone client:load />
       </div>
     </section>
 
-    <!-- Platform strip -->
-    <section class="border-y border-white/5 bg-white/[0.02] py-10">
+    <!-- Marquee -->
+    <div class="border-y border-white/5 bg-white/[0.02] py-4">
+      <div class="marquee">
+        <div class="marquee-track">
+          {[...marquee, ...marquee].map((item) => (
+            <span class="mx-6 inline-flex items-center gap-3 text-[14px] font-medium text-white/40">
+              <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#00FF87] to-[#60EFFF]" />
+              {item}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- Platform tour: sticky phone + beats -->
+    <section class="mx-auto max-w-6xl px-5 py-24">
+      <h2 class="reveal text-center text-[32px] font-bold md:text-[40px]">
+        One conversation. <span class="bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">Every platform.</span>
+      </h2>
+      <p class="reveal mx-auto mt-4 max-w-lg text-center text-[15px] text-white/55">
+        Write it once, then switch the style. The preview redraws instantly.
+      </p>
+
+      <div class="mt-16 grid gap-12 md:grid-cols-2" id="tour">
+        <div class="order-2 flex flex-col justify-center gap-24 md:order-1">
+          <div class="tour-beat reveal" data-tour="0">
+            <h3 class="text-xl font-bold text-[#00FF87]">Messaging apps</h3>
+            <p class="mt-3 max-w-sm text-[15px] leading-relaxed text-white/60">
+              WhatsApp-style, Instagram, Messenger and Telegram chats — bubbles, ticks,
+              reactions and real group conversations.
+            </p>
+          </div>
+          <div class="tour-beat reveal" data-tour="1">
+            <h3 class="text-xl font-bold text-[#E01E5A]">Team chats</h3>
+            <p class="mt-3 max-w-sm text-[15px] leading-relaxed text-white/60">
+              Slack and Discord threads — for workplace mockups, launch recaps and
+              B2B testimonial screenshots.
+            </p>
+          </div>
+          <div class="tour-beat reveal" data-tour="2">
+            <h3 class="text-xl font-bold text-[#60EFFF]">AI assistants</h3>
+            <p class="mt-3 max-w-sm text-[15px] leading-relaxed text-white/60">
+              ChatGPT, Claude and Gemini conversations — for product demos, pitch decks
+              and content.
+            </p>
+          </div>
+        </div>
+
+        <div class="order-1 md:order-2">
+          <div class="sticky top-24 mx-auto w-full max-w-[300px]">
+            <div class="relative aspect-[420/861]">
+              <img src="/tour-messaging.png" alt="WhatsApp-style chat mockup example" width="420" height="861" loading="lazy" class="tour-img absolute inset-0 w-full rounded-[32px] opacity-100 transition-opacity duration-500" data-tour-img="0" />
+              <img src="/tour-team.png" alt="Slack-style chat mockup example" width="420" height="861" loading="lazy" class="tour-img absolute inset-0 w-full rounded-[32px] opacity-0 transition-opacity duration-500" data-tour-img="1" />
+              <img src="/tour-ai.png" alt="ChatGPT-style AI chat mockup example" width="420" height="861" loading="lazy" class="tour-img absolute inset-0 w-full rounded-[32px] opacity-0 transition-opacity duration-500" data-tour-img="2" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bubble editing, shown -->
+    <section class="border-y border-white/5 bg-white/[0.02] py-24">
+      <div class="mx-auto grid max-w-6xl items-center gap-12 px-5 md:grid-cols-2">
+        <div class="reveal">
+          <h2 class="text-[32px] font-bold md:text-[40px]">Edit like you're texting</h2>
+          <p class="mt-4 max-w-md text-[15.5px] leading-relaxed text-white/60">
+            Click any bubble and type. Names, avatars, timestamps and reactions —
+            everything is editable right on the phone, and the preview updates as you write.
+          </p>
+        </div>
+        <div class="reveal">
+          <div class="mx-auto max-w-sm rounded-3xl bg-[#e5ddd5] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.4)]">
+            <div class="flex justify-start">
+              <div class="rounded-[8px] rounded-tl-none bg-white px-3 py-2 text-[14px] text-[#111] shadow-sm">
+                Hey, what time works?
+                <span class="ml-2 align-bottom text-[10px] text-[#9aa0a6]">9:41 am</span>
+              </div>
+            </div>
+            <div class="mt-3 flex justify-end">
+              <div class="min-w-[190px] rounded-[8px] rounded-tr-none bg-[#d9fdd3] px-3 py-2 text-[14px] text-[#111] shadow-sm">
+                <span id="bubble-typed"></span><span class="bubble-caret">|</span>
+                <span class="ml-2 align-bottom text-[10px] text-[#5f9c58]">9:42 am ✓✓</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="mx-auto max-w-6xl px-5 py-24">
+      <h2 class="reveal text-center text-[32px] font-bold md:text-[40px]">Three steps. That's it.</h2>
+      <div class="mt-12 grid gap-5 md:grid-cols-3">
+        <div class="reveal rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+          <span class="text-[13px] font-bold uppercase tracking-wider text-[#00FF87]">1</span>
+          <h3 class="mt-2 text-lg font-bold">Pick a platform</h3>
+          <p class="mt-2 text-[14.5px] leading-relaxed text-white/60">
+            WhatsApp, Instagram, Telegram, Slack, Discord or an AI chat.
+          </p>
+        </div>
+        <div class="reveal rounded-2xl border border-white/10 bg-white/[0.03] p-6" style="transition-delay: 0.1s">
+          <span class="text-[13px] font-bold uppercase tracking-wider text-[#00FF87]">2</span>
+          <h3 class="mt-2 text-lg font-bold">Type your conversation</h3>
+          <p class="mt-2 text-[14.5px] leading-relaxed text-white/60">
+            Edit bubbles in place, or paste a script and generate the whole thread.
+          </p>
+        </div>
+        <div class="reveal rounded-2xl border border-white/10 bg-white/[0.03] p-6" style="transition-delay: 0.2s">
+          <span class="text-[13px] font-bold uppercase tracking-wider text-[#00FF87]">3</span>
+          <h3 class="mt-2 text-lg font-bold">Export</h3>
+          <p class="mt-2 text-[14.5px] leading-relaxed text-white/60">
+            A crisp image or an animated clip. No signup, no watermark.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Platform chips (internal links for SEO) -->
+    <section class="border-y border-white/5 bg-white/[0.02] py-12">
       <div class="mx-auto max-w-6xl px-5">
         <div class="flex flex-wrap items-center justify-center gap-3">
           {platforms.map((p) => (
@@ -144,124 +262,50 @@ const faqLd = JSON.stringify({
           ))}
         </div>
         <p class="mt-5 text-center text-[13px] text-white/40">
-          One editor, every platform. Pick a style and start typing — the preview updates live.
+          Pick a style and start typing — the preview updates live.
         </p>
       </div>
     </section>
 
-    <!-- Built for -->
-    <section class="mx-auto max-w-6xl px-5 py-16">
-      <h2 class="text-center text-3xl font-bold">Built for the way you'll use it</h2>
-      <div class="mt-10 grid gap-5 md:grid-cols-3">
-        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-          <h3 class="text-lg font-bold text-[#60EFFF]">For marketers &amp; teams</h3>
-          <p class="mt-3 text-[14.5px] leading-relaxed text-white/65">
-            Turn conversations into social proof. Slack and Discord-style threads for B2B testimonials,
-            WhatsApp and Instagram styles for mobile-first proof, AI-chat mockups for product demos and
-            pitch decks — pixel-clean PNGs, no Photoshop.
-          </p>
-        </div>
-        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-          <h3 class="text-lg font-bold text-[#00FF87]">For content creators</h3>
-          <p class="mt-3 text-[14.5px] leading-relaxed text-white/65">
-            Make chat-story clips and screenshot memes for TikTok, Reels, and YouTube. Group threads,
-            message-by-message playback, and clean exports with no watermark slapped across your work.
-          </p>
-        </div>
-        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-          <h3 class="text-lg font-bold text-white/85">For everyone else</h3>
-          <p class="mt-3 text-[14.5px] leading-relaxed text-white/65">
-            Prank the group chat, settle a joke, or mock up a scene for a story. If you can type a text
-            message, you can make one of these in under a minute.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- How it works -->
-    <section class="border-y border-white/5 bg-white/[0.02] py-16">
-      <div class="mx-auto max-w-6xl px-5">
-        <h2 class="text-center text-3xl font-bold">How it works</h2>
-        <div class="mt-10 grid gap-5 md:grid-cols-3">
-          <div class="rounded-2xl p-6">
-            <span class="text-[13px] font-bold uppercase tracking-wider text-[#00FF87]">Step 1</span>
-            <h3 class="mt-2 text-lg font-bold">Pick a platform</h3>
-            <p class="mt-2 text-[14.5px] leading-relaxed text-white/65">
-              WhatsApp, Instagram, Telegram, Slack, Discord, or an AI chat — the editor loads in that style.
-            </p>
-          </div>
-          <div class="rounded-2xl p-6">
-            <span class="text-[13px] font-bold uppercase tracking-wider text-[#00FF87]">Step 2</span>
-            <h3 class="mt-2 text-lg font-bold">Type right on the phone</h3>
-            <p class="mt-2 text-[14.5px] leading-relaxed text-white/65">
-              Click any message to edit it in place — names, avatars, timestamps, reactions. Watch the
-              preview update as you type. Or paste a whole script and generate the thread at once.
-            </p>
-          </div>
-          <div class="rounded-2xl p-6">
-            <span class="text-[13px] font-bold uppercase tracking-wider text-[#00FF87]">Step 3</span>
-            <h3 class="mt-2 text-lg font-bold">Export</h3>
-            <p class="mt-2 text-[14.5px] leading-relaxed text-white/65">
-              Download a crisp image or an animated clip. No signup, no watermark, ready to share or drop
-              into your editor.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Why this one -->
-    <section class="mx-auto max-w-6xl px-5 py-16">
-      <h2 class="text-center text-3xl font-bold">Why this one</h2>
-      <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+    <section class="mx-auto max-w-6xl px-5 py-24">
+      <h2 class="reveal text-center text-[32px] font-bold md:text-[40px]">Why this one</h2>
+      <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="reveal rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-[#00FF87]/30">
           <h3 class="font-bold">No watermark, ever</h3>
-          <p class="mt-2 text-[14px] leading-relaxed text-white/60">
-            Your export is clean — no logo across the screen like most free tools.
-          </p>
+          <p class="mt-2 text-[14px] leading-relaxed text-white/60">Your export is clean — no logo across the screen.</p>
         </div>
-        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+        <div class="reveal rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-[#00FF87]/30">
           <h3 class="font-bold">No ads while you type</h3>
-          <p class="mt-2 text-[14px] leading-relaxed text-white/60">
-            The editing flow is never interrupted. Nothing pops up mid-sentence.
-          </p>
+          <p class="mt-2 text-[14px] leading-relaxed text-white/60">Nothing pops up mid-sentence.</p>
         </div>
-        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+        <div class="reveal rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-[#00FF87]/30">
           <h3 class="font-bold">Platforms others skip</h3>
-          <p class="mt-2 text-[14px] leading-relaxed text-white/60">
-            Slack, Discord, and AI-chat mockups (ChatGPT, Claude, Gemini) — not just the usual
-            WhatsApp-and-Instagram set.
-          </p>
+          <p class="mt-2 text-[14px] leading-relaxed text-white/60">Slack, Discord and AI chats — not just WhatsApp and Instagram.</p>
         </div>
-        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-          <h3 class="font-bold">Edit inline, like a real chat</h3>
-          <p class="mt-2 text-[14px] leading-relaxed text-white/60">
-            No clunky forms — click a bubble and type.
-          </p>
+        <div class="reveal rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-[#00FF87]/30">
+          <h3 class="font-bold">Edit inline</h3>
+          <p class="mt-2 text-[14px] leading-relaxed text-white/60">No clunky forms — click a bubble and type.</p>
         </div>
-        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+        <div class="reveal rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-[#00FF87]/30">
           <h3 class="font-bold">Real group chats</h3>
-          <p class="mt-2 text-[14px] leading-relaxed text-white/60">
-            Multiple people with names, colors, and avatars, plus members joining mid-thread.
-          </p>
+          <p class="mt-2 text-[14px] leading-relaxed text-white/60">Multiple people with names, colors and avatars.</p>
         </div>
-        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+        <div class="reveal rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-[#00FF87]/30">
           <h3 class="font-bold">Nothing to install</h3>
-          <p class="mt-2 text-[14px] leading-relaxed text-white/60">
-            Runs entirely in your browser. No account, no download, nothing stored on a server.
-          </p>
+          <p class="mt-2 text-[14px] leading-relaxed text-white/60">Runs in your browser. No account, nothing stored on a server.</p>
         </div>
       </div>
     </section>
 
     <!-- FAQ -->
-    <section class="border-y border-white/5 bg-white/[0.02] py-16">
+    <section class="border-y border-white/5 bg-white/[0.02] py-24">
       <div class="mx-auto max-w-3xl px-5">
-        <h2 class="text-center text-3xl font-bold">Frequently asked questions</h2>
-        <div class="mt-8 space-y-3">
+        <h2 class="reveal text-center text-[32px] font-bold md:text-[40px]">Frequently asked questions</h2>
+        <div class="mt-10 space-y-3">
           {faqs.map((f) => (
             <details class="group rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4">
-              <summary class="cursor-pointer list-none text-[15px] font-semibold text-white/85 marker:hidden">
+              <summary class="cursor-pointer list-none text-[15px] font-semibold text-white/85">
                 {f.q}
               </summary>
               <p class="mt-3 text-[14px] leading-relaxed text-white/60">{f.a}</p>
@@ -272,12 +316,12 @@ const faqLd = JSON.stringify({
     </section>
 
     <!-- Closing CTA -->
-    <section class="mx-auto max-w-6xl px-5 py-20 text-center">
-      <h2 class="text-3xl font-bold">Make your first chat now</h2>
-      <p class="mt-3 text-white/60">Free, no signup, no watermark. Pick a platform and start typing.</p>
+    <section class="mx-auto max-w-6xl px-5 py-24 text-center">
+      <h2 class="reveal text-[32px] font-bold md:text-[40px]">Make your first chat now</h2>
+      <p class="reveal mt-3 text-white/55">Free, no signup, no watermark.</p>
       <a
         href="/editor"
-        class="mt-7 inline-block rounded-2xl bg-gradient-to-r from-[#00FF87] to-[#60EFFF] px-8 py-4 text-[15px] font-bold text-[#061116] transition-all hover:brightness-110"
+        class="reveal mt-8 inline-block rounded-2xl bg-gradient-to-r from-[#00FF87] to-[#60EFFF] px-9 py-4 text-[15px] font-bold text-[#061116] transition-all hover:brightness-110"
       >
         Open the editor
       </a>
@@ -294,4 +338,77 @@ const faqLd = JSON.stringify({
       </p>
     </footer>
   </div>
+
+  <style>
+    .marquee { overflow: hidden; white-space: nowrap; }
+    .marquee-track {
+      display: inline-block;
+      animation: marquee-scroll 30s linear infinite;
+    }
+    @keyframes marquee-scroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.on { opacity: 1; transform: none; }
+    .bubble-caret { animation: caret-blink 0.9s step-end infinite; color: #128c7e; }
+    @keyframes caret-blink { 50% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) {
+      .marquee-track { animation: none; }
+      .reveal { opacity: 1; transform: none; transition: none; }
+    }
+  </style>
+
+  <script>
+    // Scroll reveals
+    const revealEls = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); }
+    }, { threshold: 0.15 });
+    revealEls.forEach((el) => io.observe(el));
+
+    // Platform tour: crossfade the sticky phone as beats scroll by
+    const beats = document.querySelectorAll('.tour-beat');
+    const imgs = document.querySelectorAll('.tour-img');
+    const tourIo = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        const idx = e.target.getAttribute('data-tour');
+        imgs.forEach((img) => {
+          img.classList.toggle('opacity-100', img.getAttribute('data-tour-img') === idx);
+          img.classList.toggle('opacity-0', img.getAttribute('data-tour-img') !== idx);
+        });
+      }
+    }, { threshold: 0.6 });
+    beats.forEach((b) => tourIo.observe(b));
+
+    // Bubble editing demo: retype phrases in the self bubble
+    const phrases = ['Does 10:30 work?', 'Let’s do 11 instead 😅', 'Actually… brunch?'];
+    const target = document.getElementById('bubble-typed');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (target && !reduced) {
+      let pi = 0;
+      const type = async () => {
+        const word = phrases[pi];
+        for (let i = 0; i <= word.length; i++) {
+          target.textContent = word.slice(0, i);
+          await new Promise((r) => setTimeout(r, 55));
+        }
+        await new Promise((r) => setTimeout(r, 1600));
+        for (let i = word.length; i >= 0; i--) {
+          target.textContent = word.slice(0, i);
+          await new Promise((r) => setTimeout(r, 25));
+        }
+        pi = (pi + 1) % phrases.length;
+        type();
+      };
+      type();
+    } else if (target) {
+      target.textContent = phrases[0];
+    }
+  </script>
 </Layout>
