@@ -181,84 +181,89 @@ const faqLd = JSON.stringify({
         </div>
 
         <div class="order-1 md:order-2">
-          <div class="sticky top-24 mx-auto w-full max-w-[400px]">
-            <div class="relative min-h-[420px]">
+          <div class="sticky top-24 mx-auto w-full max-w-[430px]">
+            <div class="relative aspect-square">
 
-              <!-- Messaging: the same message as WhatsApp / Instagram / Telegram bubbles -->
-              <div class="tour-img absolute inset-0 flex flex-col justify-center gap-5 opacity-100 transition-opacity duration-500" data-tour-img="0">
-                <div class="rounded-2xl bg-[#efeae2] p-4 shadow-lg" style="transform: rotate(-1.5deg)">
-                  <div class="flex justify-end">
-                    <span class="rounded-lg rounded-tr-none bg-[#d9fdd3] px-3 py-2 text-[14px] text-[#111]">
-                      Instant replies, round the clock ⚡
-                      <span class="ml-1.5 text-[10px] text-[#5f9c58]">9:41 ✓✓</span>
-                    </span>
+              <!-- Messaging: chat with reactions, WhatsApp-style -->
+              <div class="tour-img absolute inset-0 opacity-100 transition-opacity duration-500" data-tour-img="0">
+                <div class="flex h-full flex-col justify-between rounded-3xl bg-[#efeae2] p-6 shadow-2xl">
+                  <div class="space-y-3">
+                    <div class="flex justify-start">
+                      <span class="rounded-lg rounded-tl-none bg-white px-3 py-2 text-[14.5px] text-[#111] shadow-sm">
+                        Trip photos? 📸 <span class="ml-1.5 text-[10px] text-[#9aa0a6]">9:41</span>
+                      </span>
+                    </div>
+                    <div class="flex justify-end pb-3">
+                      <span class="relative rounded-lg rounded-tr-none bg-[#d9fdd3] px-3 py-2 text-[14.5px] text-[#111] shadow-sm">
+                        Uploading now 🚀 <span class="ml-1.5 text-[10px] text-[#5f9c58]">9:42 ✓✓</span>
+                        <span class="absolute -bottom-3.5 right-1 rounded-full border border-black/5 bg-white px-1.5 py-0.5 text-[12px] shadow-sm">❤️</span>
+                      </span>
+                    </div>
+                    <div class="flex justify-start pb-3">
+                      <span class="relative rounded-lg rounded-tl-none bg-white px-3 py-2 text-[14.5px] text-[#111] shadow-sm">
+                        You're the best 😭
+                        <span class="absolute -bottom-3.5 left-1 rounded-full border border-black/5 bg-white px-1.5 py-0.5 text-[12px] shadow-sm">😂 2</span>
+                      </span>
+                    </div>
+                    <div class="flex justify-end">
+                      <span class="rounded-lg rounded-tr-none bg-[#d9fdd3] px-3 py-2 text-[14.5px] text-[#111] shadow-sm">
+                        Anytime 😎 <span class="ml-1.5 text-[10px] text-[#5f9c58]">9:43 ✓✓</span>
+                      </span>
+                    </div>
                   </div>
-                  <div class="mt-2 text-right text-[11px] font-semibold text-[#5f9c58]">WhatsApp-style</div>
-                </div>
-                <div class="rounded-2xl bg-white p-4 shadow-lg" style="transform: rotate(1deg)">
-                  <div class="flex justify-end">
-                    <span class="rounded-[20px] px-3.5 py-2 text-[14px] text-white" style="background: linear-gradient(90deg, #7638fa, #d300c5)">
-                      Instant replies, round the clock ⚡
-                    </span>
-                  </div>
-                  <div class="mt-2 text-right text-[11px] font-semibold text-[#d300c5]">Instagram DM</div>
-                </div>
-                <div class="rounded-2xl bg-[#172331] p-4 shadow-lg" style="transform: rotate(-0.5deg)">
-                  <div class="flex justify-end">
-                    <span class="rounded-[13px] rounded-br-[4px] bg-[#4c82dc] px-3 py-2 text-[14px] text-white">
-                      Instant replies, round the clock ⚡
-                      <span class="ml-1.5 text-[10px] text-[#91b4d5]">9:41</span>
-                    </span>
-                  </div>
-                  <div class="mt-2 text-right text-[11px] font-semibold text-[#35a8e8]">Telegram</div>
+                  <div class="text-right text-[11.5px] font-semibold text-[#5f9c58]">WhatsApp-style</div>
                 </div>
               </div>
 
-              <!-- Team: Slack / Discord rows -->
-              <div class="tour-img absolute inset-0 flex flex-col justify-center gap-5 opacity-0 transition-opacity duration-500" data-tour-img="1">
-                <div class="rounded-2xl bg-white p-4 shadow-lg" style="transform: rotate(1deg)">
-                  <div class="flex items-start gap-2.5">
+              <!-- Team: channel created, members added, then chat -->
+              <div class="tour-img absolute inset-0 opacity-0 transition-opacity duration-500" data-tour-img="1">
+                <div class="flex h-full flex-col rounded-3xl bg-white p-6 shadow-2xl">
+                  <div class="text-[16px] font-extrabold text-[#1d1c1d]"># launch-day</div>
+                  <div class="mt-3 space-y-1.5 border-b border-[#1d1c1d]/10 pb-4 text-[12.5px] text-[#616061]">
+                    <div>✨ <span class="font-bold text-[#1d1c1d]">Alex</span> created this channel — today at 9:00 AM</div>
+                    <div>➕ <span class="font-bold text-[#1d1c1d]">Alex</span> added <span class="font-bold text-[#1d1c1d]">Sam</span>, <span class="font-bold text-[#1d1c1d]">Priya</span> and 2 others</div>
+                  </div>
+                  <div class="mt-4 flex items-start gap-2.5">
                     <span class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px] bg-[#e01e5a] text-[13px] font-extrabold text-white">A</span>
                     <div>
                       <div class="text-[13.5px] font-extrabold text-[#1d1c1d]">Alex <span class="ml-1 text-[11px] font-normal text-[#616061]">9:41 AM</span></div>
-                      <div class="text-[14px] text-[#1d1c1d]">Instant replies, round the clock ⚡</div>
+                      <div class="text-[14px] text-[#1d1c1d]">Kickoff in 10 — big day 🚀</div>
+                      <div class="mt-1.5 flex gap-1.5">
+                        <span class="rounded-full border border-[#1264a3]/30 bg-[#e8f5ff] px-2 py-0.5 text-[12px] text-[#1264a3]">🎉 4</span>
+                        <span class="rounded-full border border-[#1264a3]/30 bg-[#e8f5ff] px-2 py-0.5 text-[12px] text-[#1264a3]">👀 2</span>
+                      </div>
                     </div>
                   </div>
-                  <div class="mt-2 text-right text-[11px] font-semibold text-[#e01e5a]">Slack</div>
-                </div>
-                <div class="rounded-2xl bg-[#313338] p-4 shadow-lg" style="transform: rotate(-1deg)">
-                  <div class="flex items-start gap-2.5">
-                    <span class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#5865f2] text-[13px] font-extrabold text-white">A</span>
+                  <div class="mt-4 flex items-start gap-2.5">
+                    <span class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px] bg-[#2eb67d] text-[13px] font-extrabold text-white">S</span>
                     <div>
-                      <div class="text-[13.5px] font-semibold text-[#f2f3f5]">Alex <span class="ml-1 text-[11px] font-normal text-[#949ba4]">Today at 9:41 AM</span></div>
-                      <div class="text-[14px] text-[#dbdee1]">Instant replies, round the clock ⚡</div>
+                      <div class="text-[13.5px] font-extrabold text-[#1d1c1d]">Sam <span class="ml-1 text-[11px] font-normal text-[#616061]">9:42 AM</span></div>
+                      <div class="text-[14px] text-[#1d1c1d]">LFG 🔥</div>
                     </div>
                   </div>
-                  <div class="mt-2 text-right text-[11px] font-semibold text-[#5865f2]">Discord</div>
+                  <div class="mt-auto text-right text-[11.5px] font-semibold text-[#e01e5a]">Slack</div>
                 </div>
               </div>
 
-              <!-- AI: ChatGPT / Gemini rows -->
-              <div class="tour-img absolute inset-0 flex flex-col justify-center gap-5 opacity-0 transition-opacity duration-500" data-tour-img="2">
-                <div class="rounded-2xl bg-black p-4 shadow-lg" style="transform: rotate(-1deg)">
-                  <div class="flex justify-end">
-                    <span class="rounded-[20px] bg-[#303030] px-3.5 py-2 text-[14px] text-[#ececec]">How do I reply faster?</span>
+              <!-- AI: welcome screen, then a short animated exchange -->
+              <div class="tour-img absolute inset-0 opacity-0 transition-opacity duration-500" data-tour-img="2">
+                <div class="relative flex h-full flex-col overflow-hidden rounded-3xl bg-black p-6 shadow-2xl">
+                  <div class="ai-demo-welcome absolute inset-0 flex items-center justify-center">
+                    <span class="text-[20px] font-semibold text-[#ececec]">What can I help with?</span>
                   </div>
-                  <div class="mt-3 text-[14px] leading-relaxed text-[#ececec]">Instant replies, round the clock ⚡</div>
-                  <div class="mt-2 flex items-center justify-between">
-                    <span class="text-[12px] tracking-wide text-[#b4b4b4]">⧉ 👍 👎</span>
-                    <span class="text-[11px] font-semibold text-[#10a37f]">ChatGPT</span>
+                  <div class="flex h-full flex-col justify-center gap-5">
+                    <div class="ai-demo-user flex justify-end">
+                      <span class="rounded-[20px] bg-[#303030] px-4 py-2 text-[14px] text-[#ececec]">Plan my launch day ✨</span>
+                    </div>
+                    <div class="ai-demo-dot h-3 w-3 rounded-full bg-white"></div>
+                    <div class="ai-demo-resp">
+                      <div class="text-[14px] leading-relaxed text-[#ececec]">
+                        Easy. Announce at 9, demo clip at noon, recap thread at 5. I'll draft all three ✍️
+                      </div>
+                      <div class="mt-2.5 text-[12px] tracking-widest text-[#b4b4b4]">⧉ 👍 👎 🔊</div>
+                    </div>
                   </div>
-                </div>
-                <div class="rounded-2xl bg-[#131314] p-4 shadow-lg" style="transform: rotate(1deg)">
-                  <div class="flex justify-end">
-                    <span class="rounded-[20px] rounded-br-[6px] bg-[#333537] px-3.5 py-2 text-[14px] text-[#e3e3e3]">How do I reply faster?</span>
-                  </div>
-                  <div class="mt-3 text-[14px] leading-relaxed text-[#e3e3e3]">Instant replies, round the clock ⚡</div>
-                  <div class="mt-2 flex items-center justify-between">
-                    <span class="text-[11px] text-[#9aa0a6]">Gemini is AI and can make mistakes.</span>
-                    <span class="bg-clip-text text-[11px] font-semibold text-transparent" style="background-image: linear-gradient(90deg, #4285f4, #9b72cb, #d96570)">Gemini</span>
-                  </div>
+                  <div class="absolute bottom-5 right-6 text-[11.5px] font-semibold text-[#10a37f]">ChatGPT</div>
                 </div>
               </div>
 
@@ -438,6 +443,40 @@ const faqLd = JSON.stringify({
       transition: opacity 0.6s ease, transform 0.6s ease;
     }
     .reveal.on { opacity: 1; transform: none; }
+
+    /* AI card demo loop: welcome -> prompt -> thinking -> response */
+    .ai-demo-welcome { animation: ai-welcome 9s ease infinite; }
+    .ai-demo-user { animation: ai-user 9s ease infinite; }
+    .ai-demo-dot { animation: ai-dot 9s ease infinite; }
+    .ai-demo-resp { animation: ai-resp 9s ease infinite; }
+    @keyframes ai-welcome {
+      0%, 18% { opacity: 1; }
+      26%, 92% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    @keyframes ai-user {
+      0%, 24% { opacity: 0; transform: translateY(8px); }
+      30%, 88% { opacity: 1; transform: none; }
+      94%, 100% { opacity: 0; }
+    }
+    @keyframes ai-dot {
+      0%, 32% { opacity: 0; }
+      38% { opacity: 1; }
+      44% { opacity: 0.35; }
+      50% { opacity: 1; }
+      56% { opacity: 0.35; }
+      60%, 100% { opacity: 0; }
+    }
+    @keyframes ai-resp {
+      0%, 60% { opacity: 0; transform: translateY(8px); }
+      66%, 88% { opacity: 1; transform: none; }
+      94%, 100% { opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .ai-demo-welcome { display: none; animation: none; }
+      .ai-demo-user, .ai-demo-dot, .ai-demo-resp { animation: none; opacity: 1; }
+      .ai-demo-dot { display: none; }
+    }
     .bubble-caret { animation: caret-blink 0.9s step-end infinite; color: #128c7e; }
     @keyframes caret-blink { 50% { opacity: 0; } }
     @media (prefers-reduced-motion: reduce) {
