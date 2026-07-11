@@ -27,8 +27,8 @@ recording. Check items off as they're done.
       internal links to sibling pages + homepage.
 - [x] **[Claude]** Batch 1 (validate design): `/fake-whatsapp-chat-generator`,
       `/fake-chatgpt-conversation-generator`, `/chat-story-video-maker`.
-- [ ] **[Claude]** Batch 2: instagram, discord, slack, telegram, messenger,
-      claude, gemini + `/texting-story-maker`.
+- [x] **[Claude]** Batch 2: instagram, discord, slack, telegram, messenger,
+      claude, gemini + `/texting-story-maker` — all with contextual banners.
 - [x] **[Claude]** Footer links to tool pages (homepage chips pending)
       — original item: Homepage platform chips + footer link to these pages
       (internal linking so Google finds them fast).
