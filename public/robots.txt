@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /render/
 
-# Add your sitemap once the site has a domain, e.g.:
-# Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://easychatmaker.com/sitemap-index.xml
