@@ -22,14 +22,15 @@ recording. Check items off as they're done.
 
 ## Phase 1 — SEO landing pages (week 1) ✅ code work
 
-- [ ] **[Claude]** Landing page template: unique title/meta/H1, platform
+- [x] **[Claude]** Landing page template: unique title/meta/H1, platform
       preview, benefits, FAQ with FAQPage schema, CTA → `/editor?platform=X`,
       internal links to sibling pages + homepage.
-- [ ] **[Claude]** Batch 1 (validate design): `/fake-whatsapp-chat-generator`,
+- [x] **[Claude]** Batch 1 (validate design): `/fake-whatsapp-chat-generator`,
       `/fake-chatgpt-conversation-generator`, `/chat-story-video-maker`.
 - [ ] **[Claude]** Batch 2: instagram, discord, slack, telegram, messenger,
       claude, gemini + `/texting-story-maker`.
-- [ ] **[Claude]** Homepage platform chips + footer link to these pages
+- [x] **[Claude]** Footer links to tool pages (homepage chips pending)
+      — original item: Homepage platform chips + footer link to these pages
       (internal linking so Google finds them fast).
 - [ ] **[You]** After deploy: Search Console → URL Inspection → "Request
       indexing" for each new page (fastest way to get them crawled).

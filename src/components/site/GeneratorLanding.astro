@@ -1,0 +1,178 @@
+---
+// Reusable SEO landing page template for the per-keyword generator pages.
+import Layout from '../../layouts/Layout.astro';
+import SiteFooter from './SiteFooter.astro';
+import '../../styles/global.css';
+
+interface Step { title: string; text: string }
+interface Faq { q: string; a: string }
+interface Feature { icon: string; title: string; text: string }
+interface Related { href: string; label: string }
+
+interface Props {
+  metaTitle: string;
+  metaDescription: string;
+  badge: string;
+  h1Start: string;
+  h1Accent: string;
+  intro: string;
+  ctaHref: string;
+  ctaLabel: string;
+  steps: Step[];
+  features: Feature[];
+  faqs: Faq[];
+  related: Related[];
+}
+
+const {
+  metaTitle, metaDescription, badge, h1Start, h1Accent, intro,
+  ctaHref, ctaLabel, steps, features, faqs, related,
+} = Astro.props;
+
+const faqLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+});
+---
+<Layout title={metaTitle} description={metaDescription}>
+  <script type="application/ld+json" set:html={faqLd} />
+
+  <div class="min-h-screen overflow-x-clip bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
+    <!-- Nav -->
+    <header class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5">
+      <a href="/" class="flex items-center gap-2.5">
+        <img src="/favicon-96x96.png" alt="" width="32" height="32" class="h-8 w-8 rounded-[9px] shadow-lg" />
+        <span class="brand-font text-lg font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent whitespace-nowrap">
+          Easy Chat Maker
+        </span>
+      </a>
+      <a
+        href={ctaHref}
+        class="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15 whitespace-nowrap"
+      >
+        Open the editor
+      </a>
+    </header>
+
+    <!-- Hero -->
+    <section class="relative mx-auto max-w-4xl px-5 pb-16 pt-10 text-center md:pt-16">
+      <div class="pointer-events-none absolute -left-40 top-0 h-80 w-80 rounded-full bg-[#00FF87]/10 blur-[120px]" />
+      <div class="pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-[#60EFFF]/10 blur-[120px]" />
+
+      <div class="relative">
+        <div class="inline-flex items-center gap-2.5 rounded-full border border-[#00FF87]/20 bg-[#00FF87]/[0.06] px-4 py-1.5 text-[12.5px] font-semibold tracking-wide text-[#7DFFC4]">
+          <span class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#00FF87] opacity-60" />
+            <span class="relative inline-flex h-2 w-2 rounded-full bg-[#00FF87]" />
+          </span>
+          {badge}
+        </div>
+
+        <h1 class="mt-6 text-[34px] font-extrabold leading-[1.1] sm:text-[42px] md:text-[54px]">
+          {h1Start}
+          <span class="bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">{h1Accent}</span>
+        </h1>
+
+        <p class="mx-auto mt-6 max-w-2xl text-[17px] leading-relaxed text-white/60">{intro}</p>
+
+        <div class="mt-9">
+          <a
+            href={ctaHref}
+            class="group inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-[#00FF87] to-[#60EFFF] px-8 py-4 text-[15px] font-bold text-[#061116] shadow-[0_10px_40px_-8px_rgba(0,255,135,0.5)] transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_50px_-8px_rgba(0,255,135,0.65)]"
+          >
+            {ctaLabel}
+            <svg class="transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          </a>
+        </div>
+        <p class="mt-5 text-[12.5px] text-white/35">
+          100% free · No signup · No watermark · Runs in your browser
+        </p>
+      </div>
+    </section>
+
+    <!-- Steps -->
+    <section class="border-y border-white/5 bg-white/[0.02] py-16">
+      <div class="mx-auto max-w-5xl px-5">
+        <h2 class="text-center text-[28px] font-bold md:text-[36px]">How it works</h2>
+        <div class="mt-10 grid gap-6 md:grid-cols-3">
+          {steps.map((s, i) => (
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+              <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-r from-[#00FF87] to-[#60EFFF] text-[15px] font-extrabold text-[#061116]">{i + 1}</span>
+              <h3 class="mt-4 text-[17px] font-bold">{s.title}</h3>
+              <p class="mt-2 text-[14px] leading-relaxed text-white/55">{s.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="mx-auto max-w-5xl px-5 py-16">
+      <h2 class="text-center text-[28px] font-bold md:text-[36px]">What you get</h2>
+      <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {features.map((f) => (
+          <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-[#00FF87]/30">
+            <span class="text-[22px]">{f.icon}</span>
+            <h3 class="mt-3 text-[15.5px] font-bold">{f.title}</h3>
+            <p class="mt-1.5 text-[13.5px] leading-relaxed text-white/55">{f.text}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Extra page-specific content -->
+    <slot />
+
+    <!-- FAQ -->
+    <section class="border-y border-white/5 bg-white/[0.02] py-16">
+      <div class="mx-auto max-w-3xl px-5">
+        <h2 class="text-center text-[28px] font-bold md:text-[36px]">Frequently asked questions</h2>
+        <div class="mt-8 space-y-3">
+          {faqs.map((f) => (
+            <details class="group rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4">
+              <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-[15px] font-semibold text-white/85">
+                {f.q}
+                <svg class="h-4 w-4 flex-shrink-0 text-white/40 transition-transform duration-300 group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+              </summary>
+              <p class="mt-3 text-[14px] leading-relaxed text-white/60">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Related tools -->
+    <section class="mx-auto max-w-4xl px-5 py-14">
+      <h2 class="text-center text-[20px] font-bold text-white/80">More free generators</h2>
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+        {related.map((r) => (
+          <a
+            href={r.href}
+            class="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-[13.5px] font-semibold text-white/70 transition-all hover:border-white/25 hover:bg-white/[0.08] hover:text-white"
+          >
+            {r.label}
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- Closing CTA -->
+    <section class="mx-auto max-w-6xl px-5 pb-20 text-center">
+      <h2 class="text-[28px] font-bold md:text-[36px]">Try it now — it's free</h2>
+      <p class="mt-3 text-white/55">No signup, no watermark, nothing to install.</p>
+      <a
+        href={ctaHref}
+        class="mt-7 inline-block rounded-2xl bg-gradient-to-r from-[#00FF87] to-[#60EFFF] px-9 py-4 text-[15px] font-bold text-[#061116] transition-all hover:brightness-110"
+      >
+        {ctaLabel}
+      </a>
+    </section>
+
+    <SiteFooter />
+  </div>
+</Layout>
