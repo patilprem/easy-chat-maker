@@ -30,11 +30,11 @@ const PARTICIPANTS: Participant[] = [
 ];
 
 const MESSAGES: Message[] = [
-  { id: 'm1', kind: 'text', participantId: 'you', text: 'Did you finish the design?', time: '9:41 am' },
-  { id: 'm2', kind: 'text', participantId: 'alex', text: 'Just sent it 🚀', time: '9:41 am' },
-  { id: 'm3', kind: 'text', participantId: 'you', text: 'This looks incredible', time: '9:42 am', reaction: { emoji: '❤️' } },
-  { id: 'm4', kind: 'text', participantId: 'alex', text: 'Ship it?', time: '9:42 am' },
-  { id: 'm5', kind: 'text', participantId: 'you', text: 'Ship it 🎉', time: '9:43 am' },
+  { id: 'm1', kind: 'text', participantId: 'you', text: 'How do I respond to customers faster? 👋', time: '9:41 am' },
+  { id: 'm2', kind: 'text', participantId: 'alex', text: 'Instant replies and round-the-clock automation ⚡', time: '9:41 am' },
+  { id: 'm3', kind: 'text', participantId: 'you', text: 'And keeping conversations organized?', time: '9:42 am' },
+  { id: 'm4', kind: 'text', participantId: 'alex', text: 'Tag and categorize every chat for quick follow-ups ✅', time: '9:42 am', reaction: { emoji: '👍' } },
+  { id: 'm5', kind: 'text', participantId: 'you', text: 'Perfect. Let’s set it up 🎉', time: '9:43 am' },
 ];
 
 const HOLD_FRAMES = Math.round(FPS * 2.2);
@@ -114,8 +114,8 @@ export const HomeHeroPhone: React.FC = () => {
         {PLATFORM_LABEL[platform]}
       </span>
 
-      {/* Phone */}
-      <div style={{ width: 300, height: 650 }}>
+      {/* Phone — watch-only: let mouse/scroll events pass through to the page */}
+      <div style={{ width: 300, height: 650, pointerEvents: 'none' }}>
         <div
           className="relative origin-top-left"
           style={{ width: 360, height: 780, transform: 'scale(0.833)' }}

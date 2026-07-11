@@ -14,9 +14,13 @@ html, body {
 }
 
 /* Scrollbar styling */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.35) rgba(255, 255, 255, 0.06);
+}
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 10px;
+  height: 10px;
 }
 ::-webkit-scrollbar-button {
   display: none;
@@ -24,14 +28,18 @@ html, body {
   height: 0;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.05);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.35);
   border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 /* Ultra-thin rectangular scrollbar inside the live phone preview if content overflows */
