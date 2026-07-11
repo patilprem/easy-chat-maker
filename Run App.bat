@@ -9,6 +9,7 @@ echo.
 
 echo [1/5] Getting latest changes from GitHub...
 git checkout main >nul 2>&1
+git checkout -- package-lock.json >nul 2>&1
 git pull origin main
 
 echo.
