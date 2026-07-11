@@ -192,27 +192,6 @@ const faqLd = JSON.stringify({
           style="background: radial-gradient(circle, rgba(0,255,135,0.13) 0%, rgba(96,239,255,0.07) 40%, transparent 70%)"
         />
         <HomeHeroPhone client:load />
-
-        <!-- Floating accents -->
-        <div class="float-slow pointer-events-none absolute -left-28 top-10 hidden items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.07] px-3.5 py-2 shadow-2xl backdrop-blur-md md:flex">
-          <span class="text-[17px]">❤️</span><span class="text-[17px]">😂</span><span class="text-[17px]">🔥</span>
-          <span class="ml-1 text-[12px] font-bold text-white/70">+12</span>
-        </div>
-        <div class="float-slower pointer-events-none absolute -right-24 top-[58%] hidden items-center gap-2.5 rounded-2xl border border-white/10 bg-[#0d1526]/90 px-4 py-3 shadow-2xl backdrop-blur-md md:flex">
-          <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#00FF87]/15 text-[#00FF87]">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
-          </span>
-          <span>
-            <span class="block text-[12.5px] font-bold text-white">chat.png exported</span>
-            <span class="block text-[11px] text-white/45">no watermark · 2.4s</span>
-          </span>
-        </div>
-        <div class="float-slowest pointer-events-none absolute -left-20 bottom-10 hidden items-center gap-2 rounded-2xl border border-white/10 bg-[#0d1526]/90 px-4 py-2.5 shadow-2xl backdrop-blur-md md:flex">
-          <span class="flex h-7 w-7 items-center justify-center rounded-full" style={`background:${platforms[0].color}`}>
-            <svg viewBox={platforms[0].viewBox} width="14" height="14" fill="#fff" aria-hidden="true" set:html={platforms[0].icon} />
-          </span>
-          <span class="text-[12.5px] font-semibold text-white/85">Switch style anytime</span>
-        </div>
       </div>
     </section>
 
@@ -601,16 +580,8 @@ const faqLd = JSON.stringify({
       from { transform: translate(0, 0) scale(1); }
       to { transform: translate(36px, -28px) scale(1.12); }
     }
-    .float-slow { animation: float-y 5.5s ease-in-out infinite; }
-    .float-slower { animation: float-y 7s ease-in-out 0.9s infinite; }
-    .float-slowest { animation: float-y 8s ease-in-out 1.7s infinite; }
-    @keyframes float-y {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
     @media (prefers-reduced-motion: reduce) {
-      .hero-shimmer, .hero-blob, .hero-blob-2, .hero-blob-3,
-      .float-slow, .float-slower, .float-slowest { animation: none; }
+      .hero-shimmer, .hero-blob, .hero-blob-2, .hero-blob-3 { animation: none; }
     }
     .marquee-track {
       display: inline-block;
