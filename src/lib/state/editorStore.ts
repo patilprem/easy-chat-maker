@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid';
 import { parseChatScript, generateInitialsAvatar } from '../parser/parseChatScript';
 import { saveMedia, resolveObjectUrl } from '../media/mediaStore';
 import { PRESETS } from '../templates/presets';
+import { SCENARIOS } from '../templates/scenarios';
 import { isAiPlatform } from '../parser/types';
 import type { ChatProject, Message, Participant, Reaction } from '../parser/types';
 
@@ -24,6 +25,7 @@ interface EditorState {
   setScriptInput: (s: string) => void;
   parseAndLoad: (script: string, selfSpeakerName?: string) => void;
   loadPreset: (id: 'private' | 'group') => void;
+  loadScenario: (id: string) => void;
   setPlatform: (p: ChatProject['platform']) => void;
   setTheme: (t: ChatProject['theme']) => void;
   setDeviceOS: (os: ChatProject['deviceOS']) => void;
@@ -158,6 +160,13 @@ export const useEditorStore = create<EditorState>((set, get) => {
       const preset = PRESETS[id];
       if (!preset) return;
       update(() => ({ ...preset, id: nanoid(), exportConsentAccepted: false }));
+      set({ scriptInput: '', warnings: [] });
+    },
+
+    loadScenario: (id) => {
+      const scenario = SCENARIOS[id];
+      if (!scenario) return;
+      update(() => ({ ...scenario, id: nanoid(), exportConsentAccepted: false }));
       set({ scriptInput: '', warnings: [] });
     },
 

@@ -17,8 +17,14 @@ export const ChatEditorApp: React.FC = () => {
 
   useEffect(() => {
     hydrateFromStorage();
-    // Deep links from landing pages: /editor?platform=whatsapp
-    const requested = new URLSearchParams(window.location.search).get('platform') as Platform | null;
+    // Deep links from landing pages: /editor?platform=whatsapp or /editor?scenario=testimonial
+    const params = new URLSearchParams(window.location.search);
+    const scenario = params.get('scenario');
+    if (scenario) {
+      useEditorStore.getState().loadScenario(scenario);
+      return;
+    }
+    const requested = params.get('platform') as Platform | null;
     if (requested && VALID_PLATFORMS.includes(requested)) {
       useEditorStore.getState().setPlatform(requested);
     }
