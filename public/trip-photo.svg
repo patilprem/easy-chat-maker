@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" width="400" height="260">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3d2b56"/>
+      <stop offset="38%" stop-color="#bf5b7a"/>
+      <stop offset="68%" stop-color="#f2709c"/>
+      <stop offset="100%" stop-color="#ffb75e"/>
+    </linearGradient>
+    <radialGradient id="sunglow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#fff3b0" stop-opacity="0.95"/>
+      <stop offset="60%" stop-color="#ffd166" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#ffd166" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- sky -->
+  <rect width="400" height="260" fill="url(#sky)"/>
+
+  <!-- sun -->
+  <circle cx="200" cy="150" r="86" fill="url(#sunglow)"/>
+  <circle cx="200" cy="150" r="34" fill="#ffe29a"/>
+
+  <!-- far mountains -->
+  <path d="M0 190 L70 120 L130 185 L190 130 L260 195 L330 125 L400 185 L400 260 L0 260 Z" fill="#4a2c5e" opacity="0.75"/>
+
+  <!-- birds -->
+  <path d="M96 74 q6 -7 12 0 q6 -7 12 0" stroke="#3a2450" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  <path d="M282 60 q5 -6 10 0 q5 -6 10 0" stroke="#3a2450" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+
+  <!-- foreground hill -->
+  <path d="M0 224 Q100 196 200 212 Q300 228 400 206 L400 260 L0 260 Z" fill="#241333"/>
+
+  <!-- friends: four silhouettes, arms up -->
+  <g fill="#1a0d27" stroke="#1a0d27" stroke-linecap="round">
+    <!-- friend 1 -->
+    <circle cx="126" cy="176" r="9.5"/>
+    <path d="M126 185 L126 218" stroke-width="9"/>
+    <path d="M126 194 L108 176" stroke-width="5.5"/>
+    <path d="M126 194 L143 175" stroke-width="5.5"/>
+    <path d="M122 218 L116 236 M130 218 L136 236" stroke-width="5.5"/>
+    <!-- friend 2 (jumping) -->
+    <circle cx="176" cy="162" r="10"/>
+    <path d="M176 172 L176 204" stroke-width="9.5"/>
+    <path d="M176 180 L156 164 M176 180 L196 163" stroke-width="5.5"/>
+    <path d="M172 204 L162 222 M180 204 L190 221" stroke-width="5.5"/>
+    <!-- friend 3 -->
+    <circle cx="228" cy="174" r="9.5"/>
+    <path d="M228 183 L228 216" stroke-width="9"/>
+    <path d="M228 192 L210 172 M228 192 L247 174" stroke-width="5.5"/>
+    <path d="M224 216 L218 234 M232 216 L238 234" stroke-width="5.5"/>
+    <!-- friend 4 -->
+    <circle cx="278" cy="180" r="9"/>
+    <path d="M278 189 L278 220" stroke-width="8.5"/>
+    <path d="M278 197 L262 182 M278 197 L295 180" stroke-width="5.5"/>
+    <path d="M274 220 L269 237 M282 220 L288 237" stroke-width="5.5"/>
+  </g>
+</svg>
