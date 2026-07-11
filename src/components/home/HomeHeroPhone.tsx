@@ -6,15 +6,6 @@ import type { ChatProject, Message, Participant, Platform } from '../../lib/pars
 
 const CYCLE: Platform[] = ['whatsapp', 'chatgpt', 'instagram', 'slack', 'gemini', 'telegram'];
 
-const PLATFORM_LABEL: Record<string, string> = {
-  whatsapp: 'WhatsApp-style',
-  chatgpt: 'ChatGPT',
-  instagram: 'Instagram DM',
-  slack: 'Slack',
-  gemini: 'Gemini',
-  telegram: 'Telegram',
-};
-
 const SUBTITLE: Record<string, string> = {
   whatsapp: 'online',
   chatgpt: '',
@@ -106,21 +97,12 @@ export const HomeHeroPhone: React.FC = () => {
   }, [plan]);
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      {/* Platform label */}
-      <span
-        key={platform}
-        className="rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 text-[13px] font-semibold text-white/80"
-        style={{ animation: 'hero-label-in 0.5s ease' }}
-      >
-        {PLATFORM_LABEL[platform]}
-      </span>
-
+    <div className="flex flex-col items-center">
       {/* Phone — cropped to the top half, watch-only: mouse/scroll passes through */}
-      <div className="relative" style={{ width: 300, height: 440, overflow: 'hidden', pointerEvents: 'none' }}>
+      <div className="relative" style={{ width: 396, height: 560, overflow: 'hidden', pointerEvents: 'none' }}>
         <div
           className="relative origin-top-left"
-          style={{ width: 360, height: 780, transform: 'scale(0.833)' }}
+          style={{ width: 360, height: 780, transform: 'scale(1.1)' }}
         >
           <div
             className="absolute inset-0 overflow-hidden rounded-[44px] border-[10px] border-[#1a1a1a] bg-[#1a1a1a]"
@@ -143,13 +125,6 @@ export const HomeHeroPhone: React.FC = () => {
           style={{ background: 'linear-gradient(to bottom, transparent, #0c1322)' }}
         />
       </div>
-
-      <style>{`
-        @keyframes hero-label-in {
-          from { opacity: 0; transform: translateY(6px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 };
