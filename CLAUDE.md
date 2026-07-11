@@ -43,6 +43,8 @@
   Search Console with the sitemap submitted (July 2026). Keep H1 wording
   ("chat stories") separate from title/meta wording ("chat mockup", "fake
   chat generator") — intentional split to cover both keyword families.
+- Analytics: GA4 tag G-2GLC7YPJLK in Layout.astro, production builds only
+  (dev/local sessions are not tracked). Verified working July 2026.
 
 ## Project shape
 
