@@ -13,6 +13,10 @@ html, body {
   height: 100%;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* Brand display font for headings (single weight — it is bold by design) */
 h1, h2, h3 {
   font-family: 'Momo Trust Display', 'Inter', system-ui, sans-serif;

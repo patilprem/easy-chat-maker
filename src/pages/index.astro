@@ -89,13 +89,20 @@ const faqLd = JSON.stringify({
 
   <div class="min-h-screen overflow-x-clip bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
     <!-- Nav -->
-    <header class="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
-      <span class="text-lg font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">
+    <header class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5">
+      <span class="text-lg font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent whitespace-nowrap">
         Easy Chat Maker
       </span>
+      <nav class="hidden items-center gap-1 md:flex" aria-label="Page sections">
+        <a href="#how-it-works" class="rounded-lg px-3 py-2 text-sm font-medium text-white/55 transition-colors hover:bg-white/5 hover:text-white">How it works</a>
+        <a href="#use-cases" class="rounded-lg px-3 py-2 text-sm font-medium text-white/55 transition-colors hover:bg-white/5 hover:text-white">Use cases</a>
+        <a href="#platforms" class="rounded-lg px-3 py-2 text-sm font-medium text-white/55 transition-colors hover:bg-white/5 hover:text-white">Platforms</a>
+        <a href="#why" class="rounded-lg px-3 py-2 text-sm font-medium text-white/55 transition-colors hover:bg-white/5 hover:text-white">Why us</a>
+        <a href="#faq" class="rounded-lg px-3 py-2 text-sm font-medium text-white/55 transition-colors hover:bg-white/5 hover:text-white">FAQ</a>
+      </nav>
       <a
         href="/editor"
-        class="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15"
+        class="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15 whitespace-nowrap"
       >
         Open the editor
       </a>
@@ -148,7 +155,7 @@ const faqLd = JSON.stringify({
     </div>
 
     <!-- How it works -->
-    <section class="mx-auto max-w-6xl px-5 py-24">
+    <section id="how-it-works" class="mx-auto max-w-6xl scroll-mt-6 px-5 py-24">
       <div class="reveal flex justify-center">
         <span class="rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 text-[13px] font-semibold text-white/70">How it works</span>
       </div>
@@ -243,7 +250,7 @@ const faqLd = JSON.stringify({
     </section>
 
         <!-- Platform tour: sticky phone + beats -->
-    <section class="mx-auto max-w-6xl px-5 py-24">
+    <section id="use-cases" class="mx-auto max-w-6xl scroll-mt-6 px-5 py-24">
       <div class="reveal flex justify-center">
         <span class="rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 text-[13px] font-semibold text-white/70">Use cases</span>
       </div>
@@ -381,7 +388,7 @@ const faqLd = JSON.stringify({
     </section>
 
     <!-- Platform chips (internal links for SEO) -->
-    <section class="border-y border-white/5 bg-white/[0.02] py-16">
+    <section id="platforms" class="border-y border-white/5 bg-white/[0.02] scroll-mt-6 py-16">
       <div class="mx-auto max-w-6xl px-5">
         <h2 class="reveal text-center text-[34px] font-bold md:text-[44px]">
           Pick a platform. <span class="bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">Start typing.</span>
@@ -407,7 +414,7 @@ const faqLd = JSON.stringify({
     </section>
 
     <!-- Why this one -->
-    <section class="mx-auto max-w-6xl px-5 py-24">
+    <section id="why" class="mx-auto max-w-6xl scroll-mt-6 px-5 py-24">
       <h2 class="reveal text-center text-[34px] font-bold md:text-[44px]">Why <span class="bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">Easy Chat Maker</span></h2>
       <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         <div class="reveal rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-[#00FF87]/30">
@@ -456,7 +463,7 @@ const faqLd = JSON.stringify({
     </section>
 
     <!-- FAQ -->
-    <section id="faq" class="border-y border-white/5 bg-white/[0.02] py-24">
+    <section id="faq" class="border-y border-white/5 bg-white/[0.02] scroll-mt-6 py-24">
       <div class="mx-auto max-w-3xl px-5">
         <h2 class="reveal text-center text-[34px] font-bold md:text-[44px]">Frequently asked questions</h2>
         <div class="mt-10 space-y-3">
