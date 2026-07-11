@@ -24,6 +24,20 @@
 - Set the git identity before committing:
   `git config user.email noreply@anthropic.com && git config user.name Claude`.
 
+## Deployment (live site)
+
+- Production site: **https://easychatmaker.com** (+ www), served by a
+  Cloudflare **Worker** with static assets (`wrangler.jsonc` points at
+  `dist/`). Preview URL: easy-chat-maker.silverhexagon-co.workers.dev.
+- Deploys automatically on every push to `main` (Cloudflare Workers Builds,
+  GitHub integration; build `npm run build`, deploy `npx wrangler deploy`).
+  So pushing to `main` updates BOTH the user's local Run App.bat workflow and
+  the live website.
+- Domain registered at GoDaddy; DNS + nameservers on Cloudflare (free plan).
+- Note: this remote container's network policy blocks requests to
+  workers.dev / easychatmaker.com, so live-site checks must be done by the
+  user in their browser.
+
 ## Project shape
 
 - Astro 4 + React + Tailwind. Landing page: `src/pages/index.astro` (folds:
