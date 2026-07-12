@@ -34,6 +34,8 @@ recording. Check items off as they're done.
       (internal linking so Google finds them fast).
 - [ ] **[You]** After deploy: Search Console → URL Inspection → "Request
       indexing" for each new page (fastest way to get them crawled).
+      _Progress 2026-07-12: started; daily quota hit — finishing the
+      remaining pages 2026-07-13._
 
 ## Phase 2 — Launch & backlinks (weeks 2–4) 🔗 the domain is new; links are oxygen
 
