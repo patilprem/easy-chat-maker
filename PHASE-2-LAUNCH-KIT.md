@@ -43,12 +43,17 @@ no watermark, PNG + video export, no signup, runs in the browser.
 > I'd love feedback — especially which platform I should add next. I'll be
 > here all day answering everything!
 
-**Gallery captions (in upload order):**
-1. "Type a conversation, watch it render as a real chat — 9 platforms."
-2. "WhatsApp, Instagram, Discord, Slack, Telegram, Messenger… pick your look."
-3. "The only free tool with ChatGPT, Claude and Gemini mockups."
-4. "Export a clean PNG — no watermark, ever."
-5. "Or export an animated chat-story video for TikTok, Reels and Shorts."
+**Gallery images & captions (final — screenshots delivered 2026-07-12 as
+`ph-final-kit.zip`, mixed light/dark, 1270×760 @2x):**
+1. homepage — "Create realistic chat stories in seconds — free, no signup, no watermark."
+2. editor WhatsApp (light) — "Type a conversation, watch it render as a real chat — 9 platforms."
+3. editor ChatGPT (dark) — "The only free tool with ChatGPT, Claude and Gemini mockups."
+4. editor Instagram (dark) — "WhatsApp, Instagram, Discord, Slack, Telegram, Messenger — in light or dark."
+5. editor Discord (light) — "Every platform pixel-matched, down to reactions and timestamps."
+6. chat-story-video page — "Export a clean PNG — or an animated chat-story video for TikTok, Reels and Shorts."
+7. spare: editor Claude (dark) — "Claude and Gemini mockups too — almost no other tool has these."
+
+Thumbnail: logo mark from `/public` (PH wants 240×240).
 
 **Launch-day checklist [You]:**
 - [ ] Launch Tue, Wed or Thu at 00:01 PT (PH day resets then)
