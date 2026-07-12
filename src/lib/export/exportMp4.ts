@@ -1,4 +1,4 @@
-import html2canvas from 'html2canvas';
+import { toCanvas, getFontEmbedCSS } from 'html-to-image';
 import { Muxer, ArrayBufferTarget } from 'mp4-muxer';
 import type { ChatProject, FramePlan } from '../parser/types';
 import { buildFramePlan, FPS } from '../video/chatTimeline';
@@ -16,14 +16,19 @@ const CREATIVE_MSGS = [
 
 const PHONE_W = 390;
 const PHONE_H = 844;
-const VIDEO_W = PHONE_W;
-const VIDEO_H = PHONE_H;
+// Encode at 2x for crisp text on phone screens
+const VIDEO_SCALE = 2;
+const VIDEO_W = PHONE_W * VIDEO_SCALE;
+const VIDEO_H = PHONE_H * VIDEO_SCALE;
 const EXPORT_FPS = 12;
 const FRAME_STEP = Math.max(1, Math.round(FPS / EXPORT_FPS));
 // Codec preference order: H.264 (plays everywhere), then VP9 (available in
-// every Chromium build, including ones without proprietary codecs).
+// every Chromium build, including ones without proprietary codecs). Levels
+// are high enough for the 780x1688 frame.
 const CODEC_CANDIDATES: { codec: string; muxerCodec: 'avc' | 'vp9' }[] = [
+  { codec: 'avc1.42002A', muxerCodec: 'avc' },
   { codec: 'avc1.42001f', muxerCodec: 'avc' },
+  { codec: 'vp09.00.40.08', muxerCodec: 'vp9' },
   { codec: 'vp09.00.10.08', muxerCodec: 'vp9' },
 ];
 
@@ -31,7 +36,7 @@ const baseVideoConfig = (codec: string): VideoEncoderConfig => ({
   codec,
   width: VIDEO_W,
   height: VIDEO_H,
-  bitrate: 1_800_000,
+  bitrate: 4_000_000,
   framerate: EXPORT_FPS,
 });
 
@@ -127,6 +132,17 @@ export async function exportMp4(project: ChatProject, onProgress: ProgressCallba
     }
     if (!phoneEl) throw new Error('#phone-screen-export not found in iframe');
 
+    // Same readiness waits as the PNG exporter — fonts and images must be
+    // loaded in the hidden render document before the first capture.
+    await Promise.allSettled([
+      iframeDoc.fonts?.ready ?? Promise.resolve(),
+      ...Array.from(iframeDoc.images).map(
+        (img) => new Promise((r) => { img.complete ? r(null) : (img.onload = img.onerror = r); })
+      ),
+    ]);
+    // Serialize the font CSS once and reuse it for every frame capture.
+    const fontEmbedCSS = await getFontEmbedCSS(phoneEl).catch(() => '');
+
     const muxer = new Muxer({
       target: new ArrayBufferTarget(),
       video: { codec: muxerCodec, width: VIDEO_W, height: VIDEO_H },
@@ -157,13 +173,14 @@ export async function exportMp4(project: ChatProject, onProgress: ProgressCallba
         iframeWin.postMessage({ type: 'SET_FRAME', frame: f, plan }, '*');
         await new Promise((r) => setTimeout(r, 20));
 
-        phoneCanvas = await html2canvas(phoneEl, {
-          scale: 1,
-          useCORS: true,
-          backgroundColor: null,
-          logging: false,
-          window: iframeWin,
-        } as Parameters<typeof html2canvas>[1] & { window: Window });
+        phoneCanvas = await toCanvas(phoneEl, {
+          width: PHONE_W,
+          height: PHONE_H,
+          style: { width: `${PHONE_W}px`, height: `${PHONE_H}px` },
+          pixelRatio: VIDEO_SCALE,
+          fontEmbedCSS,
+          backgroundColor: project.theme === 'dark' ? '#0b141a' : '#ffffff',
+        });
         lastCapturedSignature = signature;
       }
 
