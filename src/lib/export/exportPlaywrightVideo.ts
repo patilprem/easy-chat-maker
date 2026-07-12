@@ -4,6 +4,14 @@ import { buildFramePlan, FPS } from '../video/chatTimeline';
 
 const RECORDER_URL = 'http://127.0.0.1:8817/record';
 
+/** The local Playwright recorder isn't reachable (not started, or we're on the live site). */
+export class RecorderUnavailableError extends Error {
+  constructor() {
+    super('Video exporter is not running.');
+    this.name = 'RecorderUnavailableError';
+  }
+}
+
 interface RecorderResponse {
   ok: boolean;
   outputPath: string;
@@ -27,7 +35,7 @@ export async function exportPlaywrightVideo(project: ChatProject, onProgress: Pr
       }),
     });
   } catch {
-    throw new Error('Video exporter is not running. Close the app and start it again with "Run App.bat" (or run: npm run record:server).');
+    throw new RecorderUnavailableError();
   }
 
   if (!response.ok) {

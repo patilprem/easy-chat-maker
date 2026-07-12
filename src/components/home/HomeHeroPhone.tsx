@@ -44,12 +44,11 @@ export const HomeHeroPhone: React.FC = () => {
   const rafRef = useRef<number | null>(null);
   const feedRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
-  // Seed from the viewport so the first client render never forces the
-  // 396px design width onto a narrower grid column (which would then
-  // measure back as 396 and lock the scale at 1).
-  const [scale, setScale] = useState(() =>
-    typeof window === 'undefined' ? 1 : Math.min(1, (window.innerWidth - 40) / PHONE_W)
-  );
+  // Must start at 1 to match the SSR HTML — React 19 won't patch style
+  // attributes that mismatch during hydration, so a viewport-seeded
+  // initial value would leave the server-rendered 396px in the DOM
+  // forever. The effect below shrinks it right after mount instead.
+  const [scale, setScale] = useState(1);
 
   useEffect(() => {
     const el = wrapRef.current;

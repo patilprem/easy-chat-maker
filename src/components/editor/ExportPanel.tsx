@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { ImageDown, Clapperboard } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { exportPng } from '../../lib/export/exportPng';
-import { type ProgressState } from '../../lib/export/exportMp4';
-import { exportPlaywrightVideo } from '../../lib/export/exportPlaywrightVideo';
+import { exportMp4, type ProgressState } from '../../lib/export/exportMp4';
+import { exportPlaywrightVideo, RecorderUnavailableError } from '../../lib/export/exportPlaywrightVideo';
 
 const LOADING_MESSAGES = [
   { from: 0, to: 10, text: 'Starting the chat...' },
@@ -56,11 +56,21 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
       });
     }, 900);
 
+    const onProgress = (state: ProgressState, pct: number) => {
+      simulatedPct = Math.max(simulatedPct, pct);
+      setMp4Progress({ state, pct, msg: getLoadingMsg(pct) });
+    };
+
     try {
-      await exportPlaywrightVideo(project, (state, pct) => {
-        simulatedPct = Math.max(simulatedPct, pct);
-        setMp4Progress({ state, pct, msg: getLoadingMsg(pct) });
-      });
+      // Prefer the local Playwright recorder (highest fidelity, used by the
+      // desktop Run App.bat workflow); fall back to in-browser WebCodecs
+      // rendering when it isn't running — e.g. on the live website.
+      try {
+        await exportPlaywrightVideo(project, onProgress);
+      } catch (e) {
+        if (!(e instanceof RecorderUnavailableError)) throw e;
+        await exportMp4(project, onProgress);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'MP4 export failed');
     } finally {

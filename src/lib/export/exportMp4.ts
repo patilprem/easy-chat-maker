@@ -20,13 +20,20 @@ const VIDEO_W = PHONE_W;
 const VIDEO_H = PHONE_H;
 const EXPORT_FPS = 12;
 const FRAME_STEP = Math.max(1, Math.round(FPS / EXPORT_FPS));
-const VIDEO_CONFIG: VideoEncoderConfig = {
-  codec: 'avc1.42001f',
+// Codec preference order: H.264 (plays everywhere), then VP9 (available in
+// every Chromium build, including ones without proprietary codecs).
+const CODEC_CANDIDATES: { codec: string; muxerCodec: 'avc' | 'vp9' }[] = [
+  { codec: 'avc1.42001f', muxerCodec: 'avc' },
+  { codec: 'vp09.00.10.08', muxerCodec: 'vp9' },
+];
+
+const baseVideoConfig = (codec: string): VideoEncoderConfig => ({
+  codec,
   width: VIDEO_W,
   height: VIDEO_H,
   bitrate: 1_800_000,
   framerate: EXPORT_FPS,
-};
+});
 
 function triggerDownload(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
@@ -53,20 +60,24 @@ function getFrameSignature(plan: FramePlan): string {
   ].join('|');
 }
 
-async function getSupportedVideoConfig(): Promise<VideoEncoderConfig> {
+async function getSupportedVideoConfig(): Promise<{ config: VideoEncoderConfig; muxerCodec: 'avc' | 'vp9' }> {
   if (typeof VideoEncoder === 'undefined') {
     throw new Error('MP4 export needs WebCodecs. Please try Chrome or Edge desktop.');
   }
 
-  if (typeof VideoEncoder.isConfigSupported === 'function') {
-    const support = await VideoEncoder.isConfigSupported(VIDEO_CONFIG);
-    if (!support.supported) {
-      throw new Error('MP4 export is not supported by this browser/device. Please try Chrome or Edge desktop.');
-    }
-    return support.config ?? VIDEO_CONFIG;
+  if (typeof VideoEncoder.isConfigSupported !== 'function') {
+    return { config: baseVideoConfig(CODEC_CANDIDATES[0].codec), muxerCodec: CODEC_CANDIDATES[0].muxerCodec };
   }
 
-  return VIDEO_CONFIG;
+  for (const candidate of CODEC_CANDIDATES) {
+    const attempt = baseVideoConfig(candidate.codec);
+    const support = await VideoEncoder.isConfigSupported(attempt).catch(() => null);
+    if (support?.supported) {
+      return { config: support.config ?? attempt, muxerCodec: candidate.muxerCodec };
+    }
+  }
+
+  throw new Error('MP4 export is not supported by this browser/device. Please try Chrome or Edge desktop.');
 }
 
 export async function exportMp4(project: ChatProject, onProgress: ProgressCallback): Promise<void> {
@@ -74,7 +85,7 @@ export async function exportMp4(project: ChatProject, onProgress: ProgressCallba
   const frames = buildFramePlan(project.messages, project.participants);
   const totalFrames = frames.length;
   const totalOutputFrames = Math.ceil(totalFrames / FRAME_STEP);
-  const supportedConfig = await getSupportedVideoConfig();
+  const { config: supportedConfig, muxerCodec } = await getSupportedVideoConfig();
 
   localStorage.setItem('ecm:v1:export-payload', JSON.stringify(project));
   onProgress('preparing', 2, CREATIVE_MSGS[0]);
@@ -118,7 +129,7 @@ export async function exportMp4(project: ChatProject, onProgress: ProgressCallba
 
     const muxer = new Muxer({
       target: new ArrayBufferTarget(),
-      video: { codec: 'avc', width: VIDEO_W, height: VIDEO_H },
+      video: { codec: muxerCodec, width: VIDEO_W, height: VIDEO_H },
       fastStart: 'in-memory',
     });
 
