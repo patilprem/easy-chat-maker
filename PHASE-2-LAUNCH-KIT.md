@@ -197,6 +197,58 @@ Link the **matching landing page**, not the homepage.
 
 ---
 
+## Step 4b — Value post: "how to make chat stories" (week after launch)
+
+For r/NewTubers, r/TikTokCreators or r/ContentCreation (check self-promo
+rules; in strict subs drop the link and share it only in comments; add a
+"(disclosure: I built the tool I mentioned)" line where required).
+
+**Title:**
+> Chat story videos are the most underrated faceless content format right
+> now — here's how to make them
+
+**Body:**
+> You've probably seen these — a fake text conversation plays out on
+> screen, message by message, with typing sounds. "POV: my mom found my
+> report card" etc. They pull millions of views, need zero camera time,
+> and take maybe 30 minutes to make. Here's the process after making a
+> bunch of them:
+>
+> **1. Write the story first, not in the tool.**
+> A chat story is a script, not a conversation. Structure it like this:
+> - Message 1–2: the hook. Open mid-drama ("I know what you did." /
+>   "wrong person??"). If the first message is "hey", you've lost.
+> - Middle: escalate every 2–3 messages. One reveal at a time.
+> - End: either a punchline or a cliffhanger for part 2. Part 2s are
+>   free retention.
+>
+> **2. Keep it under 45 seconds.**
+> That's roughly 15–25 short messages. If a message is longer than one
+> line, split it — fast bubbles feel like real texting and keep the
+> pacing up.
+>
+> **3. Generate the video.**
+> I use easychatmaker.com — you paste the script, it renders it as a
+> WhatsApp/Instagram/iMessage-style conversation and exports an MP4 with
+> the messages animating in. Free and no watermark, which is why I
+> switched from TextingStory. Any tool works though — the script matters
+> 10x more than the renderer.
+>
+> **4. Post natively, hook in the caption too.**
+> Upload 9:16, add trending audio quietly under the typing sounds, and
+> make the caption a second hook ("she had no idea who she was texting…").
+>
+> **5. Batch them.**
+> Write 5 scripts in one sitting, render all 5, post one a day.
+> Consistency beats quality in this format — some of the dumbest ones do
+> the biggest numbers.
+>
+> Happy to share example scripts if anyone wants — what niche are you
+> making content for?
+
+The "share example scripts" closer is deliberate: replies = ranking, and
+each reply is a natural second touchpoint made with the tool.
+
 ## Step 5 — Friends & early usage (ongoing)
 
 Message to send friends (WhatsApp/iMessage — casual, so it gets used):
