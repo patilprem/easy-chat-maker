@@ -37,15 +37,19 @@ recording. Check items off as they're done.
 
 ## Phase 2 — Launch & backlinks (weeks 2–4) 🔗 the domain is new; links are oxygen
 
-- [ ] **[You]** Product Hunt launch. **[Claude]** writes tagline, description,
-      first comment, and gallery captions. Launch Tue–Thu, be online that day
-      to reply to every comment.
+> All [Claude] copy for this phase is written → see **PHASE-2-LAUNCH-KIT.md**.
+
+- [ ] **[You]** Product Hunt launch. ~~**[Claude]** writes tagline, description,
+      first comment, and gallery captions~~ ✅ in launch kit. Launch Tue–Thu,
+      be online that day to reply to every comment.
 - [ ] **[You]** Reddit "I built this" posts: r/SideProject, r/InternetIsBeautiful
       (read each sub's self-promo rules first; post as a story, not an ad).
+      Drafts ✅ in launch kit.
 - [ ] **[You]** Directory submissions (free, ~15 min each):
       AlternativeTo (list as alternative to TextingStory, Zeoob, FakeDetail),
       Toolify.ai, There's An AI For That (AI-chat angle), SaaSHub, Uneed,
-      betalist. **[Claude]** writes the descriptions once, reuse everywhere.
+      betalist. ~~**[Claude]** writes the descriptions once, reuse everywhere~~
+      ✅ in launch kit.
 - [ ] **[You]** 5–10 Quora/Reddit answers on "how to make a fake WhatsApp
       chat / ChatGPT screenshot" questions. Genuinely answer, link the matching
       landing page. 2–3 per week, not all at once.
