@@ -32,6 +32,10 @@ const MESSAGES: Message[] = [
 const SPEED = 2.5;
 const HOLD_FRAMES = Math.round(FPS * 1.2);
 
+// Design size of the cropped phone; scaled down to fit narrow screens
+const PHONE_W = 396;
+const PHONE_H = 560;
+
 export const HomeHeroPhone: React.FC = () => {
   const [platformIdx, setPlatformIdx] = useState(0);
   const [frame, setFrame] = useState(0);
@@ -39,6 +43,23 @@ export const HomeHeroPhone: React.FC = () => {
   const lastTimeRef = useRef(0);
   const rafRef = useRef<number | null>(null);
   const feedRef = useRef<HTMLDivElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  // Seed from the viewport so the first client render never forces the
+  // 396px design width onto a narrower grid column (which would then
+  // measure back as 396 and lock the scale at 1).
+  const [scale, setScale] = useState(() =>
+    typeof window === 'undefined' ? 1 : Math.min(1, (window.innerWidth - 40) / PHONE_W)
+  );
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const update = () => setScale(Math.min(1, el.clientWidth / PHONE_W));
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const framePlan = useMemo(() => buildFramePlan(MESSAGES, PARTICIPANTS), []);
 
@@ -97,12 +118,12 @@ export const HomeHeroPhone: React.FC = () => {
   }, [plan]);
 
   return (
-    <div className="flex flex-col items-center">
+    <div ref={wrapRef} className="flex w-full flex-col items-center">
       {/* Phone — cropped to the top half, watch-only: mouse/scroll passes through */}
-      <div className="relative" style={{ width: 396, height: 560, overflow: 'hidden', pointerEvents: 'none' }}>
+      <div className="relative max-w-full" style={{ width: PHONE_W * scale, height: PHONE_H * scale, overflow: 'hidden', pointerEvents: 'none' }}>
         <div
           className="relative origin-top-left"
-          style={{ width: 360, height: 780, transform: 'scale(1.1)' }}
+          style={{ width: 360, height: 780, transform: `scale(${1.1 * scale})` }}
         >
           <div
             className="absolute inset-0 overflow-hidden rounded-[44px] border-[10px] border-[#1a1a1a] bg-[#1a1a1a]"
