@@ -79,8 +79,8 @@ export const ChatEditorApp: React.FC = () => {
           </a>
         </div>
 
-        {/* Tabs */}
-        <div className="px-4 pb-3">
+        {/* Tabs — pinned to the top while the page scrolls */}
+        <div className="sticky top-0 z-30 px-4 py-3 bg-[#0d1428]/90 backdrop-blur-md">
           <div className="flex bg-white/5 rounded-xl p-1 gap-1">
             <button onClick={() => setMobileTab('script')} className={tabCls(mobileTab === 'script')}>
               ✏️ Script
@@ -92,12 +92,11 @@ export const ChatEditorApp: React.FC = () => {
         </div>
 
         {/* Tab content */}
-        <div className="flex-1 overflow-y-auto px-4 pb-6">
+        <div className="px-4 pb-6">
           {mobileTab === 'script' ? (
             <div className="space-y-6">
               <ScriptPanel />
               <PlatformSettings />
-              <ExportPanel />
             </div>
           ) : (
             <div className="flex justify-center pt-2">
@@ -106,6 +105,11 @@ export const ChatEditorApp: React.FC = () => {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Export — pinned to the bottom on both tabs */}
+        <div className="sticky bottom-0 z-30 mt-auto px-4 pt-2 pb-3 bg-[#0d1428]/90 backdrop-blur-md border-t border-white/10">
+          <ExportPanel hideDivider />
         </div>
       </div>
     </div>
