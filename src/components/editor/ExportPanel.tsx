@@ -22,7 +22,7 @@ function getLoadingMsg(pct: number): string {
   return LOADING_MESSAGES.find((message) => pct >= message.from && pct <= message.to)?.text ?? 'Starting the chat...';
 }
 
-export const ExportPanel: React.FC = () => {
+export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }) => {
   const { project, setExportConsent } = useEditorStore();
   const [pngLoading, setPngLoading] = useState(false);
   const [mp4Progress, setMp4Progress] = useState<{ state: ProgressState; pct: number; msg: string } | null>(null);
@@ -73,7 +73,7 @@ export const ExportPanel: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="h-px bg-white/10" />
+      {!hideDivider && <div className="h-px bg-white/10" />}
 
       <div className="space-y-2">
         <label className="flex items-start gap-2.5 cursor-pointer group">
