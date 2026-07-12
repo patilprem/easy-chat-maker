@@ -197,58 +197,70 @@ Link the **matching landing page**, not the homepage.
 
 ---
 
-## Step 4b — Value post: "how to make chat stories" (week after launch)
+## Step 4b — Value post: chat stories & fake chat screenshots (week after launch)
 
 For r/NewTubers, r/TikTokCreators or r/ContentCreation (check self-promo
 rules; in strict subs drop the link and share it only in comments; add a
 "(disclosure: I built the tool I mentioned)" line where required).
 
 **Title:**
-> Chat story videos are the most underrated faceless content format right
-> now — here's how to make them
+> Fake chat content (screenshots + chat story videos) is the easiest
+> faceless format right now — here's the full workflow
 
 **Body:**
-> You've probably seen these — a fake text conversation plays out on
-> screen, message by message, with typing sounds. "POV: my mom found my
-> report card" etc. They pull millions of views, need zero camera time,
-> and take maybe 30 minutes to make. Here's the process after making a
-> bunch of them:
+> Fake chat content comes in two flavors, and most people only use one:
 >
-> **1. Write the story first, not in the tool.**
-> A chat story is a script, not a conversation. Structure it like this:
-> - Message 1–2: the hook. Open mid-drama ("I know what you did." /
->   "wrong person??"). If the first message is "hey", you've lost.
-> - Middle: escalate every 2–3 messages. One reveal at a time.
-> - End: either a punchline or a cliffhanger for part 2. Part 2s are
->   free retention.
+> **Screenshots** — a single image of a conversation. Meme pages run on
+> these ("my dad replying to 'i love you' with 👍"). Also huge for
+> product demos, presentation mockups and testimonial examples.
 >
-> **2. Keep it under 45 seconds.**
-> That's roughly 15–25 short messages. If a message is longer than one
-> line, split it — fast bubbles feel like real texting and keep the
-> pacing up.
+> **Chat story videos** — the conversation plays out message by message
+> with typing indicators. The "POV: texting my landlord" format on
+> TikTok/Shorts. Millions of views, zero camera time.
 >
-> **3. Generate the video.**
-> I use easychatmaker.com — you paste the script, it renders it as a
-> WhatsApp/Instagram/iMessage-style conversation and exports an MP4 with
-> the messages animating in. Free and no watermark, which is why I
-> switched from TextingStory. Any tool works though — the script matters
-> 10x more than the renderer.
+> Same skill makes both. Here's the workflow after making a lot of them:
 >
-> **4. Post natively, hook in the caption too.**
-> Upload 9:16, add trending audio quietly under the typing sounds, and
-> make the caption a second hook ("she had no idea who she was texting…").
+> **1. Write the conversation like a script, not a chat.**
+> - First message is the hook. Open mid-drama ("I know what you did." /
+>   "wrong number??"). If it starts with "hey", you've lost.
+> - Escalate every 2–3 messages, one reveal at a time.
+> - Screenshots end on a punchline (the last bubble is the joke). Videos
+>   end on a punchline OR a cliffhanger for part 2.
 >
-> **5. Batch them.**
-> Write 5 scripts in one sitting, render all 5, post one a day.
-> Consistency beats quality in this format — some of the dumbest ones do
-> the biggest numbers.
+> **2. Match the platform to the story.**
+> WhatsApp/iMessage = personal drama. Instagram DMs = influencer/dating
+> stories. Discord/Slack = gaming and office humor. ChatGPT/Claude =
+> "I asked AI and it got too real" posts — that last category is weirdly
+> underused and does numbers.
 >
-> Happy to share example scripts if anyone wants — what niche are you
-> making content for?
+> **3. Generate it.**
+> I use easychatmaker.com — type the conversation, pick the platform,
+> and export either a clean PNG screenshot or an MP4 with messages
+> animating in. Free, no watermark (why I dropped TextingStory), and
+> it's the only one I've found with ChatGPT/Claude/Gemini styles. Any
+> tool works though — the writing matters 10x more than the renderer.
+>
+> **4. Format for where it's going.**
+> Screenshots: post the image straight, caption = second punchline.
+> Videos: 9:16, under 45 seconds (15–25 short bubbles), quiet trending
+> audio under the typing sounds.
+>
+> **5. Batch.**
+> Write 5 conversations in one sitting. Each one gives you a screenshot
+> AND a video — that's 10 pieces of content from one writing session.
+> Post one a day.
+>
+> One rule: keep it obviously fictional or labeled as a mockup. Fake
+> chats as jokes/content = fine. Fake chats passed off as real receipts
+> = how you get banned everywhere.
+>
+> Happy to share example conversations if anyone wants — what niche are
+> you posting in?
 
-The "share example scripts" closer is deliberate: replies = ranking, and
-each reply is a natural second touchpoint made with the tool.
-
+The "share example conversations" closer is deliberate: replies =
+ranking, and each reply is a natural second touchpoint made with the
+tool. The platform-matching section quietly showcases all 9 platforms;
+the ethics line reads as credibility to moderators.
 ## Step 5 — Friends & early usage (ongoing)
 
 Message to send friends (WhatsApp/iMessage — casual, so it gets used):
