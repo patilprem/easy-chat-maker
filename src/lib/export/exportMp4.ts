@@ -32,12 +32,12 @@ const CODEC_CANDIDATES: { codec: string; muxerCodec: 'avc' | 'vp9' }[] = [
   { codec: 'vp09.00.10.08', muxerCodec: 'vp9' },
 ];
 
-const baseVideoConfig = (codec: string): VideoEncoderConfig => ({
+const baseVideoConfig = (codec: string, width: number, height: number, framerate: number): VideoEncoderConfig => ({
   codec,
-  width: VIDEO_W,
-  height: VIDEO_H,
+  width,
+  height,
   bitrate: 4_000_000,
-  framerate: EXPORT_FPS,
+  framerate,
 });
 
 function triggerDownload(blob: Blob, filename: string): void {
@@ -65,17 +65,21 @@ function getFrameSignature(plan: FramePlan): string {
   ].join('|');
 }
 
-async function getSupportedVideoConfig(): Promise<{ config: VideoEncoderConfig; muxerCodec: 'avc' | 'vp9' }> {
+export async function negotiateVideoConfig(
+  width: number,
+  height: number,
+  framerate: number
+): Promise<{ config: VideoEncoderConfig; muxerCodec: 'avc' | 'vp9' }> {
   if (typeof VideoEncoder === 'undefined') {
     throw new Error('MP4 export needs WebCodecs. Please try Chrome or Edge desktop.');
   }
 
   if (typeof VideoEncoder.isConfigSupported !== 'function') {
-    return { config: baseVideoConfig(CODEC_CANDIDATES[0].codec), muxerCodec: CODEC_CANDIDATES[0].muxerCodec };
+    return { config: baseVideoConfig(CODEC_CANDIDATES[0].codec, width, height, framerate), muxerCodec: CODEC_CANDIDATES[0].muxerCodec };
   }
 
   for (const candidate of CODEC_CANDIDATES) {
-    const attempt = baseVideoConfig(candidate.codec);
+    const attempt = baseVideoConfig(candidate.codec, width, height, framerate);
     const support = await VideoEncoder.isConfigSupported(attempt).catch(() => null);
     if (support?.supported) {
       return { config: support.config ?? attempt, muxerCodec: candidate.muxerCodec };
@@ -90,7 +94,7 @@ export async function exportMp4(project: ChatProject, onProgress: ProgressCallba
   const frames = buildFramePlan(project.messages, project.participants);
   const totalFrames = frames.length;
   const totalOutputFrames = Math.ceil(totalFrames / FRAME_STEP);
-  const { config: supportedConfig, muxerCodec } = await getSupportedVideoConfig();
+  const { config: supportedConfig, muxerCodec } = await negotiateVideoConfig(VIDEO_W, VIDEO_H, EXPORT_FPS);
 
   localStorage.setItem('ecm:v1:export-payload', JSON.stringify(project));
   onProgress('preparing', 2, CREATIVE_MSGS[0]);

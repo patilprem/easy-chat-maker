@@ -3,6 +3,7 @@ import { ImageDown, Clapperboard } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { exportPng } from '../../lib/export/exportPng';
 import { exportMp4, type ProgressState } from '../../lib/export/exportMp4';
+import { exportCompositeMp4 } from '../../lib/export/exportComposite';
 import { exportPlaywrightVideo, RecorderUnavailableError } from '../../lib/export/exportPlaywrightVideo';
 
 const LOADING_MESSAGES = [
@@ -62,14 +63,20 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
     };
 
     try {
-      // Prefer the local Playwright recorder (highest fidelity, used by the
-      // desktop Run App.bat workflow); fall back to in-browser WebCodecs
-      // rendering when it isn't running — e.g. on the live website.
+      // Prefer the local Playwright recorder (used by the desktop Run App.bat
+      // workflow). On the live site, render in-browser instead: the sprite
+      // compositor first (30fps, smooth scroll and typing animation), and the
+      // legacy per-frame capturer only if a platform layout defeats it.
       try {
         await exportPlaywrightVideo(project, onProgress);
       } catch (e) {
         if (!(e instanceof RecorderUnavailableError)) throw e;
-        await exportMp4(project, onProgress);
+        try {
+          await exportCompositeMp4(project, onProgress);
+        } catch (compositeError) {
+          console.warn('Composite export failed, using frame capture:', compositeError);
+          await exportMp4(project, onProgress);
+        }
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'MP4 export failed');
