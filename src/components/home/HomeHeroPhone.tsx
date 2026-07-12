@@ -53,7 +53,9 @@ export const HomeHeroPhone: React.FC = () => {
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
-    const update = () => setScale(Math.min(1, el.clientWidth / PHONE_W));
+    // Slightly smaller than the container so the phone gets breathing room
+    // on narrow screens; full design size once there's space for it.
+    const update = () => setScale(Math.min(1, (el.clientWidth - 24) / PHONE_W));
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
@@ -119,7 +121,8 @@ export const HomeHeroPhone: React.FC = () => {
   return (
     <div ref={wrapRef} className="flex w-full flex-col items-center">
       {/* Phone — cropped to the top half, watch-only: mouse/scroll passes through */}
-      <div className="relative max-w-full" style={{ width: PHONE_W * scale, height: PHONE_H * scale, overflow: 'hidden', pointerEvents: 'none' }}>
+      {/* width also capped in CSS so the SSR HTML can never overflow, even before hydration */}
+      <div className="relative" style={{ width: `min(${PHONE_W * scale}px, 100%)`, height: PHONE_H * scale, overflow: 'hidden', pointerEvents: 'none' }}>
         <div
           className="relative origin-top-left"
           style={{ width: 360, height: 780, transform: `scale(${1.1 * scale})` }}
