@@ -201,13 +201,16 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
     // messages (Telegram drops `system` messages entirely), so the only hard
     // invariants are 0 <= rowCountAt[k] <= rowCountAt[k+1]. setFrame already
     // token-syncs with the committed DOM, so the poll is just a safety net.
+    // Count rows via the ALREADY-RESOLVED layer element — re-deriving it with
+    // findMessageLayer at low visibleCounts walks INTO the only bubble on
+    // screen and returns garbage (0 rows → missing first messages).
     const rowCountAt: number[] = new Array(N + 1).fill(0);
     rowCountAt[N] = R;
     for (let k = N - 1; k >= 0; k--) {
       await setFrame(noTyping(k));
       let count = -1;
       for (let i = 0; i < 60; i++) {
-        count = findMessageLayer(feed, N).rows.length;
+        count = flowChildren(layer).length;
         if (count <= rowCountAt[k + 1]) break;
         await sleep(30);
       }
@@ -267,7 +270,7 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
     if (reactionIds.length > 0) {
       await setFrame(noTyping(N, reactionIds));
       await sleep(100);
-      const rRows = findMessageLayer(feed, N).rows;
+      const rRows = flowChildren(layer);
       if (rRows.length === R) {
         const rLayerRect = layer.getBoundingClientRect();
         geomReact = {
@@ -282,7 +285,7 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
       for (const badge of Array.from(doc.querySelectorAll<HTMLElement>('.reaction-badge'))) {
         let rowEl: HTMLElement = badge;
         while (rowEl.parentElement && rowEl.parentElement !== layer) rowEl = rowEl.parentElement;
-        const j = findMessageLayer(feed, N).rows.indexOf(rowEl);
+        const j = flowChildren(layer).indexOf(rowEl);
         if (j === -1) continue;
         const br = badge.getBoundingClientRect();
         badgeRects.push({
@@ -297,17 +300,55 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
     }
 
     onProgress('preparing', 14);
+    const baseBg = project.theme === 'dark' ? '#0b141a' : '#ffffff';
     await setFrame(noTyping(0));
     await sleep(100);
-    const base = await capture(phoneEl, project.theme === 'dark' ? '#0b141a' : '#ffffff');
+    const baseEmpty = await capture(phoneEl, baseBg);
+
+    // Conversation-state chrome: several platforms swap UI on message count —
+    // AI previews show an empty-state hero ("What can I help with?") and a
+    // different composer placeholder when the chat is empty. Frames with
+    // visible messages must composite over chrome captured in the
+    // has-messages state, with the message rows themselves hidden.
+    await setFrame(noTyping(N));
+    await sleep(100);
+    const convRows = flowChildren(layer);
+    for (const r of convRows) r.style.visibility = 'hidden';
+    await rafSettle(win);
+    const baseConv = await capture(phoneEl, baseBg);
+    for (const r of convRows) r.style.visibility = '';
+    await rafSettle(win);
 
     // Typing bubble sprites: 3 live phases of the CSS dot animation.
     const typingPids = Array.from(new Set(plans.map((p) => p.typingParticipantId).filter((p): p is string => !!p)));
     const typingSprites = new Map<string, { canvases: HTMLCanvasElement[]; height: number; offX: number }>();
+    // Full-phone typing overlay (Gemini's aurora shimmer): captured once and
+    // pulsed via globalAlpha during typing frames.
+    let typingOverlay: { canvas: HTMLCanvasElement; x: number; y: number } | null = null;
     for (const pid of typingPids) {
       await setFrame({ visibleCount: 0, typingParticipantId: pid, activeReactionIds: [], scrollY: 0 });
       await sleep(120);
-      const dot = doc.querySelector<HTMLElement>('.typing-dot');
+      if (!typingOverlay) {
+        const overlayEl = doc.querySelector<HTMLElement>('[data-export-typing-overlay]');
+        if (overlayEl) {
+          const oRect = overlayEl.getBoundingClientRect();
+          typingOverlay = {
+            // Neutralize absolute positioning and animation on the clone
+            // root — captured as-is, an inset-anchored element renders
+            // empty. Full opacity here; frames pulse it via globalAlpha.
+            canvas: await toCanvas(overlayEl, {
+              pixelRatio: SCALE,
+              fontEmbedCSS,
+              width: Math.round(oRect.width),
+              height: Math.round(oRect.height),
+              style: { position: 'static', inset: 'auto', animation: 'none', opacity: '1', transform: 'none' },
+            }),
+            x: oRect.left - phoneRect.left,
+            y: oRect.top - phoneRect.top,
+          };
+        }
+      }
+      const dot = doc.querySelector<HTMLElement>('.typing-dot, [data-typing-indicator]');
       if (!dot) continue; // platform without dots — typing just won't be drawn
       // The typing ROW (avatar + bubble) is the ancestor of the dots that
       // sits directly in the feed or in the message layer. Don't reuse
@@ -397,7 +438,7 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
       const targetScroll = Math.max(0, contentBottom + padBottom - feedH);
       scroll = scroll < 0 ? targetScroll : scroll + (targetScroll - scroll) * (1 - Math.exp(-(1 / FPS) / SCROLL_SMOOTHING_S));
 
-      ctx.drawImage(base, 0, 0, VIDEO_W, VIDEO_H);
+      ctx.drawImage(k > 0 ? baseConv : baseEmpty, 0, 0, VIDEO_W, VIDEO_H);
       ctx.save();
       ctx.beginPath();
       ctx.rect(feedX * SCALE, feedY * SCALE, feedW * SCALE, feedH * SCALE);
@@ -431,6 +472,15 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
         ctx.drawImage(sprite, Math.round((feedX + typing.offX) * SCALE), feedTopS + Math.round(typingTop * SCALE));
       }
       ctx.restore();
+
+      // Aurora-style overlay drawn above the feed while typing, pulsing like
+      // its CSS animation (opacity 0.55–0.85 over 2.2s).
+      if (plan.typingParticipantId && typingOverlay) {
+        const t = (f - typingSince) / FPS;
+        ctx.globalAlpha = 0.7 + 0.15 * Math.sin((t / 2.2) * 2 * Math.PI);
+        ctx.drawImage(typingOverlay.canvas, Math.round(typingOverlay.x * SCALE), Math.round(typingOverlay.y * SCALE));
+        ctx.globalAlpha = 1;
+      }
 
       const videoFrame = new VideoFrame(outCanvas, {
         timestamp: Math.round((f / FPS) * 1_000_000),

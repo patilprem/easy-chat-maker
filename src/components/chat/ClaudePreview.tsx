@@ -168,7 +168,7 @@ export const ClaudePreview: React.FC<Props> = ({
 
         {/* Thinking indicator: pulsing starburst */}
         {showThinking && (
-          <div className="py-3">
+          <div className="py-3" data-typing-indicator>
             <Starburst size={22} className="animate-pulse" />
           </div>
         )}

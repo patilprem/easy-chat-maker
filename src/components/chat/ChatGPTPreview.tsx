@@ -189,7 +189,7 @@ export const ChatGPTPreview: React.FC<Props> = ({
 
         {/* Streaming indicator: pulsing dot */}
         {showStreamDot && (
-          <div className="py-2">
+          <div className="py-2" data-typing-indicator>
             <span className={`block h-3.5 w-3.5 animate-pulse rounded-full ${isDark ? 'bg-white' : 'bg-black'}`} />
           </div>
         )}

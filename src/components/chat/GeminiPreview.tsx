@@ -205,7 +205,7 @@ export const GeminiPreview: React.FC<Props> = ({
 
         {/* Thinking: three fading dots */}
         {showThinking && (
-          <div className={`${textMuted} flex gap-1 py-3 text-[22px] leading-none`}>
+          <div className={`${textMuted} flex gap-1 py-3 text-[22px] leading-none`} data-typing-indicator>
             {[0, 1, 2].map((i) => (
               <span key={i} style={{ animation: `gemini-dot 1.2s ${i * 0.2}s infinite` }}>•</span>
             ))}
@@ -216,6 +216,7 @@ export const GeminiPreview: React.FC<Props> = ({
       {/* Aurora shimmer while generating */}
       {showThinking && (
         <div
+          data-export-typing-overlay
           className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[55%]"
           style={{
             background: isDark
