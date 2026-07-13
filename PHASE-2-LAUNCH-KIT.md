@@ -132,13 +132,13 @@ Reusable descriptions — paste the right length for each form.
 > then export a clean PNG or MP4 with no watermark. No signup, no paywall,
 > no uploads — your content never leaves your device.
 
-**Where to submit [You]:**
+**Where to submit [You]** — free listings only; if a site demands payment, skip it:
 - [ ] **AlternativeTo** — list as alternative to: TextingStory, Zeoob, FakeDetail, iFakeTextMessage
-- [ ] **Toolify.ai** — use the AI angle (ChatGPT/Claude/Gemini mockups)
-- [ ] **There's An AI For That** — same AI angle
+- [x] ~~**Toolify.ai**~~ — SKIPPED 2026-07-13: submission is paid-only now ($99), not worth it pre-revenue
+- [ ] **There's An AI For That** — AI angle (ChatGPT/Claude/Gemini mockups); free queue only — they upsell a paid fast-track, skip if free is gone
 - [ ] **SaaSHub**
-- [ ] **Uneed**
-- [ ] **BetaList**
+- [ ] **Uneed** — free tier; pick any launch date except Thursday (PH day)
+- [ ] **BetaList** — may reject launched products; lowest priority
 
 **Tags to reuse:** fake chat generator, chat mockup, chat story video,
 texting story, screenshot generator, TikTok tools, free tools
