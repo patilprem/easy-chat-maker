@@ -309,9 +309,13 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
       await sleep(120);
       const dot = doc.querySelector<HTMLElement>('.typing-dot');
       if (!dot) continue; // platform without dots — typing just won't be drawn
-      const { layer: tLayer } = findMessageLayer(feed, 2);
+      // The typing ROW (avatar + bubble) is the ancestor of the dots that
+      // sits directly in the feed or in the message layer. Don't reuse
+      // findMessageLayer here: with the typing row as the feed's only flow
+      // child it walks INTO the row and we'd capture just the bubble,
+      // losing the avatar next to it.
       let row: HTMLElement = dot;
-      while (row.parentElement && row.parentElement !== tLayer) row = row.parentElement;
+      while (row.parentElement && row.parentElement !== feed && row.parentElement !== layer) row = row.parentElement;
       const rowRect = row.getBoundingClientRect();
       const canvases: HTMLCanvasElement[] = [];
       for (let k = 0; k < 3; k++) {
@@ -321,7 +325,9 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
       typingSprites.set(pid, {
         canvases,
         height: rowRect.height,
-        offX: rowRect.left - tLayer.getBoundingClientRect().left,
+        // Row-left relative to the feed, so composition doesn't depend on
+        // which container the row lives in.
+        offX: rowRect.left - feed.getBoundingClientRect().left,
       });
     }
 
@@ -422,7 +428,7 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
       if (typing) {
         const phase = Math.floor((f - typingSince) / TYPING_PHASE_FRAMES) % typing.canvases.length;
         const sprite = typing.canvases[phase];
-        ctx.drawImage(sprite, destX + Math.round(typing.offX * SCALE), feedTopS + Math.round(typingTop * SCALE));
+        ctx.drawImage(sprite, Math.round((feedX + typing.offX) * SCALE), feedTopS + Math.round(typingTop * SCALE));
       }
       ctx.restore();
 
