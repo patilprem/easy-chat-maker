@@ -16,10 +16,6 @@ const CREATIVE_MSGS = [
 
 const PHONE_W = 390;
 const PHONE_H = 844;
-// Encode at 2x for crisp text on phone screens
-const VIDEO_SCALE = 2;
-const VIDEO_W = PHONE_W * VIDEO_SCALE;
-const VIDEO_H = PHONE_H * VIDEO_SCALE;
 // Step the 30fps timeline by an integer divisor so playback speed is exact
 // (12fps with a 3-frame step used to play 20% too fast).
 const EXPORT_FPS = 15;
@@ -67,6 +63,30 @@ function getFrameSignature(plan: FramePlan): string {
   ].join('|');
 }
 
+/**
+ * Capture/encode scale: 2x for crisp text on desktop, 1x on phones and
+ * low-memory devices — the 2x pipeline (5MB+ per frame plus sprite
+ * canvases) can OOM-crash a mobile tab.
+ */
+export function getExportScale(): number {
+  if (typeof navigator === 'undefined') return 2;
+  const deviceMemory = (navigator as { deviceMemory?: number }).deviceMemory;
+  const isMobile = /Android|iPhone|iPad|Mobi/i.test(navigator.userAgent);
+  return isMobile || (typeof deviceMemory === 'number' && deviceMemory <= 4) ? 1 : 2;
+}
+
+/**
+ * Keep the WebCodecs encoder queue bounded. Without this, a slow (often
+ * software) encoder falls behind the frame producer and queued VideoFrames
+ * pile up until the tab is killed — the usual cause of "Aw, Snap!" during
+ * export on phones.
+ */
+export async function drainEncoderQueue(encoder: VideoEncoder, maxQueued = 4): Promise<void> {
+  while (encoder.encodeQueueSize > maxQueued) {
+    await new Promise((r) => setTimeout(r, 5));
+  }
+}
+
 export async function negotiateVideoConfig(
   width: number,
   height: number,
@@ -96,7 +116,10 @@ export async function exportMp4(project: ChatProject, onProgress: ProgressCallba
   const frames = buildFramePlan(project.messages, project.participants);
   const totalFrames = frames.length;
   const totalOutputFrames = Math.ceil(totalFrames / FRAME_STEP);
-  const { config: supportedConfig, muxerCodec } = await negotiateVideoConfig(VIDEO_W, VIDEO_H, EXPORT_FPS);
+  const videoScale = getExportScale();
+  const videoW = PHONE_W * videoScale;
+  const videoH = PHONE_H * videoScale;
+  const { config: supportedConfig, muxerCodec } = await negotiateVideoConfig(videoW, videoH, EXPORT_FPS);
 
   localStorage.setItem('ecm:v1:export-payload', JSON.stringify(project));
   onProgress('preparing', 2, CREATIVE_MSGS[0]);
@@ -114,8 +137,8 @@ export async function exportMp4(project: ChatProject, onProgress: ProgressCallba
   document.body.appendChild(iframe);
 
   const outCanvas = document.createElement('canvas');
-  outCanvas.width = VIDEO_W;
-  outCanvas.height = VIDEO_H;
+  outCanvas.width = videoW;
+  outCanvas.height = videoH;
   const ctx = outCanvas.getContext('2d');
   if (!ctx) throw new Error('Could not create export canvas.');
 
@@ -151,7 +174,7 @@ export async function exportMp4(project: ChatProject, onProgress: ProgressCallba
 
     const muxer = new Muxer({
       target: new ArrayBufferTarget(),
-      video: { codec: muxerCodec, width: VIDEO_W, height: VIDEO_H },
+      video: { codec: muxerCodec, width: videoW, height: videoH },
       fastStart: 'in-memory',
     });
 
@@ -191,16 +214,16 @@ export async function exportMp4(project: ChatProject, onProgress: ProgressCallba
           width: PHONE_W,
           height: PHONE_H,
           style: { width: `${PHONE_W}px`, height: `${PHONE_H}px` },
-          pixelRatio: VIDEO_SCALE,
+          pixelRatio: videoScale,
           fontEmbedCSS,
           backgroundColor: project.theme === 'dark' ? '#0b141a' : '#ffffff',
         });
         lastCapturedSignature = signature;
       }
 
-      ctx.clearRect(0, 0, VIDEO_W, VIDEO_H);
+      ctx.clearRect(0, 0, videoW, videoH);
       if (!phoneCanvas) throw new Error('Could not render video frame.');
-      ctx.drawImage(phoneCanvas, 0, 0, VIDEO_W, VIDEO_H);
+      ctx.drawImage(phoneCanvas, 0, 0, videoW, videoH);
 
       const videoFrame = new VideoFrame(outCanvas, {
         timestamp: Math.round((outFrame / EXPORT_FPS) * 1_000_000),
@@ -208,6 +231,7 @@ export async function exportMp4(project: ChatProject, onProgress: ProgressCallba
       });
       encoder.encode(videoFrame, { keyFrame: outFrame % (EXPORT_FPS * 2) === 0 });
       videoFrame.close();
+      await drainEncoderQueue(encoder);
 
       const pct = 5 + (outFrame / totalOutputFrames) * 80;
       onProgress('encoding', pct, getMsgForProgress(pct));

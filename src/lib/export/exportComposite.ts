@@ -2,7 +2,7 @@ import { toCanvas, getFontEmbedCSS } from 'html-to-image';
 import { Muxer, ArrayBufferTarget } from 'mp4-muxer';
 import type { ChatProject, FramePlan } from '../parser/types';
 import { buildFramePlan, FPS } from '../video/chatTimeline';
-import { negotiateVideoConfig, type ProgressCallback } from './exportMp4';
+import { drainEncoderQueue, getExportScale, negotiateVideoConfig, type ProgressCallback } from './exportMp4';
 
 /**
  * Sprite-compositing video exporter.
@@ -17,9 +17,6 @@ import { negotiateVideoConfig, type ProgressCallback } from './exportMp4';
 
 const PHONE_W = 390;
 const PHONE_H = 844;
-const SCALE = 2; // capture + encode at 2x for crisp text
-const VIDEO_W = PHONE_W * SCALE;
-const VIDEO_H = PHONE_H * SCALE;
 const SCROLL_SMOOTHING_S = 0.12; // exponential smooth-scroll time constant
 const TYPING_PHASE_FRAMES = Math.max(1, Math.round(FPS * 0.22));
 
@@ -82,6 +79,11 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
   const filename = `${project.platform}-chat.mp4`;
   const messages = project.messages;
   const plans = buildFramePlan(messages, project.participants);
+  // 2x for crisp text on desktop, 1x on phones/low-memory devices (see
+  // getExportScale) — the 2x buffers can OOM-crash a mobile tab.
+  const SCALE = getExportScale();
+  const VIDEO_W = PHONE_W * SCALE;
+  const VIDEO_H = PHONE_H * SCALE;
   const { config, muxerCodec } = await negotiateVideoConfig(VIDEO_W, VIDEO_H, FPS);
 
   localStorage.setItem('ecm:v1:export-payload', JSON.stringify(project));
@@ -430,6 +432,9 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
       });
       encoder.encode(videoFrame, { keyFrame: f % (FPS * 2) === 0 });
       videoFrame.close();
+      // Bound the encoder queue — on phones the encoder can't keep up with
+      // frame production, and an unbounded queue OOM-kills the tab.
+      await drainEncoderQueue(encoder);
       if (f % 3 === 0) onProgress('encoding', 18 + (f / plans.length) * 72);
       // Yield periodically so the UI stays responsive
       if (f % 30 === 0) await sleep(0);
