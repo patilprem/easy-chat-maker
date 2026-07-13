@@ -20,10 +20,14 @@ const PHONE_H = 844;
 // (12fps with a 3-frame step used to play 20% too fast).
 const EXPORT_FPS = 15;
 const FRAME_STEP = Math.max(1, Math.round(FPS / EXPORT_FPS));
-// Codec preference order: H.264 (plays everywhere), then VP9 (available in
-// every Chromium build, including ones without proprietary codecs). Levels
-// are high enough for the 780x1688 frame.
+// Codec preference order: H.264 (plays everywhere) High profile first —
+// Baseline noticeably blurs small text at the same bitrate — then Main,
+// then Baseline, then VP9 (available in every Chromium build, including
+// ones without proprietary codecs). Levels are high enough for the
+// 780x1688 frame.
 const CODEC_CANDIDATES: { codec: string; muxerCodec: 'avc' | 'vp9' }[] = [
+  { codec: 'avc1.64002A', muxerCodec: 'avc' },
+  { codec: 'avc1.4D002A', muxerCodec: 'avc' },
   { codec: 'avc1.42002A', muxerCodec: 'avc' },
   { codec: 'avc1.42001f', muxerCodec: 'avc' },
   { codec: 'vp09.00.40.08', muxerCodec: 'vp9' },
@@ -34,7 +38,9 @@ const baseVideoConfig = (codec: string, width: number, height: number, framerate
   codec,
   width,
   height,
-  bitrate: 4_000_000,
+  // Scale the bitrate budget with resolution (~0.12 bits/pixel/frame) so
+  // text stays sharp at 2x without bloating 1x files.
+  bitrate: Math.min(10_000_000, Math.max(2_500_000, Math.round(width * height * framerate * 0.12))),
   framerate,
 });
 
@@ -64,15 +70,14 @@ function getFrameSignature(plan: FramePlan): string {
 }
 
 /**
- * Capture/encode scale: 2x for crisp text on desktop, 1x on phones and
- * low-memory devices — the 2x pipeline (5MB+ per frame plus sprite
- * canvases) can OOM-crash a mobile tab.
+ * Capture/encode scale: 2x for crisp text everywhere now that the encoder
+ * queue is bounded (the mobile tab crashes were queue growth, not the 2x
+ * buffers). Only genuinely low-memory devices drop to 1x.
  */
 export function getExportScale(): number {
   if (typeof navigator === 'undefined') return 2;
   const deviceMemory = (navigator as { deviceMemory?: number }).deviceMemory;
-  const isMobile = /Android|iPhone|iPad|Mobi/i.test(navigator.userAgent);
-  return isMobile || (typeof deviceMemory === 'number' && deviceMemory <= 4) ? 1 : 2;
+  return typeof deviceMemory === 'number' && deviceMemory <= 2 ? 1 : 2;
 }
 
 /**
