@@ -136,8 +136,9 @@ Reusable descriptions — paste the right length for each form.
 - [ ] **AlternativeTo** — list as alternative to: TextingStory, Zeoob, FakeDetail, iFakeTextMessage
 - [x] ~~**Toolify.ai**~~ — SKIPPED 2026-07-13: submission is paid-only now ($99), not worth it pre-revenue
 - [ ] **There's An AI For That** — AI angle (ChatGPT/Claude/Gemini mockups); free queue only — they upsell a paid fast-track, skip if free is gone
-- [ ] **SaaSHub**
-- [ ] **Uneed** — free tier; pick any launch date except Thursday (PH day)
+- [x] **SaaSHub** — ✅ submitted 2026-07-13, listing active, pending approval (up to 32 days)
+- [ ] **Uneed** — submitted 2026-07-13, in waiting line but NOT SCHEDULED yet:
+      pick a launch date in the product's Edit screen (any day except Thu PH day)
 - [ ] **BetaList** — may reject launched products; lowest priority
 
 **Tags to reuse:** fake chat generator, chat mockup, chat story video,
