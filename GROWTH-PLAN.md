@@ -45,7 +45,9 @@ recording. Check items off as they're done.
       first comment, and gallery captions~~ ✅ in launch kit. Launch Tue–Thu,
       be online that day to reply to every comment.
       _Launch day set: **Thursday, July 16, 2026** (PH day starts 12:01 AM PT).
-      Prep the PH page Wednesday from PHASE-2-LAUNCH-KIT.md._
+      PH draft created 2026-07-13. Remaining: verify draft against
+      PHASE-2-LAUNCH-KIT.md, set scheduled launch to Thu in PH settings,
+      final export test on the live site Wednesday._
 - [ ] **[You]** Reddit "I built this" posts: r/SideProject, r/InternetIsBeautiful
       (read each sub's self-promo rules first; post as a story, not an ad).
       Drafts ✅ in launch kit.
