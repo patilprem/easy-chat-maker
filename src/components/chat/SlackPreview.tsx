@@ -341,7 +341,7 @@ const SlackMessageRow: React.FC<{
         {msg.reaction && (
           <button
             onClick={() => isEditor && onClearReaction?.(msg.id)}
-            className={`mt-2 inline-flex items-center gap-1 rounded-full px-3 py-1 text-[16px] transition-transform ${
+            className={`reaction-badge mt-2 inline-flex items-center gap-1 rounded-full px-3 py-1 text-[16px] transition-transform ${
               isDark ? 'bg-[#27272b]' : 'bg-[#f6f6f6]'
             } ${isEditor ? 'cursor-pointer hover:scale-105' : 'cursor-default'}`}
             title={isEditor ? 'Remove reaction' : undefined}

@@ -302,7 +302,7 @@ const TelegramBubble: React.FC<{
         {msg.reaction && (
           <button
             onClick={() => isEditor && onClearReaction?.(msg.id)}
-            className={`mt-1 flex h-6 w-fit items-center gap-1 rounded-full px-2 text-[13px] shadow-sm transition-transform ${
+            className={`reaction-badge mt-1 flex h-6 w-fit items-center gap-1 rounded-full px-2 text-[13px] shadow-sm transition-transform ${
               isDark ? 'bg-[#1b2838]' : 'bg-[#eaf4f8]'
             } ${isEditor ? 'cursor-pointer hover:scale-110' : 'cursor-default'}`}
             title={isEditor ? 'Remove reaction' : undefined}

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ChatPreview } from '../chat/ChatPreview';
 import { buildFramePlan, FPS } from '../../lib/video/chatTimeline';
 import type { ChatProject, FramePlan } from '../../lib/parser/types';
@@ -44,6 +44,8 @@ export const RenderChatApp: React.FC<Props> = ({ mode }) => {
   const [framePlan, setFramePlan] = useState<FramePlan[]>([]);
   const [currentFrame, setCurrentFrame] = useState<FramePlan | null>(null);
   const [renderToken, setRenderToken] = useState<string | null>(null);
+  const [pinScroll, setPinScroll] = useState(false);
+  const [noScroll, setNoScroll] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
 
   const getCompleteFrame = (p: ChatProject): FramePlan => ({
@@ -81,8 +83,10 @@ export const RenderChatApp: React.FC<Props> = ({ mode }) => {
     // Listen for frame commands from parent (video mode)
     const handler = (event: MessageEvent) => {
       if (event.data?.type === 'SET_FRAME') {
-        const { frame, plan, token } = event.data as { frame: number; plan?: FramePlan; token?: string };
+        const { frame, plan, token, pin, noscroll } = event.data as { frame: number; plan?: FramePlan; token?: string; pin?: boolean; noscroll?: boolean };
         setRenderToken(token ?? null);
+        setPinScroll(pin === true);
+        setNoScroll(noscroll === true);
         if (plan) {
           setCurrentFrame(plan);
         } else if (framePlan[frame]) {
@@ -139,16 +143,47 @@ export const RenderChatApp: React.FC<Props> = ({ mode }) => {
     };
   }, [framePlan, project, runtimeConfig.autoplay, runtimeConfig.mode]);
 
+  // DOM-cloning frame capture (html-to-image) cannot see live scrollTop
+  // state, so per-frame capturers ask for the feed to be pinned to its
+  // latest content with a translateY transform instead of being scrolled —
+  // the same trick as freezeFeedAtScrollPosition in exportPng. Opt-in via
+  // SET_FRAME's `pin` flag: the composite exporter measures row geometry
+  // and captures the tall message layer directly, so it must NOT get
+  // transforms injected under it.
+  const applyPinnedScroll = useCallback(() => {
+    const feed = feedRef.current;
+    if (!feed) return;
+    feed.style.scrollBehavior = 'auto';
+    feed.style.overflowY = 'hidden';
+    feed.scrollTop = 0;
+
+    const win = feed.ownerDocument.defaultView;
+    const layers = (Array.from(feed.children) as HTMLElement[]).filter(
+      (child) => child.nodeType === 1 && win?.getComputedStyle(child).position !== 'absolute'
+    );
+    for (const layer of layers) layer.style.transform = '';
+    const offset = Math.max(0, feed.scrollHeight - feed.clientHeight);
+    if (offset > 0) {
+      for (const layer of layers) layer.style.transform = `translateY(-${offset}px)`;
+    }
+  }, []);
+
   useEffect(() => {
     if (runtimeConfig.mode !== 'video' || !currentFrame || !feedRef.current) return;
 
     const raf = requestAnimationFrame(() => {
       const feed = feedRef.current;
       if (!feed) return;
-      feed.scrollTo({
-        top: feed.scrollHeight,
-        behavior: runtimeConfig.autoplay ? 'auto' : 'smooth',
-      });
+      if (pinScroll) {
+        applyPinnedScroll();
+      } else if (!noScroll) {
+        // noscroll: the composite exporter measures layout-true row geometry
+        // and composes scrolling itself, so the live feed must stay put.
+        feed.scrollTo({
+          top: feed.scrollHeight,
+          behavior: runtimeConfig.autoplay ? 'auto' : 'smooth',
+        });
+      }
       requestAnimationFrame(() => {
         if (renderToken) {
           (window as any).__ECM_FRAME_READY = renderToken;
@@ -157,7 +192,7 @@ export const RenderChatApp: React.FC<Props> = ({ mode }) => {
     });
 
     return () => cancelAnimationFrame(raf);
-  }, [currentFrame?.visibleCount, currentFrame?.typingParticipantId, renderToken, runtimeConfig.mode]);
+  }, [currentFrame?.visibleCount, currentFrame?.typingParticipantId, currentFrame?.activeReactionIds?.length, renderToken, pinScroll, noScroll, runtimeConfig.mode, runtimeConfig.autoplay, applyPinnedScroll]);
 
   if (!project) {
     return (

@@ -125,9 +125,13 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
     let frameToken = 0;
     const setFrame = async (plan: FramePlan) => {
       const token = `composite-${++frameToken}`;
-      win.postMessage({ type: 'SET_FRAME', frame: 0, plan, token }, '*');
+      // noscroll: keep the live feed unscrolled — row geometry must be
+      // layout-true (a scrolled feed bakes -scrollTop into every rect when
+      // the message layer IS the scroll container), and scrolling is
+      // composed on the canvas anyway.
+      win.postMessage({ type: 'SET_FRAME', frame: 0, plan, token, noscroll: true }, '*');
       // RenderChatApp echoes the token via __ECM_FRAME_READY once the frame
-      // is committed and the feed has scrolled.
+      // is committed.
       for (let i = 0; i < 60; i++) {
         if ((win as Window & { __ECM_FRAME_READY?: string }).__ECM_FRAME_READY === token) break;
         await sleep(25);
@@ -144,6 +148,10 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
 
     const feed = doc.querySelector<HTMLElement>('.phone-chat-scroll');
     if (!feed) throw new CompositeUnsupportedError('no .phone-chat-scroll');
+    // Earlier frames may have scrolled the feed before noscroll took effect.
+    feed.style.scrollBehavior = 'auto';
+    feed.scrollTop = 0;
+    await rafSettle(win);
     // Platforms may inject rows that aren't messages (auto date chips, group
     // headers), so rows are NOT 1:1 with messages. Wait for the complete
     // state to commit (row count stops growing), then map messages to rows
@@ -158,7 +166,7 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
       await sleep(50);
     }
     const R = rows.length;
-    if (R < N) throw new CompositeUnsupportedError(`rows=${R} < messages=${N}`);
+    if (R === 0) throw new CompositeUnsupportedError('no message rows rendered');
 
     // html-to-image's clone establishes a new block formatting context, so
     // child margins that collapse through the layer in the live DOM don't
@@ -187,6 +195,10 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
     const rowGap = R > 1 ? Math.max(0, rowTops[1] - rowBottoms[0]) : 4;
 
     // rowCountAt[k] = number of rows rendered when k messages are visible.
+    // Platforms may render extra rows (auto date chips) or FEWER rows than
+    // messages (Telegram drops `system` messages entirely), so the only hard
+    // invariants are 0 <= rowCountAt[k] <= rowCountAt[k+1]. setFrame already
+    // token-syncs with the committed DOM, so the poll is just a safety net.
     const rowCountAt: number[] = new Array(N + 1).fill(0);
     rowCountAt[N] = R;
     for (let k = N - 1; k >= 0; k--) {
@@ -194,11 +206,10 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
       let count = -1;
       for (let i = 0; i < 60; i++) {
         count = findMessageLayer(feed, N).rows.length;
-        // k messages need at least k rows (platforms only ever inject extras)
-        if (count >= k && count <= rowCountAt[k + 1]) break;
+        if (count <= rowCountAt[k + 1]) break;
         await sleep(30);
       }
-      rowCountAt[k] = Math.max(k, Math.min(count, rowCountAt[k + 1]));
+      rowCountAt[k] = Math.max(0, Math.min(count, rowCountAt[k + 1]));
     }
     // Which message id (if any) each row belongs to, for reaction slices.
     const rowMsgId: (string | null)[] = new Array(R).fill(null);
@@ -213,8 +224,34 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
     const sliceBottom = (g: Geom, j: number) => (j < R - 1 ? g.rowTops[j + 1] : g.layerH);
     const geomPlain: Geom = { rowTops, rowBottoms, layerH };
 
+    // When the message layer IS the scroll container (platforms that render
+    // rows as direct feed children, e.g. Telegram), a plain capture clips to
+    // the feed's viewport height — html-to-image clones at layout size with
+    // scrollTop reset. Temporarily grow the feed to its full content height
+    // so the tall sprite contains every row.
+    const captureTall = async (): Promise<HTMLCanvasElement> => {
+      if (layer !== feed) return capture(layer);
+      const prev = {
+        height: feed.style.height,
+        flex: feed.style.flex,
+        overflowY: feed.style.overflowY,
+      };
+      feed.style.height = `${layer.scrollHeight || layerH}px`;
+      feed.style.flex = 'none';
+      feed.style.overflowY = 'visible';
+      await rafSettle(win);
+      try {
+        return await capture(feed);
+      } finally {
+        feed.style.height = prev.height;
+        feed.style.flex = prev.flex;
+        feed.style.overflowY = prev.overflowY;
+        await rafSettle(win);
+      }
+    };
+
     onProgress('preparing', 8);
-    const tallPlain = await capture(layer);
+    const tallPlain = await captureTall();
 
     // Reactions can change row heights (badge spacing), so the reacted state
     // gets its own capture AND its own geometry; frames stack per-row slices
@@ -254,7 +291,7 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
           h: br.height + 6,
         });
       }
-      tallReacted = await capture(layer);
+      tallReacted = await captureTall();
     }
 
     onProgress('preparing', 14);

@@ -346,7 +346,7 @@ const DiscordMessageRow: React.FC<{
         {msg.reaction && (
           <button
             onClick={() => isEditor && onClearReaction?.(msg.id)}
-            className={`mt-2 inline-flex items-center gap-1 rounded-[5px] px-1.5 py-0.5 text-[14px] transition-transform ${
+            className={`reaction-badge mt-2 inline-flex items-center gap-1 rounded-[5px] px-1.5 py-0.5 text-[14px] transition-transform ${
               isDark ? 'bg-[#2b2d31] text-[#d6d9df]' : 'bg-[#e9ecef] text-[#2e3338]'
             } ${isEditor ? 'cursor-pointer hover:scale-105' : 'cursor-default'}`}
             title={isEditor ? 'Remove reaction' : undefined}

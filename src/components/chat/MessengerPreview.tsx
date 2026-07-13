@@ -344,7 +344,7 @@ const MessengerBubble: React.FC<{
         {msg.reaction && (
           <button
             onClick={() => isEditor && onClearReaction?.(msg.id)}
-            className={`absolute -bottom-3 ${isSelf ? 'left-2' : 'right-2'} flex h-6 min-w-8 items-center justify-center rounded-full border px-2 text-[14px] shadow-sm transition-transform ${
+            className={`reaction-badge absolute -bottom-3 ${isSelf ? 'left-2' : 'right-2'} flex h-6 min-w-8 items-center justify-center rounded-full border px-2 text-[14px] shadow-sm transition-transform ${
               isDark ? 'border-black bg-[#303030]' : 'border-white bg-white'
             } ${isEditor ? 'cursor-pointer hover:scale-110' : 'cursor-default'}`}
             title={isEditor ? 'Remove reaction' : undefined}

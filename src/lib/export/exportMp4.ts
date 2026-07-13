@@ -20,7 +20,9 @@ const PHONE_H = 844;
 const VIDEO_SCALE = 2;
 const VIDEO_W = PHONE_W * VIDEO_SCALE;
 const VIDEO_H = PHONE_H * VIDEO_SCALE;
-const EXPORT_FPS = 12;
+// Step the 30fps timeline by an integer divisor so playback speed is exact
+// (12fps with a 3-frame step used to play 20% too fast).
+const EXPORT_FPS = 15;
 const FRAME_STEP = Math.max(1, Math.round(FPS / EXPORT_FPS));
 // Codec preference order: H.264 (plays everywhere), then VP9 (available in
 // every Chromium build, including ones without proprietary codecs). Levels
@@ -174,8 +176,16 @@ export async function exportMp4(project: ChatProject, onProgress: ProgressCallba
       const shouldCapture = signature !== lastCapturedSignature || phoneCanvas === null;
 
       if (shouldCapture) {
-        iframeWin.postMessage({ type: 'SET_FRAME', frame: f, plan }, '*');
-        await new Promise((r) => setTimeout(r, 20));
+        // `pin: true` makes the renderer pin the feed to its latest content
+        // with a transform (live scrollTop is lost when html-to-image clones
+        // the DOM). The token round-trip replaces a fixed delay, so capture
+        // happens only after the frame is committed and pinned.
+        const token = `mp4-${outFrame}`;
+        iframeWin.postMessage({ type: 'SET_FRAME', frame: f, plan, token, pin: true }, '*');
+        for (let i = 0; i < 60; i++) {
+          if ((iframeWin as Window & { __ECM_FRAME_READY?: string }).__ECM_FRAME_READY === token) break;
+          await new Promise((r) => setTimeout(r, 15));
+        }
 
         phoneCanvas = await toCanvas(phoneEl, {
           width: PHONE_W,
