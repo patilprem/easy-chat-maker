@@ -1,0 +1,152 @@
+---
+import Layout from './Layout.astro';
+import SiteFooter from '../components/site/SiteFooter.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;          // <title> / og:title
+  description: string;    // meta description
+  heading: string;        // on-page H1
+  published: string;      // ISO date, e.g. "2026-07-13"
+  publishedLabel: string; // human label, e.g. "July 13, 2026"
+  readingTime: string;    // e.g. "6 min read"
+  ogImage?: string;
+}
+const { title, description, heading, published, publishedLabel, readingTime, ogImage } = Astro.props;
+
+const articleSchema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: heading,
+  description,
+  datePublished: published,
+  dateModified: published,
+  author: { '@type': 'Organization', name: 'Easy Chat Maker', url: 'https://easychatmaker.com' },
+  publisher: { '@type': 'Organization', name: 'Easy Chat Maker', url: 'https://easychatmaker.com' },
+  mainEntityOfPage: new URL(Astro.url.pathname, Astro.site ?? 'https://easychatmaker.com').href,
+});
+---
+<Layout title={title} description={description} ogImage={ogImage}>
+  <div class="min-h-screen bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
+    <header class="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
+      <a href="/" class="text-lg font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">
+        Easy Chat Maker
+      </a>
+      <div class="flex items-center gap-3">
+        <a href="/blog" class="hidden text-sm font-medium text-white/60 transition-colors hover:text-white sm:block">Blog</a>
+        <a
+          href="/editor"
+          class="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15"
+        >
+          Open the editor
+        </a>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-3xl px-5 pb-24 pt-8">
+      <article>
+        <p class="text-[13px] font-semibold uppercase tracking-wide text-[#60efff]/80">
+          <a href="/blog" class="hover:underline">Blog</a>
+        </p>
+        <h1 class="mt-2 text-[32px] font-bold leading-tight md:text-[40px]">{heading}</h1>
+        <p class="mt-3 text-[13px] text-white/40">{publishedLabel} · {readingTime}</p>
+        <div class="blog-prose mt-8">
+          <slot />
+        </div>
+      </article>
+    </main>
+
+    <SiteFooter />
+  </div>
+
+  <script type="application/ld+json" set:html={articleSchema} />
+
+  <style is:global>
+    .blog-prose h2 {
+      margin-top: 2.6rem;
+      font-size: 23px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.94);
+    }
+    .blog-prose h3 {
+      margin-top: 1.7rem;
+      font-size: 17px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.88);
+    }
+    .blog-prose p {
+      margin-top: 1rem;
+      font-size: 15.5px;
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.68);
+    }
+    .blog-prose ul, .blog-prose ol {
+      margin-top: 1rem;
+      padding-left: 1.4rem;
+    }
+    .blog-prose ul { list-style: disc; }
+    .blog-prose ol { list-style: decimal; }
+    .blog-prose li {
+      margin-top: 0.5rem;
+      font-size: 15.5px;
+      line-height: 1.75;
+      color: rgba(255, 255, 255, 0.68);
+    }
+    .blog-prose a {
+      color: #60efff;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .blog-prose strong { color: rgba(255, 255, 255, 0.9); }
+    .blog-prose img, .blog-prose video {
+      margin-top: 1.4rem;
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .blog-prose figure { margin-top: 1.4rem; }
+    .blog-prose figure img, .blog-prose figure video { margin-top: 0; }
+    .blog-prose figcaption {
+      margin-top: 0.55rem;
+      text-align: center;
+      font-size: 12.5px;
+      color: rgba(255, 255, 255, 0.4);
+    }
+    .blog-prose .phone-shot {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 330px;
+    }
+    .blog-prose code {
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.1rem 0.4rem;
+      font-size: 13.5px;
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .blog-prose pre {
+      margin-top: 1.2rem;
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(0, 0, 0, 0.35);
+      padding: 1rem 1.2rem;
+    }
+    .blog-prose pre code {
+      background: none;
+      padding: 0;
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.75);
+    }
+    .blog-prose .cta-box {
+      margin-top: 2rem;
+      border-radius: 16px;
+      border: 1px solid rgba(96, 239, 255, 0.25);
+      background: linear-gradient(135deg, rgba(0, 255, 135, 0.08), rgba(96, 239, 255, 0.08));
+      padding: 1.3rem 1.5rem;
+    }
+    .blog-prose .cta-box p { margin-top: 0.3rem; }
+  </style>
+</Layout>

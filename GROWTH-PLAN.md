@@ -64,9 +64,12 @@ recording. Check items off as they're done.
 
 ## Phase 3 — Content engine (ongoing, ~1 post/week) ✍️
 
-- [ ] **[Claude]** Add a simple `/blog` to the site.
+- [x] **[Claude]** Add a simple `/blog` to the site. _Done 2026-07-13: index at
+      `/blog`, post layout with Article schema, footer link, sitemap included._
 - [ ] **[Claude]** drafts + **[You]** review/publish, one per week:
-  1. How to make a fake WhatsApp chat (2026 guide) — screenshots + tool CTA
+  1. ✅ How to make a fake WhatsApp chat (2026 guide) — live 2026-07-13 at
+     `/blog/how-to-make-a-fake-whatsapp-chat` with real screenshots + video.
+     **[You]**: request indexing for `/blog` and the post URL in Search Console.
   2. How to make chat story videos for TikTok/Reels/Shorts
   3. How to make a fake ChatGPT screenshot for presentations & demos
   4. 12 chat meme formats that go viral (with templates)
