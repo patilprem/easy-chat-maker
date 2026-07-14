@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
-import { Play, Pause, Plus } from 'lucide-react';
+import { Play, Pause, Plus, Volume2, VolumeX } from 'lucide-react';
 import { ChatPreview } from '../chat/ChatPreview';
 import { buildFramePlan, FPS } from '../../lib/video/chatTimeline';
 import { useEditorStore } from '../../lib/state/editorStore';
+import { playMessageSound } from '../../lib/media/messageSounds';
 import type { Message } from '../../lib/parser/types';
 
 export const PhonePreview: React.FC = () => {
@@ -14,6 +15,7 @@ export const PhonePreview: React.FC = () => {
   } = useEditorStore();
 
   const [isPlaying, setIsPlaying] = useState(false);
+  const [muted, setMuted] = useState(false);
   const [frame, setFrame] = useState(0);
   const [framePlan, setFramePlan] = useState(() => buildFramePlan(project.messages, project.participants));
 
@@ -79,6 +81,35 @@ export const PhonePreview: React.FC = () => {
     }
   }, [currentPlan]);
 
+  // Play a sound when a new bubble or reaction appears during playback.
+  // The timeline only schedules system/date/text/image/voice messages, so the
+  // Nth visible item maps to the Nth message of those kinds.
+  const prevSoundStateRef = useRef({ visible: 0, reactions: 0 });
+  useEffect(() => {
+    if (!currentPlan) return;
+    const prev = prevSoundStateRef.current;
+    const visible = currentPlan.visibleCount;
+    const reactions = currentPlan.activeReactionIds.length;
+
+    if (isPlaying && !muted) {
+      if (visible > prev.visible) {
+        const timelineMessages = project.messages.filter(
+          (m) => m.kind !== 'call',
+        );
+        const revealed = timelineMessages[visible - 1];
+        if (revealed && (revealed.kind === 'text' || revealed.kind === 'image' || revealed.kind === 'voice')) {
+          const isSelf = project.participants.find((p) => p.id === revealed.participantId)?.isSelf;
+          playMessageSound(isSelf ? 'send' : 'receive');
+        }
+      }
+      if (reactions > prev.reactions) {
+        playMessageSound('reaction');
+      }
+    }
+
+    prevSoundStateRef.current = { visible, reactions };
+  }, [currentPlan, isPlaying, muted, project.messages, project.participants]);
+
   const handleAvatarClick = useCallback((participantId: string) => {
     pendingAvatarParticipantId.current = participantId;
     avatarInputRef.current?.click();
@@ -105,6 +136,15 @@ export const PhonePreview: React.FC = () => {
         >
           {isPlaying ? <Pause size={13} /> : <Play size={13} />}
           {isPlaying ? 'Pause' : 'Play'}
+        </button>
+        <button
+          onClick={() => setMuted(!muted)}
+          title={muted ? 'Unmute preview sounds' : 'Mute preview sounds'}
+          className={`flex items-center justify-center w-7 h-7 rounded-full transition-colors ${
+            muted ? 'bg-white/5 text-white/30 hover:text-white/60' : 'bg-white/10 text-white hover:bg-[#00FF87]/15'
+          }`}
+        >
+          {muted ? <VolumeX size={13} /> : <Volume2 size={13} />}
         </button>
         <span className="text-white/40 text-xs">
           {currentPlan ? `${currentPlan.visibleCount} / ${project.messages.length} messages` : ''}
