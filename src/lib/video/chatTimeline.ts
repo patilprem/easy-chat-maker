@@ -90,4 +90,37 @@ export function buildFramePlan(messages: Message[], participants: Participant[] 
   return plans;
 }
 
+export interface SoundEvent {
+  timeSec: number;
+  sound: 'send' | 'receive' | 'reaction';
+}
+
+/**
+ * When each message sound should play, mirroring buildFramePlan's frame
+ * arithmetic so sounds land exactly when bubbles/reactions become visible.
+ */
+export function buildSoundEvents(messages: Message[], participants: Participant[] = []): SoundEvent[] {
+  const selfParticipantIds = new Set(participants.filter((p) => p.isSelf).map((p) => p.id));
+  const events: SoundEvent[] = [];
+  let frame = 0;
+
+  for (const msg of messages) {
+    if (msg.kind === 'system' || msg.kind === 'date') {
+      frame += INSTANT_PAUSE;
+    } else if (msg.kind === 'text' || msg.kind === 'image' || msg.kind === 'voice') {
+      const revealFrame = frame + TYPING_FRAMES;
+      events.push({
+        timeSec: revealFrame / FPS,
+        sound: selfParticipantIds.has(msg.participantId) ? 'send' : 'receive',
+      });
+      if (msg.reaction?.emoji) {
+        events.push({ timeSec: (revealFrame + REACTION_DELAY) / FPS, sound: 'reaction' });
+      }
+      frame = revealFrame + PAUSE_FRAMES;
+    }
+  }
+
+  return events;
+}
+
 export { FPS };

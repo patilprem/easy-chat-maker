@@ -2,7 +2,8 @@ import { toCanvas, getFontEmbedCSS } from 'html-to-image';
 import { Muxer, ArrayBufferTarget } from 'mp4-muxer';
 import type { ChatProject, FramePlan } from '../parser/types';
 import { buildFramePlan, FPS } from '../video/chatTimeline';
-import { drainEncoderQueue, getExportScale, negotiateVideoConfig, type ProgressCallback } from './exportMp4';
+import { tryEncodeMessageSoundTrack } from './exportAudio';
+import { drainEncoderQueue, getExportScale, negotiateVideoConfig, type ExportOptions, type ProgressCallback } from './exportMp4';
 
 /**
  * Sprite-compositing video exporter.
@@ -75,10 +76,15 @@ function findMessageLayer(feed: HTMLElement, expectedRows: number): { layer: HTM
   return { layer, rows };
 }
 
-export async function exportCompositeMp4(project: ChatProject, onProgress: ProgressCallback): Promise<void> {
+export async function exportCompositeMp4(
+  project: ChatProject,
+  onProgress: ProgressCallback,
+  options: ExportOptions = {},
+): Promise<void> {
   const filename = `${project.platform}-chat.mp4`;
   const messages = project.messages;
   const plans = buildFramePlan(messages, project.participants);
+  const audioTrack = await tryEncodeMessageSoundTrack(project, plans.length / FPS, options.includeSounds !== false);
   // 2x for crisp text on desktop, 1x on phones/low-memory devices (see
   // getExportScale) — the 2x buffers can OOM-crash a mobile tab.
   const SCALE = getExportScale();
@@ -383,6 +389,9 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
     const muxer = new Muxer({
       target: new ArrayBufferTarget(),
       video: { codec: muxerCodec, width: VIDEO_W, height: VIDEO_H },
+      ...(audioTrack
+        ? { audio: { codec: audioTrack.muxerCodec, sampleRate: audioTrack.sampleRate, numberOfChannels: audioTrack.numberOfChannels } }
+        : {}),
       fastStart: 'in-memory',
     });
     let encoderError: unknown = null;
@@ -498,6 +507,9 @@ export async function exportCompositeMp4(project: ChatProject, onProgress: Progr
 
     await encoder.flush();
     onProgress('muxing', 92);
+    if (audioTrack) {
+      for (const { chunk, meta } of audioTrack.chunks) muxer.addAudioChunk(chunk, meta);
+    }
     muxer.finalize();
     const { buffer } = muxer.target as ArrayBufferTarget;
     onProgress('downloading', 98);

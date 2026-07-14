@@ -73,10 +73,10 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
       } catch (e) {
         if (!(e instanceof RecorderUnavailableError)) throw e;
         try {
-          await exportCompositeMp4(project, onProgress);
+          await exportCompositeMp4(project, onProgress, { includeSounds });
         } catch (compositeError) {
           console.warn('Composite export failed, using frame capture:', compositeError);
-          await exportMp4(project, onProgress);
+          await exportMp4(project, onProgress, { includeSounds });
         }
       }
     } catch (e) {
