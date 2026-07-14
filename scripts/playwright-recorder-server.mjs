@@ -41,11 +41,27 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const RECORDING_DIR = join(HERE, '..', '.tmp', 'playwright-recordings');
 const EXPORT_DIR = join(HERE, '..', '.tmp', 'exported-videos');
 const SOUNDS_DIR = join(HERE, '..', 'public', 'sounds');
-const SOUND_FILES = {
-  send: join(SOUNDS_DIR, 'message-send.wav'),
-  receive: join(SOUNDS_DIR, 'message-receive.wav'),
-  reaction: join(SOUNDS_DIR, 'reaction-pop.wav'),
+const SOUND_FILE_NAMES = {
+  send: 'message-send.wav',
+  receive: 'message-receive.wav',
+  reaction: 'reaction-pop.wav',
 };
+
+// Per-platform sounds live in public/sounds/<platform>/, falling back to the
+// defaults at the root of public/sounds/. Drop in your own WAVs to customize.
+function resolveSoundFiles(platform) {
+  const safePlatform = /^[a-z0-9_-]+$/i.test(String(platform || '')) ? String(platform) : null;
+  const files = {};
+  for (const [key, fileName] of Object.entries(SOUND_FILE_NAMES)) {
+    const candidates = [
+      ...(safePlatform ? [join(SOUNDS_DIR, safePlatform, fileName)] : []),
+      join(SOUNDS_DIR, fileName),
+    ];
+    const found = candidates.find((candidate) => existsSync(candidate));
+    if (found) files[key] = found;
+  }
+  return files;
+}
 const execFileAsync = promisify(execFile);
 
 function sendCors(res) {
@@ -237,7 +253,7 @@ function buildFramePlan(messages = [], participants = []) {
 
 // Mirrors the frame arithmetic of buildFramePlan so each sound lands exactly
 // when its bubble/reaction becomes visible.
-function buildAudioEvents(messages = [], participants = []) {
+function buildAudioEvents(messages = [], participants = [], soundFiles = {}) {
   const selfParticipantIds = new Set(participants.filter((p) => p.isSelf).map((p) => p.id));
   const events = [];
   let frame = 0;
@@ -261,10 +277,10 @@ function buildAudioEvents(messages = [], participants = []) {
     }
   }
 
-  return events.filter((event) => existsSync(SOUND_FILES[event.sound]));
+  return events.filter((event) => soundFiles[event.sound]);
 }
 
-function buildAudioMixArgs(audioEvents) {
+function buildAudioMixArgs(audioEvents, soundFiles) {
   const inputArgs = [];
   const filters = [];
   const mixLabels = ['[1:a]'];
@@ -272,7 +288,7 @@ function buildAudioMixArgs(audioEvents) {
   let inputIndex = 2; // 0 = video frames, 1 = silent base track
 
   for (const sound of soundNames) {
-    inputArgs.push('-i', SOUND_FILES[sound]);
+    inputArgs.push('-i', soundFiles[sound]);
     const events = audioEvents.filter((event) => event.sound === sound);
     const copyLabels = events.map((_, i) => `[${sound}${i}]`);
 
@@ -310,14 +326,14 @@ function concatPath(filePath) {
   return filePath.replace(/\\/g, '/').replace(/'/g, "'\\''");
 }
 
-async function encodeFrameSegmentsToMp4(listPath, mp4Path, audioEvents = []) {
+async function encodeFrameSegmentsToMp4(listPath, mp4Path, audioEvents = [], soundFiles = {}) {
   if (!ffmpegPath) {
     throw new Error('FFmpeg is not available. Run: npm install');
   }
 
   const hasSounds = audioEvents.length > 0;
   const { inputArgs, filterComplex } = hasSounds
-    ? buildAudioMixArgs(audioEvents)
+    ? buildAudioMixArgs(audioEvents, soundFiles)
     : { inputArgs: [], filterComplex: '' };
 
   try {
@@ -433,10 +449,11 @@ async function renderProjectFrames(page, project, runDir, mp4Path, includeSounds
     concatList.push(`file '${concatPath(segments[segments.length - 1].path)}'`);
   }
   await writeFile(listPath, `${concatList.join('\n')}\n`, 'utf8');
+  const soundFiles = includeSounds ? resolveSoundFiles(project.platform) : {};
   const audioEvents = includeSounds
-    ? buildAudioEvents(project.messages, project.participants)
+    ? buildAudioEvents(project.messages, project.participants, soundFiles)
     : [];
-  await encodeFrameSegmentsToMp4(listPath, mp4Path, audioEvents);
+  await encodeFrameSegmentsToMp4(listPath, mp4Path, audioEvents, soundFiles);
 }
 
 async function openRenderPage(page, url, requireText = false) {

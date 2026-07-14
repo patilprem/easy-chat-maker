@@ -99,16 +99,16 @@ export const PhonePreview: React.FC = () => {
         const revealed = timelineMessages[visible - 1];
         if (revealed && (revealed.kind === 'text' || revealed.kind === 'image' || revealed.kind === 'voice')) {
           const isSelf = project.participants.find((p) => p.id === revealed.participantId)?.isSelf;
-          playMessageSound(isSelf ? 'send' : 'receive');
+          playMessageSound(isSelf ? 'send' : 'receive', project.platform);
         }
       }
       if (reactions > prev.reactions) {
-        playMessageSound('reaction');
+        playMessageSound('reaction', project.platform);
       }
     }
 
     prevSoundStateRef.current = { visible, reactions };
-  }, [currentPlan, isPlaying, muted, project.messages, project.participants]);
+  }, [currentPlan, isPlaying, muted, project.messages, project.participants, project.platform]);
 
   const handleAvatarClick = useCallback((participantId: string) => {
     pendingAvatarParticipantId.current = participantId;

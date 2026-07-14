@@ -1,29 +1,44 @@
 export type MessageSound = 'send' | 'receive' | 'reaction';
 
-const SOUND_URLS: Record<MessageSound, string> = {
-  send: '/sounds/message-send.wav',
-  receive: '/sounds/message-receive.wav',
-  reaction: '/sounds/reaction-pop.wav',
+const SOUND_FILE_NAMES: Record<MessageSound, string> = {
+  send: 'message-send.wav',
+  receive: 'message-receive.wav',
+  reaction: 'reaction-pop.wav',
 };
 
 const PREVIEW_VOLUME = 0.55;
 
-const cache = new Map<MessageSound, HTMLAudioElement>();
+const cache = new Map<string, HTMLAudioElement>();
 
-export function playMessageSound(name: MessageSound): void {
-  if (typeof Audio === 'undefined') return;
+function tryPlay(urls: string[], index: number): void {
+  if (index >= urls.length) return;
+  const url = urls[index];
 
-  let base = cache.get(name);
+  let base = cache.get(url);
   if (!base) {
-    base = new Audio(SOUND_URLS[name]);
+    base = new Audio(url);
     base.preload = 'auto';
-    cache.set(name, base);
+    cache.set(url, base);
   }
 
   // Clone so overlapping sounds (e.g. receive + reaction) don't cut each other off
   const node = base.cloneNode() as HTMLAudioElement;
   node.volume = PREVIEW_VOLUME;
-  node.play().catch(() => {
-    // Autoplay policy or missing file — preview sound is best-effort
-  });
+  node.play().catch(() => tryPlay(urls, index + 1));
+}
+
+/**
+ * Play a message sound, preferring the platform-specific file in
+ * public/sounds/<platform>/ and falling back to the default in public/sounds/.
+ */
+export function playMessageSound(name: MessageSound, platform?: string): void {
+  if (typeof Audio === 'undefined') return;
+
+  const fileName = SOUND_FILE_NAMES[name];
+  const urls: string[] = [];
+  if (platform && /^[a-z0-9_-]+$/i.test(platform)) {
+    urls.push(`/sounds/${platform}/${fileName}`);
+  }
+  urls.push(`/sounds/${fileName}`);
+  tryPlay(urls, 0);
 }
