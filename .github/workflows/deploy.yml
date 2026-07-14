@@ -1,0 +1,47 @@
+name: Deploy to Cloudflare Workers
+
+on:
+  push:
+    branches:
+      - main
+      - claude/live-server-rnfbth
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      # Secrets can't be used in `if:` directly — surface presence via env.
+      CF_TOKEN_SET: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # --ignore-scripts: ffmpeg-static's postinstall downloads a binary the
+      # site build doesn't need (it's only for the local recorder tool).
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build site
+        run: npm run build
+
+      - name: Deploy to Cloudflare
+        if: env.CF_TOKEN_SET == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Deploy skipped — token missing
+        if: env.CF_TOKEN_SET != 'true'
+        run: |
+          echo "::warning::CLOUDFLARE_API_TOKEN secret is not set — build succeeded but deploy was skipped."
+          echo "Add it under Settings → Secrets and variables → Actions to enable automatic deploys."
