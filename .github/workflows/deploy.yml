@@ -39,6 +39,9 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # The action's default wrangler 3.x can't deploy an assets-only
+          # Worker config (fails with "Missing entry-point").
+          wranglerVersion: "4.110.0"
 
       - name: Deploy skipped — token missing
         if: env.CF_TOKEN_SET != 'true'
