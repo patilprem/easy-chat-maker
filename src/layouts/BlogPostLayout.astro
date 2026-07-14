@@ -1,5 +1,6 @@
 ---
 import Layout from './Layout.astro';
+import BrandMark from '../components/site/BrandMark.astro';
 import SiteFooter from '../components/site/SiteFooter.astro';
 import '../styles/global.css';
 
@@ -29,9 +30,7 @@ const articleSchema = JSON.stringify({
 <Layout title={title} description={description} ogImage={ogImage}>
   <div class="min-h-screen bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
     <header class="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
-      <a href="/" class="text-lg font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">
-        Easy Chat Maker
-      </a>
+      <BrandMark />
       <div class="flex items-center gap-3">
         <a href="/blog" class="hidden text-sm font-medium text-white/60 transition-colors hover:text-white sm:block">Blog</a>
         <a

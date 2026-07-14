@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { HomeHeroPhone } from '../components/home/HomeHeroPhone';
+import BrandMark from '../components/site/BrandMark.astro';
 import SiteFooter from '../components/site/SiteFooter.astro';
 import '../styles/global.css';
 
@@ -90,12 +91,7 @@ const faqLd = JSON.stringify({
   <div class="min-h-screen overflow-x-clip bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
     <!-- Nav -->
     <header class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5">
-      <a href="/" class="flex items-center gap-2.5">
-        <img src="/favicon-96x96.png" alt="" width="32" height="32" class="h-7 w-7 rounded-[9px] shadow-lg sm:h-8 sm:w-8" />
-        <span class="brand-font text-[14px] font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent whitespace-nowrap sm:text-lg">
-          Easy Chat Maker
-        </span>
-      </a>
+      <BrandMark />
       <nav class="hidden items-center gap-1 md:flex" aria-label="Page sections">
         <a href="#how-it-works" class="rounded-lg px-3 py-2 text-sm font-medium text-white/55 transition-colors hover:bg-white/5 hover:text-white">How it works</a>
         <a href="#use-cases" class="rounded-lg px-3 py-2 text-sm font-medium text-white/55 transition-colors hover:bg-white/5 hover:text-white">Use cases</a>

@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import BrandMark from '../../components/site/BrandMark.astro';
 import SiteFooter from '../../components/site/SiteFooter.astro';
 import '../../styles/global.css';
 
@@ -22,9 +23,7 @@ const posts = [
 >
   <div class="min-h-screen bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
     <header class="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
-      <a href="/" class="text-lg font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent">
-        Easy Chat Maker
-      </a>
+      <BrandMark />
       <a
         href="/editor"
         class="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15"

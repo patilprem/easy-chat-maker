@@ -1,0 +1,14 @@
+---
+// Canonical logo + wordmark lockup, used in every page header.
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+
+<a href="/" class:list={['flex items-center gap-2.5', className]}>
+  <img src="/favicon-96x96.png" alt="" width="32" height="32" class="h-7 w-7 rounded-[9px] shadow-lg sm:h-8 sm:w-8" />
+  <span class="brand-font text-[14px] font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent whitespace-nowrap sm:text-lg">
+    Easy Chat Maker
+  </span>
+</a>

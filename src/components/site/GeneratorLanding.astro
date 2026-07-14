@@ -1,6 +1,7 @@
 ---
 // Reusable SEO landing page template for the per-keyword generator pages.
 import Layout from '../../layouts/Layout.astro';
+import BrandMark from './BrandMark.astro';
 import SiteFooter from './SiteFooter.astro';
 import '../../styles/global.css';
 
@@ -47,12 +48,7 @@ const faqLd = JSON.stringify({
   <div class="min-h-screen overflow-x-clip bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
     <!-- Nav -->
     <header class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5">
-      <a href="/" class="flex items-center gap-2.5">
-        <img src="/favicon-96x96.png" alt="" width="32" height="32" class="h-8 w-8 rounded-[9px] shadow-lg" />
-        <span class="brand-font text-lg font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent whitespace-nowrap">
-          Easy Chat Maker
-        </span>
-      </a>
+      <BrandMark />
       <a
         href={ctaHref}
         class="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15 whitespace-nowrap"
