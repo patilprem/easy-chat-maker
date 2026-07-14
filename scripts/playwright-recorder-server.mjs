@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { join } from 'node:path';
@@ -9,7 +10,18 @@ import { createRequire } from 'node:module';
 import { chromium } from 'playwright';
 
 const require = createRequire(import.meta.url);
-const ffmpegPath = require('ffmpeg-static');
+
+function resolveFfmpegPath() {
+  try {
+    const staticPath = require('ffmpeg-static');
+    if (staticPath && existsSync(staticPath)) return staticPath;
+  } catch {
+    // ffmpeg-static not installed or its binary download failed; fall back to system ffmpeg
+  }
+  return 'ffmpeg';
+}
+
+const ffmpegPath = resolveFfmpegPath();
 
 const PORT = Number(process.env.ECM_RECORDER_PORT || 8817);
 const PHONE_W = 390;
@@ -28,6 +40,12 @@ const END_HOLD = CAPTURE_FPS * 2.5;
 const HERE = dirname(fileURLToPath(import.meta.url));
 const RECORDING_DIR = join(HERE, '..', '.tmp', 'playwright-recordings');
 const EXPORT_DIR = join(HERE, '..', '.tmp', 'exported-videos');
+const SOUNDS_DIR = join(HERE, '..', 'public', 'sounds');
+const SOUND_FILES = {
+  send: join(SOUNDS_DIR, 'message-send.wav'),
+  receive: join(SOUNDS_DIR, 'message-receive.wav'),
+  reaction: join(SOUNDS_DIR, 'reaction-pop.wav'),
+};
 const execFileAsync = promisify(execFile);
 
 function sendCors(res) {
@@ -217,6 +235,66 @@ function buildFramePlan(messages = [], participants = []) {
   return plans;
 }
 
+// Mirrors the frame arithmetic of buildFramePlan so each sound lands exactly
+// when its bubble/reaction becomes visible.
+function buildAudioEvents(messages = [], participants = []) {
+  const selfParticipantIds = new Set(participants.filter((p) => p.isSelf).map((p) => p.id));
+  const events = [];
+  let frame = 0;
+
+  for (const msg of messages) {
+    if (msg.kind === 'system' || msg.kind === 'date') {
+      frame += INSTANT_PAUSE;
+    } else if (msg.kind === 'text' || msg.kind === 'image' || msg.kind === 'voice') {
+      const revealFrame = frame + TYPING_FRAMES;
+      events.push({
+        timeSec: revealFrame / CAPTURE_FPS,
+        sound: selfParticipantIds.has(msg.participantId) ? 'send' : 'receive',
+      });
+      if (msg.reaction?.emoji) {
+        events.push({
+          timeSec: (revealFrame + REACTION_DELAY) / CAPTURE_FPS,
+          sound: 'reaction',
+        });
+      }
+      frame = revealFrame + PAUSE_FRAMES;
+    }
+  }
+
+  return events.filter((event) => existsSync(SOUND_FILES[event.sound]));
+}
+
+function buildAudioMixArgs(audioEvents) {
+  const inputArgs = [];
+  const filters = [];
+  const mixLabels = ['[1:a]'];
+  const soundNames = [...new Set(audioEvents.map((event) => event.sound))];
+  let inputIndex = 2; // 0 = video frames, 1 = silent base track
+
+  for (const sound of soundNames) {
+    inputArgs.push('-i', SOUND_FILES[sound]);
+    const events = audioEvents.filter((event) => event.sound === sound);
+    const copyLabels = events.map((_, i) => `[${sound}${i}]`);
+
+    if (events.length > 1) {
+      filters.push(`[${inputIndex}:a]asplit=${events.length}${copyLabels.join('')}`);
+    }
+
+    events.forEach((event, i) => {
+      const source = events.length > 1 ? copyLabels[i] : `[${inputIndex}:a]`;
+      const delayMs = Math.max(0, Math.round(event.timeSec * 1000));
+      const label = `[${sound}d${i}]`;
+      filters.push(`${source}adelay=${delayMs}:all=1${label}`);
+      mixLabels.push(label);
+    });
+
+    inputIndex += 1;
+  }
+
+  filters.push(`${mixLabels.join('')}amix=inputs=${mixLabels.length}:duration=first:normalize=0[aout]`);
+  return { inputArgs, filterComplex: filters.join(';') };
+}
+
 function getCompleteFrame(project) {
   return {
     visibleCount: project.messages.length,
@@ -232,10 +310,15 @@ function concatPath(filePath) {
   return filePath.replace(/\\/g, '/').replace(/'/g, "'\\''");
 }
 
-async function encodeFrameSegmentsToMp4(listPath, mp4Path) {
+async function encodeFrameSegmentsToMp4(listPath, mp4Path, audioEvents = []) {
   if (!ffmpegPath) {
     throw new Error('FFmpeg is not available. Run: npm install');
   }
+
+  const hasSounds = audioEvents.length > 0;
+  const { inputArgs, filterComplex } = hasSounds
+    ? buildAudioMixArgs(audioEvents)
+    : { inputArgs: [], filterComplex: '' };
 
   try {
     await execFileAsync(
@@ -247,8 +330,10 @@ async function encodeFrameSegmentsToMp4(listPath, mp4Path) {
         '-i', listPath,
         '-f', 'lavfi',
         '-i', 'anullsrc=channel_layout=stereo:sample_rate=44100',
+        ...inputArgs,
+        ...(hasSounds ? ['-filter_complex', filterComplex] : []),
         '-map', '0:v:0',
-        '-map', '1:a:0',
+        '-map', hasSounds ? '[aout]' : '1:a:0',
         '-vf', `fps=${OUTPUT_FPS},format=yuv420p`,
         '-c:v', 'libx264',
         '-profile:v', 'baseline',
@@ -282,7 +367,7 @@ async function setRenderedFrame(page, plan, token, frameIndex) {
   await page.waitForFunction((nextToken) => window.__ECM_FRAME_READY === nextToken, token, { timeout: 5000 });
 }
 
-async function renderProjectFrames(page, project, runDir, mp4Path) {
+async function renderProjectFrames(page, project, runDir, mp4Path, includeSounds) {
   const frameDir = join(runDir, 'frames');
   await mkdir(frameDir, { recursive: true });
 
@@ -348,7 +433,10 @@ async function renderProjectFrames(page, project, runDir, mp4Path) {
     concatList.push(`file '${concatPath(segments[segments.length - 1].path)}'`);
   }
   await writeFile(listPath, `${concatList.join('\n')}\n`, 'utf8');
-  await encodeFrameSegmentsToMp4(listPath, mp4Path);
+  const audioEvents = includeSounds
+    ? buildAudioEvents(project.messages, project.participants)
+    : [];
+  await encodeFrameSegmentsToMp4(listPath, mp4Path, audioEvents);
 }
 
 async function openRenderPage(page, url, requireText = false) {
@@ -371,7 +459,7 @@ async function openRenderPage(page, url, requireText = false) {
   throw lastError;
 }
 
-async function recordProject({ project, appUrl, durationMs, promptForSave = false, saveToExportDir = true }) {
+async function recordProject({ project, appUrl, durationMs, promptForSave = false, saveToExportDir = true, includeSounds = true }) {
   if (!project) throw new Error('Missing project payload.');
   const safeDurationMs = Number.isFinite(durationMs) && durationMs > 0
     ? Math.min(Math.max(durationMs, 1500), 120_000)
@@ -384,7 +472,11 @@ async function recordProject({ project, appUrl, durationMs, promptForSave = fals
 
   let browser;
   try {
-    browser = await chromium.launch({ headless: true });
+    const launchOptions = { headless: true };
+    if (process.env.ECM_CHROMIUM_PATH) {
+      launchOptions.executablePath = process.env.ECM_CHROMIUM_PATH;
+    }
+    browser = await chromium.launch(launchOptions);
   } catch (error) {
     throw new Error(
       `Could not launch Playwright Chromium. Run: npx playwright install chromium\n${error instanceof Error ? error.message : ''}`
@@ -410,7 +502,7 @@ async function recordProject({ project, appUrl, durationMs, promptForSave = fals
     const baseName = `${safePlatform}-chat-${Date.now()}`;
     const fileName = `${baseName}.mp4`;
     const mp4Path = join(runDir, fileName);
-    await renderProjectFrames(page, project, runDir, mp4Path);
+    await renderProjectFrames(page, project, runDir, mp4Path, includeSounds !== false);
     await context.close();
     const buffer = await readFile(mp4Path);
     let outputPath = null;

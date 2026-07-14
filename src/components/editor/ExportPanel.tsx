@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ImageDown, Clapperboard } from 'lucide-react';
+import { ImageDown, Clapperboard, Volume2 } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { exportPng } from '../../lib/export/exportPng';
 import { exportMp4, type ProgressState } from '../../lib/export/exportMp4';
@@ -28,6 +28,7 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
   const [pngLoading, setPngLoading] = useState(false);
   const [mp4Progress, setMp4Progress] = useState<{ state: ProgressState; pct: number; msg: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [includeSounds, setIncludeSounds] = useState(true);
 
   const handleExportPng = async () => {
     if (!project.exportConsentAccepted) return;
@@ -68,7 +69,7 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
       // compositor first (30fps, smooth scroll and typing animation), and the
       // legacy per-frame capturer only if a platform layout defeats it.
       try {
-        await exportPlaywrightVideo(project, onProgress);
+        await exportPlaywrightVideo(project, onProgress, { includeSounds });
       } catch (e) {
         if (!(e instanceof RecorderUnavailableError)) throw e;
         try {
@@ -105,6 +106,19 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
           </div>
           <span className="text-white/40 text-[11px] leading-relaxed group-hover:text-white/60 transition-colors">
             I confirm this is a fictional/mock conversation and will not be used to deceive or mislead anyone.
+          </span>
+        </label>
+
+        <label className="flex items-center gap-2.5 cursor-pointer group">
+          <input
+            type="checkbox"
+            id="export-sounds"
+            checked={includeSounds}
+            onChange={(e) => setIncludeSounds(e.target.checked)}
+            className="w-4 h-4 rounded accent-[#60EFFF] cursor-pointer flex-shrink-0"
+          />
+          <span className="flex items-center gap-1.5 text-white/40 text-[11px] group-hover:text-white/60 transition-colors">
+            <Volume2 size={12} /> Message sounds in video
           </span>
         </label>
 

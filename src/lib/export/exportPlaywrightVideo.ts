@@ -18,7 +18,15 @@ interface RecorderResponse {
   bytes: number;
 }
 
-export async function exportPlaywrightVideo(project: ChatProject, onProgress: ProgressCallback): Promise<string> {
+export interface PlaywrightVideoOptions {
+  includeSounds?: boolean;
+}
+
+export async function exportPlaywrightVideo(
+  project: ChatProject,
+  onProgress: ProgressCallback,
+  options: PlaywrightVideoOptions = {},
+): Promise<string> {
   onProgress('preparing', 5);
   const durationMs = Math.ceil((buildFramePlan(project.messages, project.participants).length / FPS) * 1000);
 
@@ -32,6 +40,7 @@ export async function exportPlaywrightVideo(project: ChatProject, onProgress: Pr
         appUrl: window.location.origin,
         durationMs,
         promptForSave: true,
+        includeSounds: options.includeSounds !== false,
       }),
     });
   } catch {
