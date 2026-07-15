@@ -281,3 +281,77 @@ Message to send friends (WhatsApp/iMessage — casual, so it gets used):
 | Day 2–3 | r/SideProject post, then r/InternetIsBeautiful |
 | Week 2–3 | Directory submissions, 1–2 per day |
 | Ongoing | 2–3 Quora/Reddit answers per week, friends sharing |
+
+---
+
+## Step 6 — YouTube demo video
+
+Upload BEFORE the Product Hunt launch — PH lets you put a YouTube video as
+the first gallery slot, and it autoplays for visitors. One video does
+double duty.
+
+**Video structure (45–75s is the sweet spot for demos):**
+1. 0:00–0:05 — Finished result first: a chat-story video playing with sound
+2. 0:05–0:20 — Type a conversation in the editor, bubbles appear live
+3. 0:20–0:35 — Switch platforms (WhatsApp → Instagram → ChatGPT) with one click
+4. 0:35–0:50 — Hit Export Video, show the downloaded MP4 playing WITH sound
+5. 0:50–end — Homepage + URL on screen: easychatmaker.com
+
+**Title (pick one):**
+> Easy Chat Maker — Fake Chat Screenshots & Story Videos (Free, No Watermark)
+
+> How to Make Fake WhatsApp / ChatGPT Chats & Texting Story Videos — Free
+
+**Description:**
+> Make realistic fake chat screenshots and animated texting-story videos —
+> free, no watermark, no signup. Everything runs in your browser.
+>
+> Try it: https://easychatmaker.com
+>
+> 9 platforms: WhatsApp, Instagram, Messenger, Telegram, Discord, Slack —
+> plus AI chats: ChatGPT, Claude and Gemini (almost no other tool has these).
+>
+> ✅ Export pixel-perfect PNG screenshots
+> ✅ Export animated chat-story videos with message sounds (the TikTok
+>    "texting story" format for Reels & Shorts)
+> ✅ Group chats, reactions, typing indicators, light/dark mode
+> ✅ 100% free, no watermark, no signup, nothing uploaded to a server
+>
+> Chapters:
+> 0:00 The result
+> 0:05 Typing a conversation
+> 0:20 Switching platforms
+> 0:35 Exporting the video
+>
+> Please use responsibly — for content, demos and entertainment, never to
+> deceive or impersonate anyone.
+>
+> #fakechat #textingstory #chatstory #whatsapp #chatgpt #free
+
+**Tags (paste into the tags field, comma-separated):**
+> fake chat maker, fake whatsapp chat, fake text message, texting story,
+> chat story video, fake chat generator, whatsapp chat generator, fake
+> instagram dm, fake chatgpt conversation, chat mockup, text story maker,
+> fake conversation maker, free no watermark, tiktok texting story, chat
+> video maker
+
+**Upload settings:**
+- Visibility: **Public** (set Premiere off — instant is fine for a demo)
+- Audience: **Not made for kids**
+- Category: **Science & Technology** (or Howto & Style — either works)
+- License: Standard YouTube License
+- Allow embedding: **ON** (required for the PH gallery + your own site later)
+- Thumbnail: phone frame with a colorful chat + big text "FAKE CHAT MAKER —
+  FREE" on the site's dark gradient; reuse the brand green/cyan (#00FF87 /
+  #60EFFF). 1280×720.
+- Add easychatmaker.com as the first line of the description AND a pinned
+  comment (link in comment survives even if people don't expand the
+  description).
+- After upload: drop the YouTube URL into the PH gallery's video slot, and
+  consider embedding it on the homepage later.
+
+**Recording tips:**
+- Record at 1920×1080, browser at 100% zoom, hide bookmarks bar
+- Keep system sounds off; let the exported video's own message sounds be
+  the only audio (or add subtle background music at ~20% volume)
+- OBS or Windows Game Bar (Win+G) both work; trim in Clipchamp/CapCut
