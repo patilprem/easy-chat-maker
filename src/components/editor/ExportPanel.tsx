@@ -5,6 +5,7 @@ import { exportPng } from '../../lib/export/exportPng';
 import { exportMp4, type ProgressState } from '../../lib/export/exportMp4';
 import { exportCompositeMp4 } from '../../lib/export/exportComposite';
 import { exportPlaywrightVideo, RecorderUnavailableError } from '../../lib/export/exportPlaywrightVideo';
+import { trackExport } from '../../lib/track';
 
 const LOADING_MESSAGES = [
   { from: 0, to: 10, text: 'Starting the chat...' },
@@ -36,6 +37,7 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
     setPngLoading(true);
     try {
       await exportPng(project);
+      trackExport('png', project.platform);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'PNG export failed');
     } finally {
@@ -79,6 +81,7 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
           await exportMp4(project, onProgress, { includeSounds });
         }
       }
+      trackExport('mp4', project.platform);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'MP4 export failed');
     } finally {

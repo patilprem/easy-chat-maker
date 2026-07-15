@@ -1,9 +1,16 @@
 {
-  // Cloudflare Workers config — serves the built Astro site as static assets
+  // Cloudflare Workers config — a small Worker fronts the built Astro site:
+  // /api/* endpoints count video/PNG exports, everything else serves assets.
   "name": "easy-chat-maker",
   "compatibility_date": "2026-07-01",
+  "main": "worker/index.mjs",
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "not_found_handling": "404-page"
-  }
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "EXPORT_COUNTER", "class_name": "ExportCounter" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["ExportCounter"] }]
 }
