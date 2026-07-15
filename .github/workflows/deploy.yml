@@ -17,6 +17,7 @@ jobs:
     env:
       # Secrets can't be used in `if:` directly — surface presence via env.
       CF_TOKEN_SET: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+      STATS_KEY_SET: ${{ secrets.STATS_KEY != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -42,6 +43,16 @@ jobs:
           # The action's default wrangler 3.x can't deploy an assets-only
           # Worker config (fails with "Missing entry-point").
           wranglerVersion: "4.110.0"
+
+      # Push the stats-page passphrase to the Worker as a secret. /stats and
+      # /api/stats stay public until the STATS_KEY repo secret exists.
+      - name: Sync stats key
+        if: env.CF_TOKEN_SET == 'true' && env.STATS_KEY_SET == 'true'
+        run: printf '%s' "$STATS_KEY" | npx wrangler@4.110.0 secret put STATS_KEY
+        env:
+          STATS_KEY: ${{ secrets.STATS_KEY }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy skipped — token missing
         if: env.CF_TOKEN_SET != 'true'
