@@ -14,8 +14,9 @@ export default defineConfig({
     react(),
     tailwind(),
     sitemap({
-      // Internal page used by the video recorder — not for search engines
-      filter: (page) => !page.includes('/render/'),
+      // Internal pages — not for search engines: the video recorder's render
+      // target and the export-stats dashboard
+      filter: (page) => !page.includes('/render/') && !page.includes('/stats'),
     }),
   ],
   devToolbar: {
