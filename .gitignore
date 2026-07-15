@@ -17,6 +17,9 @@ pnpm-debug.log*
 .tmp/
 .tmp-*
 
+# wrangler local dev state
+.wrangler/
+
 # environment variables
 .env
 .env.production
