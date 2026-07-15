@@ -22,13 +22,18 @@ function sanitize(value) {
   return typeof value === 'string' && NAME_RE.test(value) ? value.toLowerCase() : 'unknown';
 }
 
-function isAuthorized(request, env) {
-  if (!env.STATS_KEY) return true; // secret not configured yet — stays open until it is
+function hasValidKey(request, env) {
+  if (!env.STATS_KEY) return false;
   const url = new URL(request.url);
   if (url.searchParams.get('key') === env.STATS_KEY) return true;
   const cookies = request.headers.get('Cookie') ?? '';
   const match = cookies.match(new RegExp(`(?:^|;\\s*)${KEY_COOKIE}=([^;]+)`));
   return !!match && decodeURIComponent(match[1]) === env.STATS_KEY;
+}
+
+function isAuthorized(request, env) {
+  if (!env.STATS_KEY) return true; // secret not configured yet — stays open until it is
+  return hasValidKey(request, env);
 }
 
 function notFound(request, env, url) {
@@ -65,6 +70,11 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === '/api/event' && request.method === 'POST') {
+      // Don't count the owner's own exports: any browser that has opened
+      // /stats with the key carries the stats cookie.
+      if (hasValidKey(request, env)) {
+        return Response.json({ ok: true, skipped: 'owner' });
+      }
       let body = {};
       try {
         body = await request.json();
