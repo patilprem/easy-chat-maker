@@ -70,12 +70,6 @@ export const FeedbackWidget: React.FC = () => {
     }
   };
 
-  const handleSkip = () => {
-    if (step === 'q2') {
-      submit('');
-    }
-  };
-
   return (
     <>
       {open && (
@@ -137,7 +131,7 @@ export const FeedbackWidget: React.FC = () => {
                       handleSend();
                     }
                   }}
-                  placeholder="Type your reply…"
+                  placeholder={step === 'q2' ? 'Type your reply… (optional)' : 'Type your reply…'}
                   rows={2}
                   className="flex-1 resize-none rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[13.5px] text-white placeholder:text-white/30 focus:border-white/25 focus:outline-none"
                 />
@@ -146,14 +140,9 @@ export const FeedbackWidget: React.FC = () => {
                   disabled={step === 'q1' && !draft.trim()}
                   className="shrink-0 rounded-xl bg-gradient-to-r from-[#00FF87] to-[#60EFFF] px-3.5 py-2.5 text-[13px] font-bold text-[#061116] transition-opacity disabled:opacity-40"
                 >
-                  Send
+                  {step === 'q2' && !draft.trim() ? 'Skip' : 'Send'}
                 </button>
               </div>
-              {step === 'q2' && (
-                <button onClick={handleSkip} className="mt-2 text-[12px] text-white/40 hover:text-white/70">
-                  Skip and send
-                </button>
-              )}
             </div>
           )}
 
