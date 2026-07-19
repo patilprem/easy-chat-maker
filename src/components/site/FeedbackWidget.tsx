@@ -77,8 +77,16 @@ export const FeedbackWidget: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-24 right-4 z-40 md:bottom-6 md:right-6">
+    <>
       {open && (
+        <div
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm"
+        />
+      )}
+      <div className="fixed bottom-24 right-4 z-40 md:bottom-6 md:right-6">
+        {open && (
         <div className="mb-3 flex h-[420px] w-[calc(100vw-2rem)] max-w-[340px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#10172b] shadow-2xl shadow-black/50 backdrop-blur">
           <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.03] px-4 py-3">
             <div>
@@ -162,14 +170,15 @@ export const FeedbackWidget: React.FC = () => {
         </div>
       )}
 
-      <button
-        onClick={() => setOpen((v) => !v)}
-        aria-label={open ? 'Close feedback chat' : 'Open feedback chat'}
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-[#00FF87] to-[#60EFFF] text-2xl shadow-[0_10px_30px_-6px_rgba(0,255,135,0.5)] transition-transform hover:-translate-y-0.5"
-      >
-        {open ? '✕' : '💬'}
-      </button>
-    </div>
+        <button
+          onClick={() => setOpen((v) => !v)}
+          aria-label={open ? 'Close feedback chat' : 'Open feedback chat'}
+          className="relative z-10 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-[#00FF87] to-[#60EFFF] text-2xl shadow-[0_10px_30px_-6px_rgba(0,255,135,0.5)] transition-transform hover:-translate-y-0.5"
+        >
+          {open ? '✕' : '💬'}
+        </button>
+      </div>
+    </>
   );
 };
 
