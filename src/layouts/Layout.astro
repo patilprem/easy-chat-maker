@@ -1,4 +1,6 @@
 ---
+import { FeedbackWidget } from '../components/site/FeedbackWidget';
+
 interface Props {
   title?: string;
   description?: string;
@@ -50,5 +52,6 @@ const ogImageAbs = new URL(ogImage, Astro.site ?? 'https://easychatmaker.com').h
   </head>
   <body>
     <slot />
+    <FeedbackWidget client:load />
   </body>
 </html>
