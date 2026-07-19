@@ -1,0 +1,123 @@
+---
+import BlogPostLayout from '../../layouts/BlogPostLayout.astro';
+---
+<BlogPostLayout
+  title="How to Make a Fake ChatGPT Screenshot for Presentations & Demos (Free)"
+  description="Step-by-step guide to creating a realistic ChatGPT conversation screenshot for slide decks, product demos and tutorials — free, no watermark, no signup. Claude and Gemini styles too."
+  heading="How to make a fake ChatGPT screenshot for presentations & demos"
+  published="2026-07-19"
+  publishedLabel="July 19, 2026"
+  readingTime="6 min read"
+  ogImage="/landing/banner-chatgpt.png"
+>
+  <p>
+    You're building a slide deck, a product demo, a tutorial or an app-store mockup, and you need to show a ChatGPT conversation. Screenshotting the real thing is a pain: you fight with cropping, the model won't say exactly what you need, private data lurks in the sidebar, and the light/dark theme never matches your slides. A mockup solves all of it — you script the exact exchange and export a clean, pixel-perfect screenshot in a couple of minutes.
+  </p>
+
+  <p>
+    This guide shows you how, for free, with no watermark and no signup. Quick note up front: a mockup is for <strong>illustration</strong> — never pass a scripted conversation off as something an AI genuinely said. More on that <a href="#ethics">at the end</a>.
+  </p>
+
+  <figure>
+    <img src="/landing/banner-chatgpt.png" alt="A realistic fake ChatGPT conversation mockup on a phone — prompts, responses and action icons" loading="lazy" width="1200" height="630" />
+    <figcaption>A ChatGPT mockup with prompt bubbles, response actions and the real interface details — scripted, not screenshotted.</figcaption>
+  </figure>
+
+  <h2>Why mock it up instead of screenshotting the real thing</h2>
+  <ul>
+    <li><strong>You control the answer.</strong> The real model rarely produces the exact response your slide needs on the first try. A mockup says precisely what you want.</li>
+    <li><strong>No private data.</strong> Real screenshots leak chat history, your name, and sidebar content. A mockup shows only what you type.</li>
+    <li><strong>Clean framing.</strong> No browser chrome, no awkward crop, no cursor. Export at screenshot resolution, ready to drop into a deck.</li>
+    <li><strong>Theme match.</strong> Pick light or dark to match your slides — instead of whatever the app happened to be set to.</li>
+    <li><strong>Repeatable.</strong> Need five example exchanges for a course? Script them all in one sitting.</li>
+  </ul>
+
+  <h2>What you'll need</h2>
+  <p>
+    Just a browser. We'll use <a href="/fake-chatgpt-conversation-generator">Easy Chat Maker's free ChatGPT conversation generator</a> — it runs entirely in your browser (nothing you type is uploaded to a server), and exports clean PNGs and MP4 clips with no watermark.
+  </p>
+
+  <h2>Step 1 — Open the editor and pick ChatGPT</h2>
+  <p>
+    Head to the <a href="/editor?platform=chatgpt">editor with ChatGPT preselected</a>. You'll see a live preview in the middle, a script panel on the left, and settings on the right — platform, light/dark theme, and device.
+  </p>
+
+  <h2>Step 2 — Script the exchange</h2>
+  <p>
+    Instead of coaxing the real model, you write both sides of the conversation as plain text — one line per message, like a screenplay. Use a name for the person (the prompt) and "ChatGPT" for the assistant:
+  </p>
+  <pre><code>Me: Summarize our Q3 launch plan in 3 bullet points.
+ChatGPT: Here's a concise summary of your Q3 launch plan:
+
+• Ship the mobile app to beta users by August 15
+• Run the paid acquisition test across 3 channels in September
+• Publish the case-study page and open general availability October 1
+Me: Great. Now rewrite it for a non-technical exec.
+ChatGPT: Absolutely — here's an exec-friendly version...</code></pre>
+  <p>
+    Hit <strong>Generate Chat</strong> and the preview fills in instantly, styled exactly like the ChatGPT interface — prompt bubbles on the right, responses on the left with the copy, thumbs and regenerate action icons underneath. There's no limit on length, so you can build a full multi-turn conversation, not just a single prompt and reply.
+  </p>
+
+  <h2>Step 3 — Polish the details</h2>
+  <p>These small touches are what make a mockup read as real:</p>
+  <ul>
+    <li><strong>Edit in place:</strong> click any message in the preview and type to fix wording.</li>
+    <li><strong>Theme:</strong> light or dark mode — match your slides or the look your audience recognizes.</li>
+    <li><strong>Formatting:</strong> keep responses looking like real AI output — short intro line, bullet points, a closing offer to help further.</li>
+    <li><strong>Length:</strong> trim to what fits your slide. A tight 2–3 turn exchange reads better on screen than a wall of text.</li>
+  </ul>
+
+  <h2>Step 4 — Export a screenshot (PNG)</h2>
+  <p>
+    Tick the consent box (you're confirming the conversation is fictional), then hit <strong>Export PNG</strong>. You get a crisp, high-resolution image of exactly what's in the preview — no watermark, no branding, sized like a real screenshot. Drop it straight into Keynote, PowerPoint, Google Slides, a Notion doc or a blog post.
+  </p>
+
+  <h2>Step 5 — Or export an animated clip (MP4)</h2>
+  <p>
+    For a demo video or a tutorial, <strong>Export Video</strong> renders the exchange as an animated MP4 — the prompt appears, the assistant "thinks", and the response types out just like the real interface. It's a clean way to show a flow on a slide or in a screen recording without a live model going off-script.
+  </p>
+
+  <h2>Bonus — Claude and Gemini too</h2>
+  <p>
+    The same script styles as <a href="/fake-claude-conversation-generator">Claude</a> or <a href="/fake-gemini-chat-generator">Gemini</a> with one click — no retyping. If your deck compares assistants, or your audience uses a different one, switch the whole conversation instantly. Almost no other mockup tool offers Claude and Gemini styles.
+  </p>
+  <figure>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px;">
+      <img src="/landing/banner-chatgpt.png" alt="Fake ChatGPT conversation mockup" loading="lazy" width="1200" height="630" style="margin-top:0;" />
+      <img src="/landing/banner-claude.png" alt="Fake Claude conversation mockup" loading="lazy" width="1200" height="630" style="margin-top:0;" />
+      <img src="/landing/banner-gemini.png" alt="Fake Gemini chat mockup" loading="lazy" width="1200" height="630" style="margin-top:0;" />
+    </div>
+    <figcaption>One script, three AI interfaces — ChatGPT, Claude and Gemini, a click apart.</figcaption>
+  </figure>
+
+  <h2>Common questions</h2>
+  <h3>Is it really free?</h3>
+  <p>
+    Free, no signup, no watermark. The tool runs in your browser — your conversations never leave your device, so there's no account or cloud storage to pay for.
+  </p>
+  <h3>Is there a limit on conversation length?</h3>
+  <p>
+    No. Unlike many ChatGPT screenshot tools that stop at a single exchange, you can script conversations of any length with as many turns as you need.
+  </p>
+  <h3>Can I export a video instead of a screenshot?</h3>
+  <p>
+    Yes — an animated clip where the prompt appears and the response types out, ideal for product demos, tutorials and social content.
+  </p>
+  <h3>Will it look real in my slides?</h3>
+  <p>
+    The mockup reproduces the ChatGPT interface closely — prompt bubbles, response action icons, spacing and light/dark theme. At normal viewing sizes it's hard to tell apart from a genuine screenshot, which is exactly why the next section matters.
+  </p>
+
+  <h2 id="ethics">Use it responsibly</h2>
+  <p>
+    Fake AI screenshots are for <strong>clearly illustrative</strong> uses: slide decks, demos, tutorials, UI mockups and content. Don't use them to misrepresent what an AI actually said, fabricate evidence, or spread misinformation — that can be genuinely harmful, and it's the reason the export asks you to confirm your conversation is fictional. If there's any chance someone takes your mockup as a real AI answer, label it as simulated. Easy Chat Maker is an independent tool and is not affiliated with OpenAI, Anthropic or Google; interface styles are recreated for illustration only.
+  </p>
+
+  <div class="cta-box">
+    <p><strong>Ready to make yours?</strong></p>
+    <p>
+      Open the <a href="/fake-chatgpt-conversation-generator">free ChatGPT conversation generator</a> — no
+      signup, no watermark, exports in under two minutes.
+    </p>
+  </div>
+</BlogPostLayout>
