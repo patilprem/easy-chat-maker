@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { DOODLE_SVG } from '../../lib/doodlePattern';
 
 // Web3Forms access keys are meant to be used client-side — this key only
 // lets people submit the feedback form, it can't read or manage anything.
@@ -96,7 +97,13 @@ export const FeedbackWidget: React.FC = () => {
             </button>
           </div>
 
-          <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+          <div ref={scrollRef} className="relative flex-1 overflow-y-auto px-4 py-4">
+            {/* WhatsApp-style doodle wallpaper — subtle on the dark panel */}
+            <div
+              className="pointer-events-none absolute inset-0 opacity-[0.07]"
+              style={{ backgroundImage: `url('${DOODLE_SVG}')`, backgroundRepeat: 'repeat', backgroundSize: '176px 176px' }}
+            />
+            <div className="relative z-10 space-y-3">
             <ChatBubble from="bot">{QUESTIONS.q1}</ChatBubble>
             {answer1 && <ChatBubble from="user">{answer1}</ChatBubble>}
             {(step === 'q2' || step === 'sending' || step === 'done' || step === 'error') && (
@@ -116,6 +123,7 @@ export const FeedbackWidget: React.FC = () => {
                 instead?
               </ChatBubble>
             )}
+            </div>
           </div>
 
           {(step === 'q1' || step === 'q2') && (
