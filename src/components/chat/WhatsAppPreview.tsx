@@ -5,6 +5,7 @@ import { SystemChip } from './SystemChip';
 import { TypingIndicator } from './TypingIndicator';
 import { DeviceStatusBar } from './DeviceStatusBar';
 import type { ChatProject, Message, Participant, TextMessage, ImageMessage, CallMessage, VoiceNoteMessage } from '../../lib/parser/types';
+import { DOODLE_SVG } from '../../lib/doodlePattern';
 
 function generateGroupInitials(title: string): string {
   const words = title.replace(/[^\w\s]/g, '').trim().split(/\s+/).filter(Boolean);
@@ -209,8 +210,6 @@ interface Props {
   feedRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-// Doodle SVG wallpaper pattern URL
-const DOODLE_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><g fill="none" stroke="%23128C7E" stroke-width="0.8" opacity="0.08"><circle cx="20" cy="20" r="6"/><path d="M17 22 q3 3 6 0"/><circle cx="18" cy="18" r="0.8" fill="%23128C7E"/><circle cx="22" cy="18" r="0.8" fill="%23128C7E"/><path d="M70 20 h10 v8 h-6 l-4 4 v-4 h-0 z"/><path d="M20 70 c-3-3-6 0-6 3 c0 4 6 7 6 7 c0 0 6-3 6-7 c0-3-3-6-6-3 z"/><path d="M75 70 a3 3 0 0 1 3 3 v4 a3 3 0 0 1-3 3 h-1 a10 10 0 0 1-10-10 v-1 a3 3 0 0 1 3-3 z"/><path d="M45 45 l2 5 l5 2 l-5 2 l-2 5 l-2-5 l-5-2 l5-2 z"/></g></svg>`;
 
 function isParticipantMessage(msg: Message | undefined): msg is TextMessage | ImageMessage | CallMessage | VoiceNoteMessage {
   return !!msg && (msg.kind === 'text' || msg.kind === 'image' || msg.kind === 'call' || msg.kind === 'voice');
@@ -311,9 +310,9 @@ export const WhatsAppPreview: React.FC<Props> = ({
         style={{ scrollBehavior: 'smooth' }}
       >
         {/* WhatsApp wallpaper doodle pattern */}
-        <div 
-          className="absolute inset-0 opacity-20 dark:opacity-5 pointer-events-none"
-          style={{ backgroundImage: `url("${DOODLE_SVG}")`, backgroundRepeat: 'repeat', backgroundSize: '120px 120px' }}
+        <div
+          className="absolute inset-0 opacity-[0.38] dark:opacity-[0.14] pointer-events-none"
+          style={{ backgroundImage: `url('${DOODLE_SVG}')`, backgroundRepeat: 'repeat', backgroundSize: '176px 176px' }}
         />
 
         <div className="relative z-10 space-y-1 px-1">
