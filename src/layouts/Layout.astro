@@ -10,10 +10,12 @@ interface Props {
 const {
   title = 'Easy Chat Maker — Free Chat Mockup Generator (No Watermark)',
   description = 'Create realistic chat mockups in the style of WhatsApp, Instagram, Slack, Discord and AI chats like ChatGPT, Claude & Gemini. Free, no signup, no watermark. Export PNG or animated clip.',
-  ogImage = '/hero-phone.png',
+  ogImage = '/og-image.png',
   noindex = false,
 } = Astro.props;
-const ogImageAbs = new URL(ogImage, Astro.site ?? 'https://easychatmaker.com').href;
+const siteBase = Astro.site ?? 'https://easychatmaker.com';
+const ogImageAbs = new URL(ogImage, siteBase).href;
+const canonical = new URL(Astro.url.pathname, siteBase).href;
 ---
 <!doctype html>
 <html lang="en">
@@ -28,13 +30,20 @@ const ogImageAbs = new URL(ogImage, Astro.site ?? 'https://easychatmaker.com').h
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
+    <link rel="canonical" href={canonical} />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Easy Chat Maker" />
+    <meta property="og:url" content={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImageAbs} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Easy Chat Maker — make fake chat screenshots and story videos, free and no watermark" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageAbs} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     {import.meta.env.PROD && (
