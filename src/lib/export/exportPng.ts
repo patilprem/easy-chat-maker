@@ -143,20 +143,37 @@ export async function exportPng(project: ChatProject): Promise<void> {
 
     const feed = iframeDoc.querySelector<HTMLElement>('.phone-chat-scroll');
     if (feed) {
-      const exportMax = Math.max(0, feed.scrollHeight - feed.clientHeight);
-      const dimensionsMatch = liveFeed
-        ? liveFeed.clientWidth === feed.clientWidth && liveFeed.clientHeight === feed.clientHeight
-        : false;
-      const targetScrollTop = liveScrollState && dimensionsMatch
-        ? liveScrollState.top
-        : liveScrollState && liveScrollState.max > 0
-        ? (liveScrollState.top / liveScrollState.max) * exportMax
-        : liveScrollState?.top ?? 0;
+      // Derive the scrollable range from the message layer's real content
+      // height, not the feed's own scroll metrics. In the export iframe the
+      // feed can report no overflow (scrollHeight === clientHeight), which
+      // makes exportMax 0 and pins every export to the top regardless of where
+      // the user scrolled. The layer (the feed's direct child wrapping the
+      // .z-10 rows) always reflects the true content height.
+      const z10 = feed.querySelector<HTMLElement>('.z-10');
+      let layer: HTMLElement = feed;
+      if (z10) {
+        layer = z10;
+        while (layer.parentElement && layer.parentElement !== feed) layer = layer.parentElement;
+      }
+      const contentH = Math.max(
+        feed.scrollHeight,
+        layer.scrollHeight,
+        Math.ceil(layer.getBoundingClientRect().height),
+      );
+      const exportMax = Math.max(0, contentH - feed.clientHeight);
+      // Match the live preview by scroll FRACTION so it stays correct even when
+      // the export's screen dimensions differ from the editor's.
+      const fraction = liveScrollState && liveScrollState.max > 0
+        ? Math.min(1, Math.max(0, liveScrollState.top / liveScrollState.max))
+        : 0;
+      const targetScrollTop = fraction * exportMax;
 
       feed.scrollTop = Math.min(targetScrollTop, exportMax);
       await waitForFrame(iframe.contentWindow);
       await waitForFrame(iframe.contentWindow);
-      freezeFeedAtScrollPosition(feed, Math.min(targetScrollTop, exportMax));
+      // Freeze via transform (works regardless of whether the feed natively
+      // overflows in the export clone).
+      freezeFeedAtScrollPosition(feed, targetScrollTop);
       await waitForFrame(iframe.contentWindow);
     }
 
