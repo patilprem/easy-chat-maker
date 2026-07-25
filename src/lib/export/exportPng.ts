@@ -48,18 +48,14 @@ function waitForFrame(win: Window | null): Promise<void> {
 }
 
 function freezeFeedAtScrollPosition(feed: HTMLElement, scrollTop: number): void {
-  // The scrollable content is the `.z-10` message layer. It may be a direct
-  // child of the feed, or nested one level down inside a full-height wrapper
-  // (WhatsApp/the feedback widget wrap it so the wallpaper spans the whole
-  // conversation). Either way we must translate the feed's DIRECT child, so
-  // climb from the z-10 layer up to the element the feed owns.
-  let messageLayer: HTMLElement | undefined;
-  const z10 = feed.querySelector<HTMLElement>('.z-10');
-  if (z10) {
-    let el: HTMLElement = z10;
-    while (el.parentElement && el.parentElement !== feed) el = el.parentElement;
-    if (el.parentElement === feed) messageLayer = el;
-  }
+  // Translate the `.z-10` message layer up to reproduce the live scroll (the
+  // rasterizer, html-to-image, can't capture a live scrollTop). Translate the
+  // message layer ITSELF — not any full-height wrapper around it — so the
+  // decorative wallpaper (a sibling of the rows) stays fixed and, crucially,
+  // so the transform sits on a plain element html-to-image reproduces
+  // reliably (a transform on a `min-height:100%` wrapper does not survive the
+  // clone, which pinned every export to the top).
+  let messageLayer: HTMLElement | null = feed.querySelector<HTMLElement>('.z-10');
 
   if (!messageLayer) {
     messageLayer = feed.ownerDocument.createElement('div');
@@ -101,16 +97,6 @@ export async function exportPng(project: ChatProject): Promise<void> {
         max: Math.max(0, liveFeed.scrollHeight - liveFeed.clientHeight),
       }
     : null;
-  // eslint-disable-next-line no-console
-  console.log('[ECM-EXPORT] live', {
-    liveFeedFound: !!liveFeed,
-    scrollTop: liveFeed?.scrollTop,
-    scrollHeight: liveFeed?.scrollHeight,
-    clientHeight: liveFeed?.clientHeight,
-    liveScrollState,
-    exportSize,
-    allFeeds: document.querySelectorAll('.phone-chat-scroll').length,
-  });
 
   // Render via an iframe at the live preview's screen size so wrapping,
   // scroll position, and visible content match the editor preview.
@@ -185,30 +171,6 @@ export async function exportPng(project: ChatProject): Promise<void> {
       // overflows in the export clone).
       freezeFeedAtScrollPosition(feed, targetScrollTop);
       await waitForFrame(iframe.contentWindow);
-
-      // eslint-disable-next-line no-console
-      console.log('[ECM-EXPORT] iframe', {
-        layerTag: layer.tagName,
-        layerClass: layer.className,
-        layerIsWrapper: layer !== z10,
-        feedScrollHeight: feed.scrollHeight,
-        feedClientHeight: feed.clientHeight,
-        layerScrollHeight: layer.scrollHeight,
-        layerBoxHeight: Math.ceil(layer.getBoundingClientRect().height),
-        contentH,
-        exportMax,
-        fraction,
-        targetScrollTop,
-        translatedEl: (() => {
-          const l = feed.querySelector<HTMLElement>('.z-10');
-          let el2: HTMLElement | null = l;
-          while (el2 && el2.parentElement && el2.parentElement !== feed) el2 = el2.parentElement;
-          return { tag: el2?.tagName, transform: el2?.style.transform };
-        })(),
-      });
-    } else {
-      // eslint-disable-next-line no-console
-      console.log('[ECM-EXPORT] iframe: no .phone-chat-scroll feed found');
     }
 
     const blob = await toBlob(el, {
