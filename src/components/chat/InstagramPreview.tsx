@@ -237,14 +237,6 @@ export const InstagramPreview: React.FC<Props> = ({
           <CirclePlus size={24} strokeWidth={2.2} className={`${inputIconColor} flex-shrink-0`} />
         </div>
       </div>
-
-      {project.deviceOS === 'android' && (
-        <div className={`${bg} ${textSecondary} h-8 flex items-center justify-around flex-shrink-0`}>
-          <span className="text-[23px] leading-none">|||</span>
-          <span className={`w-[15px] h-[15px] rounded-full border-2 ${isDark ? 'border-white' : 'border-[#737373]'}`} />
-          <ChevronLeft size={24} strokeWidth={2.1} className="-rotate-180" />
-        </div>
-      )}
     </div>
   );
 };

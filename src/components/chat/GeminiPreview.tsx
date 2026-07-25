@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { AudioLines, ChevronDown, ChevronLeft, Copy, Menu, Mic, MoreHorizontal, MoreVertical, Plus, RotateCw, SquarePen, ThumbsDown, ThumbsUp, Volume2 } from 'lucide-react';
+import { AudioLines, ChevronDown, Copy, Menu, Mic, MoreHorizontal, MoreVertical, Plus, RotateCw, SquarePen, ThumbsDown, ThumbsUp, Volume2 } from 'lucide-react';
 import { DeviceStatusBar } from './DeviceStatusBar';
 import { AiMessageActions } from './ChatGPTPreview';
 import type { ChatProject, ImageMessage, Message, Participant, TextMessage } from '../../lib/parser/types';
@@ -238,14 +238,6 @@ export const GeminiPreview: React.FC<Props> = ({
           </span>
         </div>
       </div>
-
-      {project.deviceOS === 'android' && (
-        <div className={`flex h-8 flex-shrink-0 items-center justify-around ${pageBg} ${textPrimary}`}>
-          <span className="text-[23px] leading-none">|||</span>
-          <span className="h-[15px] w-[15px] rounded-full border-2 border-current" />
-          <ChevronLeft size={24} strokeWidth={2.1} className="-rotate-180" />
-        </div>
-      )}
     </div>
   );
 };

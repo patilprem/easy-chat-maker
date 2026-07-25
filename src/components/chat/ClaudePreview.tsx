@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { AudioLines, ChevronLeft, Copy, Menu, Mic, MoreVertical, Play, Plus, RotateCw, Share2, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { AudioLines, Copy, Menu, Mic, MoreVertical, Play, Plus, RotateCw, Share2, ThumbsDown, ThumbsUp } from 'lucide-react';
 import { DeviceStatusBar } from './DeviceStatusBar';
 import { AiMessageActions } from './ChatGPTPreview';
 import type { ChatProject, ImageMessage, Message, Participant, TextMessage } from '../../lib/parser/types';
@@ -211,14 +211,6 @@ export const ClaudePreview: React.FC<Props> = ({
           </div>
         </div>
       </div>
-
-      {project.deviceOS === 'android' && (
-        <div className={`flex h-8 flex-shrink-0 items-center justify-around ${pageBg} ${textPrimary}`}>
-          <span className="text-[23px] leading-none">|||</span>
-          <span className="h-[15px] w-[15px] rounded-full border-2 border-current" />
-          <ChevronLeft size={24} strokeWidth={2.1} className="-rotate-180" />
-        </div>
-      )}
     </div>
   );
 };

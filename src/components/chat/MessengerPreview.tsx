@@ -597,14 +597,6 @@ export const MessengerPreview: React.FC<Props> = ({
         </div>
         <MessengerLikeIcon size={29} className="flex-shrink-0" />
       </div>
-
-      {project.deviceOS === 'android' && (
-        <div className={`${isDark ? 'bg-black text-white' : 'bg-[#303030] text-white'} flex h-8 flex-shrink-0 items-center justify-around`}>
-          <span className="text-[23px] leading-none">|||</span>
-          <span className="h-[15px] w-[15px] rounded-full border-2 border-current" />
-          <ChevronLeft size={24} strokeWidth={2.1} className="-rotate-180" />
-        </div>
-      )}
     </div>
   );
 };

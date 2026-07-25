@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { ArrowUp, Copy, Menu, Mic, MoreVertical, Plus, Share2, SquarePen, ThumbsDown, ThumbsUp, Trash2, Volume2, MessageSquarePlus, ChevronLeft } from 'lucide-react';
+import { ArrowUp, Copy, Menu, Mic, MoreVertical, Plus, Share2, SquarePen, ThumbsDown, ThumbsUp, Trash2, Volume2, MessageSquarePlus } from 'lucide-react';
 import { DeviceStatusBar } from './DeviceStatusBar';
 import type { ChatProject, ImageMessage, Message, Participant, TextMessage } from '../../lib/parser/types';
 
@@ -208,14 +208,6 @@ export const ChatGPTPreview: React.FC<Props> = ({
           </span>
         </div>
       </div>
-
-      {project.deviceOS === 'android' && (
-        <div className={`flex h-8 flex-shrink-0 items-center justify-around ${pageBg} ${isDark ? 'text-white' : 'text-black'}`}>
-          <span className="text-[23px] leading-none">|||</span>
-          <span className="h-[15px] w-[15px] rounded-full border-2 border-current" />
-          <ChevronLeft size={24} strokeWidth={2.1} className="-rotate-180" />
-        </div>
-      )}
     </div>
   );
 };

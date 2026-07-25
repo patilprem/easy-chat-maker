@@ -597,14 +597,6 @@ export const TelegramPreview: React.FC<Props> = ({
           </div>
         </div>
       </div>
-
-      {project.deviceOS === 'android' && (
-        <div className="relative z-20 flex h-8 flex-shrink-0 items-center justify-around bg-black/10 text-white">
-          <span className="text-[23px] leading-none">|||</span>
-          <span className="h-[15px] w-[15px] rounded-full border-2 border-current" />
-          <ChevronLeft size={24} strokeWidth={2.1} className="-rotate-180" />
-        </div>
-      )}
     </div>
   );
 };

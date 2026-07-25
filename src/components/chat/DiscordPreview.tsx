@@ -596,14 +596,6 @@ export const DiscordPreview: React.FC<Props> = ({
           <Mic size={21} strokeWidth={2.2} />
         </button>
       </div>
-
-      {project.deviceOS === 'android' && (
-        <div className={`${isDark ? 'bg-[#1e1f22] text-white' : 'bg-white text-[#4e5661]'} flex h-8 flex-shrink-0 items-center justify-around`}>
-          <span className="text-[23px] leading-none">|||</span>
-          <span className="h-[15px] w-[15px] rounded-full border-2 border-current" />
-          <ChevronLeft size={24} strokeWidth={2.1} className="-rotate-180" />
-        </div>
-      )}
     </div>
   );
 };

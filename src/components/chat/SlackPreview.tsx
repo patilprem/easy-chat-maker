@@ -653,14 +653,6 @@ export const SlackPreview: React.FC<Props> = ({
           <Mic size={22} strokeWidth={2.2} className={`${textMuted} flex-shrink-0`} />
         </div>
       </div>
-
-      {project.deviceOS === 'android' && (
-        <div className={`${isDark ? 'bg-[#1d1c21] text-white' : 'bg-white text-[#555555]'} flex h-8 flex-shrink-0 items-center justify-around`}>
-          <span className="text-[23px] leading-none">|||</span>
-          <span className="h-[15px] w-[15px] rounded-full border-2 border-current" />
-          <ChevronLeft size={24} strokeWidth={2.1} className="-rotate-180" />
-        </div>
-      )}
     </div>
   );
 };
