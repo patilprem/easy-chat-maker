@@ -4,13 +4,28 @@ import type { ChatProject } from '../parser/types';
 const EXPORT_SCREEN_WIDTH = 370;
 const EXPORT_SCREEN_HEIGHT = 824;
 
+/**
+ * The editor renders TWO phone previews (desktop and mobile layouts), one of
+ * which is always display:none — and both carry id="phone-screen". A plain
+ * getElementById/querySelector returns whichever comes first in the DOM (the
+ * desktop one), which on mobile is the HIDDEN instance: its feed reports
+ * scrollTop 0, so exports always captured the top of the chat. Resolve the
+ * VISIBLE instance instead.
+ */
+function getVisibleLiveScreen(): HTMLElement | null {
+  const screens = Array.from(document.querySelectorAll<HTMLElement>('[id="phone-screen"]'));
+  return screens.find((s) => s.clientHeight > 0 && s.offsetParent !== null) ?? screens[0] ?? null;
+}
+
 function getLiveScreenSize(): { width: number; height: number } {
-  const liveScreen = document.getElementById('phone-screen');
+  const liveScreen = getVisibleLiveScreen();
   if (!liveScreen) {
     return { width: EXPORT_SCREEN_WIDTH, height: EXPORT_SCREEN_HEIGHT };
   }
 
   const rect = liveScreen.getBoundingClientRect();
+  // clientWidth/Height are unaffected by the mobile layout's scale() transform,
+  // so prefer them over the (scaled) bounding rect.
   const measuredWidth = liveScreen.clientWidth || rect.width;
   const measuredHeight = liveScreen.clientHeight || rect.height;
   return {
@@ -90,7 +105,7 @@ function triggerDownload(blob: Blob, filename: string): void {
 export async function exportPng(project: ChatProject): Promise<void> {
   const filename = `${project.platform}-chat.png`;
   const exportSize = getLiveScreenSize();
-  const liveFeed = document.querySelector<HTMLElement>('#phone-screen .phone-chat-scroll');
+  const liveFeed = getVisibleLiveScreen()?.querySelector<HTMLElement>('.phone-chat-scroll') ?? null;
   const liveScrollState = liveFeed
     ? {
         top: liveFeed.scrollTop,
