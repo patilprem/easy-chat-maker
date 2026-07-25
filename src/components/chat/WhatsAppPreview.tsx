@@ -309,6 +309,9 @@ export const WhatsAppPreview: React.FC<Props> = ({
         className={`phone-chat-scroll flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${bg} py-2 relative`}
         style={{ scrollBehavior: 'smooth' }}
       >
+        {/* Inner wrapper grows to the full scroll height so the wallpaper
+            covers the whole conversation, not just the first screen */}
+        <div className="relative min-h-full">
         {/* WhatsApp wallpaper doodle pattern (whatsapp-bg.png — white doodles;
             inverted on the light theme so they read dark on the beige bg) */}
         <div
@@ -444,6 +447,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
             <span className="text-gray-400 text-sm">No messages yet</span>
           </div>
         )}
+        </div>
       </div>
 
       {/* Input bar matching the Android UI layout */}

@@ -98,6 +98,9 @@ export const FeedbackWidget: React.FC = () => {
           </div>
 
           <div ref={scrollRef} className="relative flex-1 overflow-y-auto px-4 py-4">
+            {/* Inner wrapper grows to full scroll height so the wallpaper
+                covers the whole thread, not just the first screen */}
+            <div className="relative min-h-full">
             {/* WhatsApp doodle wallpaper (white doodles) — subtle on the dark panel */}
             <div
               className="pointer-events-none absolute inset-0 opacity-[0.06]"
@@ -123,6 +126,7 @@ export const FeedbackWidget: React.FC = () => {
                 instead?
               </ChatBubble>
             )}
+            </div>
             </div>
           </div>
 
