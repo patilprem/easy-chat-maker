@@ -48,10 +48,18 @@ function waitForFrame(win: Window | null): Promise<void> {
 }
 
 function freezeFeedAtScrollPosition(feed: HTMLElement, scrollTop: number): void {
-  let messageLayer = Array.from(feed.children).find(
-    (child): child is HTMLElement =>
-      child instanceof HTMLElement && child.classList.contains('z-10')
-  );
+  // The scrollable content is the `.z-10` message layer. It may be a direct
+  // child of the feed, or nested one level down inside a full-height wrapper
+  // (WhatsApp/the feedback widget wrap it so the wallpaper spans the whole
+  // conversation). Either way we must translate the feed's DIRECT child, so
+  // climb from the z-10 layer up to the element the feed owns.
+  let messageLayer: HTMLElement | undefined;
+  const z10 = feed.querySelector<HTMLElement>('.z-10');
+  if (z10) {
+    let el: HTMLElement = z10;
+    while (el.parentElement && el.parentElement !== feed) el = el.parentElement;
+    if (el.parentElement === feed) messageLayer = el;
+  }
 
   if (!messageLayer) {
     messageLayer = feed.ownerDocument.createElement('div');
