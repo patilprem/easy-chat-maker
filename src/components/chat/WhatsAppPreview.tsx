@@ -306,12 +306,14 @@ export const WhatsAppPreview: React.FC<Props> = ({
       {/* Chat feed */}
       <div
         ref={feedRef}
-        className={`phone-chat-scroll flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${bg} py-2 relative`}
+        className={`phone-chat-scroll flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${bg} relative`}
         style={{ scrollBehavior: 'smooth' }}
       >
         {/* Inner wrapper grows to the full scroll height so the wallpaper
-            covers the whole conversation, not just the first screen */}
-        <div className="relative min-h-full">
+            covers the whole conversation, not just the first screen. The
+            vertical padding lives here (not on the feed) so the wallpaper
+            reaches the feed's top and bottom edges with no bare strip. */}
+        <div className="relative min-h-full py-2">
         {/* WhatsApp wallpaper doodle pattern (whatsapp-bg.png — white doodles;
             inverted on the light theme so they read dark on the beige bg) */}
         <div
