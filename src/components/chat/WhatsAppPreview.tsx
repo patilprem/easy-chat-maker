@@ -5,7 +5,7 @@ import { SystemChip } from './SystemChip';
 import { TypingIndicator } from './TypingIndicator';
 import { DeviceStatusBar } from './DeviceStatusBar';
 import type { ChatProject, Message, Participant, TextMessage, ImageMessage, CallMessage, VoiceNoteMessage } from '../../lib/parser/types';
-import { DOODLE_SVG } from '../../lib/doodlePattern';
+import { DOODLE_IMG } from '../../lib/doodlePattern';
 
 function generateGroupInitials(title: string): string {
   const words = title.replace(/[^\w\s]/g, '').trim().split(/\s+/).filter(Boolean);
@@ -309,10 +309,17 @@ export const WhatsAppPreview: React.FC<Props> = ({
         className={`phone-chat-scroll flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${bg} py-2 relative`}
         style={{ scrollBehavior: 'smooth' }}
       >
-        {/* WhatsApp wallpaper doodle pattern */}
+        {/* WhatsApp wallpaper doodle pattern (whatsapp-bg.png — white doodles;
+            inverted on the light theme so they read dark on the beige bg) */}
         <div
-          className="absolute inset-0 opacity-[0.38] dark:opacity-[0.14] pointer-events-none"
-          style={{ backgroundImage: `url('${DOODLE_SVG}')`, backgroundRepeat: 'repeat', backgroundSize: '176px 176px' }}
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `url('${DOODLE_IMG}')`,
+            backgroundRepeat: 'repeat',
+            backgroundSize: '380px auto',
+            opacity: isDark ? 0.05 : 0.07,
+            filter: isDark ? undefined : 'invert(1)',
+          }}
         />
 
         <div className="relative z-10 space-y-1 px-1">
