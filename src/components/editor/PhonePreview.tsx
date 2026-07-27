@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { Play, Pause, Plus, Volume2, VolumeX } from 'lucide-react';
 import { ChatPreview } from '../chat/ChatPreview';
+import { OnboardingHint } from './OnboardingHint';
 import { buildFramePlan, FPS } from '../../lib/video/chatTimeline';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { playMessageSound } from '../../lib/media/messageSounds';
@@ -200,6 +201,8 @@ export const PhonePreview: React.FC = () => {
             feedRef={feedRef}
           />
         </div>
+
+        <OnboardingHint visible={project.messages.length > 0 && !isPlaying} />
 
         {/* Side buttons (decorative) */}
         <div className="absolute left-[-12px] top-24 w-1.5 h-8 rounded-l-full bg-gray-600" />
