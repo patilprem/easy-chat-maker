@@ -46,9 +46,9 @@ const WhatsAppCallCard: React.FC<{
     : 'rounded-[8px]';
 
   return (
-    <div className={`flex items-start gap-1.5 px-3 py-0.5 group relative ${isSelf ? 'flex-row-reverse' : 'flex-row'}`}>
+    <div className={`flex items-end gap-1.5 px-3 py-0.5 group relative ${isSelf ? 'flex-row-reverse' : 'flex-row'}`}>
       {!isSelf && (
-        <div className="w-7 h-7 flex-shrink-0 mt-[1px]">
+        <div className="w-7 h-7 flex-shrink-0 mb-[1px]">
           {isLastInGroup && participant && (
             <img
               src={participant.avatarUrl}
@@ -127,9 +127,9 @@ const WhatsAppVoiceNoteCard: React.FC<{
     : 'rounded-[8px]';
 
   return (
-    <div className={`flex items-start gap-1.5 px-3 py-0.5 group relative ${isSelf ? 'flex-row-reverse' : 'flex-row'}`}>
+    <div className={`flex items-end gap-1.5 px-3 py-0.5 group relative ${isSelf ? 'flex-row-reverse' : 'flex-row'}`}>
       {!isSelf && (
-        <div className="w-7 h-7 flex-shrink-0 mt-[1px]">
+        <div className="w-7 h-7 flex-shrink-0 mb-[1px]">
           {isLastInGroup && participant && (
             <img
               src={participant.avatarUrl}
