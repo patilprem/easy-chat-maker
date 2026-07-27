@@ -99,13 +99,20 @@ function discordInitials(name = ''): string {
     .slice(0, 2) || '?';
 }
 
-function avatarColor(name = ''): string {
-  const colors = ['#5865f2', '#f23f42', '#23a559', '#fee75c', '#eb459e', '#57f287', '#ffb02e'];
-  const hash = Array.from(name).reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  return colors[hash % colors.length];
+const DISCORD_AVATAR_COLORS = ['#5865f2', '#f23f42', '#23a559', '#fee75c', '#eb459e', '#57f287', '#ffb02e'];
+
+/**
+ * Color by the participant's stable position in the chat rather than hashing
+ * their name — guarantees distinct colors for every participant in a chat up
+ * to the palette size, instead of leaving it to chance (two names can easily
+ * hash to the same color; a fixed slot per participant never collides).
+ */
+function avatarColor(index: number): string {
+  const n = DISCORD_AVATAR_COLORS.length;
+  return DISCORD_AVATAR_COLORS[((index % n) + n) % n];
 }
 
-const DiscordAvatar: React.FC<{ participant?: Participant; size?: number; onClick?: () => void }> = ({ participant, size = 42, onClick }) => {
+const DiscordAvatar: React.FC<{ participant?: Participant; participants: Participant[]; size?: number; onClick?: () => void }> = ({ participant, participants, size = 42, onClick }) => {
   if (!participant) return <div style={{ width: size, height: size }} className="flex-shrink-0" />;
   const isGenerated = participant.avatarUrl?.startsWith('data:image/svg+xml');
   const className = `${onClick ? 'cursor-pointer hover:opacity-85' : ''} flex-shrink-0 rounded-full object-cover`;
@@ -114,11 +121,12 @@ const DiscordAvatar: React.FC<{ participant?: Participant; size?: number; onClic
     return <img src={participant.avatarUrl} alt={participant.name} style={{ width: size, height: size }} className={className} onClick={onClick} />;
   }
 
+  const colorIndex = participants.findIndex((p) => p.id === participant.id);
   return (
     <button
       type="button"
       onClick={onClick}
-      style={{ width: size, height: size, backgroundColor: avatarColor(participant.name) }}
+      style={{ width: size, height: size, backgroundColor: avatarColor(colorIndex) }}
       className={`${className} flex items-center justify-center text-[13px] font-extrabold text-white`}
     >
       {discordInitials(participant.name)}
@@ -307,7 +315,7 @@ const DiscordMessageRow: React.FC<{
     >
       <div className="w-11 flex-shrink-0">
         {isFirstInGroup && participant ? (
-          <DiscordAvatar participant={participant} onClick={() => onAvatarClick?.(participant.id)} />
+          <DiscordAvatar participant={participant} participants={project.participants} onClick={() => onAvatarClick?.(participant.id)} />
         ) : null}
       </div>
 
@@ -474,7 +482,7 @@ export const DiscordPreview: React.FC<Props> = ({
         <button className={`${textPrimary} flex h-8 w-7 flex-shrink-0 items-center justify-center`}>
           <ChevronLeft size={26} strokeWidth={2.7} />
         </button>
-        <DiscordAvatar participant={headerParticipant} size={32} onClick={() => onAvatarClick?.(headerParticipant?.id ?? '')} />
+        <DiscordAvatar participant={headerParticipant} participants={project.participants} size={32} onClick={() => onAvatarClick?.(headerParticipant?.id ?? '')} />
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-1">
             <span
@@ -570,7 +578,7 @@ export const DiscordPreview: React.FC<Props> = ({
 
         {typingParticipant && (
           <div className="flex items-end gap-3 px-4 pt-3">
-            <DiscordAvatar participant={typingParticipant} size={42} />
+            <DiscordAvatar participant={typingParticipant} participants={project.participants} size={42} />
             <div className={`${isDark ? 'bg-[#2b2d31]' : 'bg-[#f2f3f5]'} rounded-[18px] px-2 py-0.5`}>
               <TypingIndicator />
             </div>

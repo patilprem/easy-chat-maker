@@ -16,8 +16,8 @@ const SUBTITLE: Record<string, string> = {
 };
 
 const PARTICIPANTS: Participant[] = [
-  { id: 'you', name: 'You', isSelf: true, avatarUrl: generateInitialsAvatar('You', true) },
-  { id: 'alex', name: 'Alex', isSelf: false, avatarUrl: generateInitialsAvatar('Alex', false) },
+  { id: 'you', name: 'You', isSelf: true, avatarUrl: generateInitialsAvatar('You', true, 0) },
+  { id: 'alex', name: 'Alex', isSelf: false, avatarUrl: generateInitialsAvatar('Alex', false, 1) },
 ];
 
 const MESSAGES: Message[] = [

@@ -79,10 +79,17 @@ function slackInitials(name = ''): string {
     .slice(0, 2) || '?';
 }
 
-function slackAvatarColor(name = ''): string {
-  const colors = ['#1b4332', '#6b4226', '#0f3460', '#533483', '#2b2d42', '#075e54', '#8a3ffc'];
-  const hash = Array.from(name).reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  return colors[hash % colors.length];
+const SLACK_AVATAR_COLORS = ['#1b4332', '#6b4226', '#0f3460', '#533483', '#2b2d42', '#075e54', '#8a3ffc'];
+
+/**
+ * Color by the participant's stable position in the chat rather than hashing
+ * their name — guarantees distinct colors for every participant in a chat up
+ * to the palette size, instead of leaving it to chance (two names can easily
+ * hash to the same color; a fixed slot per participant never collides).
+ */
+function slackAvatarColor(index: number): string {
+  const n = SLACK_AVATAR_COLORS.length;
+  return SLACK_AVATAR_COLORS[((index % n) + n) % n];
 }
 
 function formattedSlackCreatedDate(date = new Date()): string {
@@ -140,7 +147,7 @@ const SlackLogoIcon: React.FC<{ size?: number; className?: string }> = ({ size =
   </svg>
 );
 
-const SlackAvatar: React.FC<{ participant?: Participant; size?: number }> = ({ participant, size = 40 }) => {
+const SlackAvatar: React.FC<{ participant?: Participant; participants: Participant[]; size?: number }> = ({ participant, participants, size = 40 }) => {
   if (!participant) return <div style={{ width: size, height: size }} className="flex-shrink-0" />;
   const isGenerated = participant.avatarUrl?.startsWith('data:image/svg+xml');
 
@@ -155,9 +162,10 @@ const SlackAvatar: React.FC<{ participant?: Participant; size?: number }> = ({ p
     );
   }
 
+  const colorIndex = participants.findIndex((p) => p.id === participant.id);
   return (
     <div
-      style={{ width: size, height: size, backgroundColor: slackAvatarColor(participant.name) }}
+      style={{ width: size, height: size, backgroundColor: slackAvatarColor(colorIndex) }}
       className="flex flex-shrink-0 items-center justify-center rounded-[10px] text-sm font-extrabold text-white"
     >
       {slackInitials(participant.name)}
@@ -205,7 +213,7 @@ const SlackMemberJoinedEvent: React.FC<{
   return (
     <div className="flex gap-3 px-4 pb-2 pt-3">
       <div className="w-10 flex-shrink-0">
-        <SlackAvatar participant={participant} />
+        <SlackAvatar participant={participant} participants={project.participants} />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-baseline gap-2">
@@ -300,7 +308,7 @@ const SlackMessageRow: React.FC<{
     <div className={`group/message relative flex gap-3 px-4 ${isFirstInGroup ? 'pt-3' : 'pt-1'} pb-1`}>
       <div className="w-10 flex-shrink-0">
         {isFirstInGroup && participant ? (
-          <SlackAvatar participant={participant} />
+          <SlackAvatar participant={participant} participants={project.participants} />
         ) : null}
       </div>
 
@@ -514,7 +522,7 @@ export const SlackPreview: React.FC<Props> = ({
               onClick={() => onAvatarClick?.(otherParticipant?.id ?? '')}
               className={`relative flex-shrink-0 ${isEditor ? 'cursor-pointer hover:opacity-80' : 'cursor-default'}`}
             >
-              <SlackAvatar participant={headerParticipant} size={36} />
+              <SlackAvatar participant={headerParticipant} participants={project.participants} size={36} />
               <span className={`absolute -bottom-1.5 right-0 h-3.5 w-3.5 rounded-full border-2 ${isDark ? 'border-[#232428]' : 'border-[#f7f7f7]'} bg-white`} />
             </button>
           )}
@@ -634,7 +642,7 @@ export const SlackPreview: React.FC<Props> = ({
 
         {typingParticipant && (
           <div className="flex gap-3 px-4 pt-3">
-            <SlackAvatar participant={typingParticipant} />
+            <SlackAvatar participant={typingParticipant} participants={project.participants} />
             <div className={`${isDark ? 'bg-[#2a2b2f]' : 'bg-[#f6f6f6]'} rounded-xl px-2`}>
               <TypingIndicator />
             </div>

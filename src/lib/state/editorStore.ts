@@ -190,10 +190,10 @@ export const useEditorStore = create<EditorState>((set, get) => {
     setSelfParticipant: (participantId) => {
       update((p) => ({
         ...p,
-        participants: p.participants.map((pp) => ({
+        participants: p.participants.map((pp, i) => ({
           ...pp,
           isSelf: pp.id === participantId,
-          avatarUrl: generateInitialsAvatar(pp.name, pp.id === participantId),
+          avatarUrl: generateInitialsAvatar(pp.name, pp.id === participantId, i),
         })),
       }));
     },

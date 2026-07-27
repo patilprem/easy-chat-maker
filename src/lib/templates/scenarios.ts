@@ -5,8 +5,8 @@ import type { ChatProject, Message, Participant } from '../parser/types';
 
 type Scenario = Omit<ChatProject, 'id' | 'exportConsentAccepted'>;
 
-function person(id: string, name: string, isSelf: boolean): Participant {
-  return { id, name, isSelf, avatarUrl: generateInitialsAvatar(name, isSelf) };
+function person(id: string, name: string, isSelf: boolean, index: number): Participant {
+  return { id, name, isSelf, avatarUrl: generateInitialsAvatar(name, isSelf, index) };
 }
 
 const chatStory: Scenario = {
@@ -16,7 +16,7 @@ const chatStory: Scenario = {
   title: 'Maria ✈️',
   subtitle: 'online',
   isGroup: false,
-  participants: [person('you', 'You', true), person('maria', 'Maria', false)],
+  participants: [person('you', 'You', true, 0), person('maria', 'Maria', false, 1)],
   messages: [
     { id: 's1', kind: 'text', participantId: 'maria', text: 'Guess who just landed in Goa 🌴', time: '4:02 pm' },
     { id: 's2', kind: 'text', participantId: 'you', text: 'NO WAY. With who??', time: '4:02 pm' },
@@ -33,7 +33,7 @@ const testimonial: Scenario = {
   title: 'customer-love',
   subtitle: '12 members • 4 tabs',
   isGroup: true,
-  participants: [person('you', 'Priya', true), person('jake', 'Jake', false), person('sam', 'Sam', false)],
+  participants: [person('you', 'Priya', true, 0), person('jake', 'Jake', false, 1), person('sam', 'Sam', false, 2)],
   messages: [
     { id: 't1', kind: 'text', participantId: 'jake', text: 'Just got off a call with Meadow Café — the new dashboard saves them 6 hours a week 🤯', time: '9:41 AM' },
     { id: 't2', kind: 'text', participantId: 'sam', text: 'Screenshot that for the case study 📸', time: '9:42 AM', reaction: { emoji: '🎉' } },
@@ -48,7 +48,7 @@ const aiDemo: Scenario = {
   title: 'ChatGPT',
   subtitle: '',
   isGroup: false,
-  participants: [person('you', 'You', true), person('ai', 'ChatGPT', false)],
+  participants: [person('you', 'You', true, 0), person('ai', 'ChatGPT', false, 1)],
   messages: [
     { id: 'a1', kind: 'text', participantId: 'you', text: 'Write a 3-line pitch for our note-taking app', time: '9:41 am' },
     { id: 'a2', kind: 'text', participantId: 'ai', text: '1. Capture ideas the moment they strike.\n2. Organize nothing — search finds everything.\n3. Share a living doc, not an attachment.', time: '9:41 am' },

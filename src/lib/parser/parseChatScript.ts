@@ -1,7 +1,14 @@
 import { nanoid } from 'nanoid';
 import type { Participant, Message, ParsedChatResult, TextMessage } from './types';
 
-function generateInitialsAvatar(name: string, isSelf: boolean): string {
+/**
+ * `index` is the participant's stable position in the chat (e.g. the order
+ * they first speak) and picks the color slot directly — guaranteeing
+ * distinct colors for every participant up to the palette size, instead of a
+ * name hash that can collide (two names can easily land on the same color;
+ * a fixed slot per participant never does).
+ */
+function generateInitialsAvatar(name: string, isSelf: boolean, index = 0): string {
   const initials = name
     .split(' ')
     .map((w) => w[0]?.toUpperCase() ?? '')
@@ -11,7 +18,7 @@ function generateInitialsAvatar(name: string, isSelf: boolean): string {
   const colors = isSelf
     ? ['#075E54', '#128C7E']
     : ['#1a1a2e', '#16213e', '#0f3460', '#533483', '#2b2d42', '#6b4226', '#1b4332'];
-  const bg = colors[Math.abs(name.charCodeAt(0) + (name.charCodeAt(1) ?? 0)) % colors.length];
+  const bg = colors[((index % colors.length) + colors.length) % colors.length];
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
     <circle cx="20" cy="20" r="20" fill="${bg}"/>
@@ -81,7 +88,7 @@ export function parseChatScript(input: string, selfSpeakerName?: string): Parsed
         id: nanoid(),
         name: speaker,
         isSelf,
-        avatarUrl: generateInitialsAvatar(speaker, isSelf),
+        avatarUrl: generateInitialsAvatar(speaker, isSelf, participantMap.size),
       };
       participantMap.set(speaker, p);
     }
