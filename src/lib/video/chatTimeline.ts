@@ -1,11 +1,17 @@
 import type { Message, FramePlan, Participant } from '../parser/types';
 
 const FPS = 30;
-const TYPING_FRAMES = Math.round(FPS * 1.45);  // typing indicator before incoming bubbles
-const PAUSE_FRAMES = Math.round(FPS * 0.9);    // hold after each bubble appears
-const INSTANT_PAUSE = Math.round(FPS * 0.45);  // date/system chips
-const REACTION_DELAY = Math.round(FPS * 0.5);  // frames after bubble before reaction shows
-const END_HOLD = FPS * 2.5;         // 2.5s final hold
+// Base pacing at 1x speed; buildFramePlan/buildSoundEvents divide these by the
+// requested speed so a higher speed means fewer frames between reveals.
+const TYPING_FRAMES_BASE = FPS * 1.45;  // typing indicator before incoming bubbles
+const PAUSE_FRAMES_BASE = FPS * 0.9;    // hold after each bubble appears
+const INSTANT_PAUSE_BASE = FPS * 0.45;  // date/system chips
+const REACTION_DELAY_BASE = FPS * 0.5;  // frames after bubble before reaction shows
+const END_HOLD_BASE = FPS * 2.5;        // final hold
+
+function normalizeSpeed(speed?: number): number {
+  return typeof speed === 'number' && Number.isFinite(speed) && speed > 0 ? speed : 1;
+}
 
 interface MessageReveal {
   msgId: string;
@@ -18,7 +24,14 @@ interface MessageReveal {
   reactionFrame: number;
 }
 
-export function buildFramePlan(messages: Message[], participants: Participant[] = []): FramePlan[] {
+export function buildFramePlan(messages: Message[], participants: Participant[] = [], speed?: number): FramePlan[] {
+  const s = normalizeSpeed(speed);
+  const TYPING_FRAMES = Math.round(TYPING_FRAMES_BASE / s);
+  const PAUSE_FRAMES = Math.round(PAUSE_FRAMES_BASE / s);
+  const INSTANT_PAUSE = Math.round(INSTANT_PAUSE_BASE / s);
+  const REACTION_DELAY = Math.round(REACTION_DELAY_BASE / s);
+  const END_HOLD = Math.round(END_HOLD_BASE / s);
+
   const reveals: MessageReveal[] = [];
   const selfParticipantIds = new Set(participants.filter((p) => p.isSelf).map((p) => p.id));
   let frame = 0;
@@ -99,7 +112,13 @@ export interface SoundEvent {
  * When each message sound should play, mirroring buildFramePlan's frame
  * arithmetic so sounds land exactly when bubbles/reactions become visible.
  */
-export function buildSoundEvents(messages: Message[], participants: Participant[] = []): SoundEvent[] {
+export function buildSoundEvents(messages: Message[], participants: Participant[] = [], speed?: number): SoundEvent[] {
+  const s = normalizeSpeed(speed);
+  const TYPING_FRAMES = Math.round(TYPING_FRAMES_BASE / s);
+  const PAUSE_FRAMES = Math.round(PAUSE_FRAMES_BASE / s);
+  const INSTANT_PAUSE = Math.round(INSTANT_PAUSE_BASE / s);
+  const REACTION_DELAY = Math.round(REACTION_DELAY_BASE / s);
+
   const selfParticipantIds = new Set(participants.filter((p) => p.isSelf).map((p) => p.id));
   const events: SoundEvent[] = [];
   let frame = 0;

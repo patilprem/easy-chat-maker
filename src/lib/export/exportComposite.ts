@@ -83,7 +83,7 @@ export async function exportCompositeMp4(
 ): Promise<void> {
   const filename = `${project.platform}-chat.mp4`;
   const messages = project.messages;
-  const plans = buildFramePlan(messages, project.participants);
+  const plans = buildFramePlan(messages, project.participants, project.playbackSpeed);
   const audioTrack = await tryEncodeMessageSoundTrack(project, plans.length / FPS, options.includeSounds !== false);
   // 2x for crisp text on desktop, 1x on phones/low-memory devices (see
   // getExportScale) — the 2x buffers can OOM-crash a mobile tab.

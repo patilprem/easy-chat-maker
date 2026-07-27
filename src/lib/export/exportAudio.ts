@@ -75,7 +75,7 @@ export async function encodeMessageSoundTrack(
 ): Promise<EncodedAudioTrack | null> {
   if (typeof AudioEncoder === 'undefined' || typeof OfflineAudioContext === 'undefined') return null;
 
-  const events = buildSoundEvents(project.messages, project.participants);
+  const events = buildSoundEvents(project.messages, project.participants, project.playbackSpeed);
   if (events.length === 0 || durationSec <= 0) return null;
 
   const negotiated = await negotiateAudioConfig();

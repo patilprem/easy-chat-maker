@@ -29,6 +29,7 @@ interface EditorState {
   setPlatform: (p: ChatProject['platform']) => void;
   setTheme: (t: ChatProject['theme']) => void;
   setDeviceOS: (os: ChatProject['deviceOS']) => void;
+  setPlaybackSpeed: (speed: number) => void;
   setTitle: (title: string) => void;
   setSubtitle: (sub: string) => void;
   setSelfParticipant: (participantId: string) => void;
@@ -182,6 +183,7 @@ export const useEditorStore = create<EditorState>((set, get) => {
     }),
     setTheme: (theme) => update((p) => ({ ...p, theme })),
     setDeviceOS: (deviceOS) => update((p) => ({ ...p, deviceOS })),
+    setPlaybackSpeed: (playbackSpeed) => update((p) => ({ ...p, playbackSpeed })),
     setTitle: (title) => update((p) => ({ ...p, title })),
     setSubtitle: (subtitle) => update((p) => ({ ...p, subtitle })),
 

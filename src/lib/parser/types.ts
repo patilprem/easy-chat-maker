@@ -89,6 +89,8 @@ export interface ChatProject {
   participants: Participant[];
   messages: Message[];
   exportConsentAccepted: boolean;
+  /** Playback/export pacing multiplier (1 = normal). Optional for backward compat with saved projects. */
+  playbackSpeed?: number;
 }
 
 export interface ParsedChatResult {

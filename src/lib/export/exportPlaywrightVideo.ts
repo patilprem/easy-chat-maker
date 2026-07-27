@@ -28,7 +28,7 @@ export async function exportPlaywrightVideo(
   options: PlaywrightVideoOptions = {},
 ): Promise<string> {
   onProgress('preparing', 5);
-  const durationMs = Math.ceil((buildFramePlan(project.messages, project.participants).length / FPS) * 1000);
+  const durationMs = Math.ceil((buildFramePlan(project.messages, project.participants, project.playbackSpeed).length / FPS) * 1000);
 
   let response: Response;
   try {

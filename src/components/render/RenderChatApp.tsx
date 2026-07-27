@@ -64,7 +64,7 @@ export const RenderChatApp: React.FC<Props> = ({ mode }) => {
       if (raw) {
         const p = JSON.parse(raw) as ChatProject;
         setProject(p);
-        const plan = buildFramePlan(p.messages, p.participants);
+        const plan = buildFramePlan(p.messages, p.participants, p.playbackSpeed);
         setFramePlan(plan);
         if (runtimeConfig.mode === 'export') {
           // Show all messages for static PNG export

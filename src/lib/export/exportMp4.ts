@@ -126,7 +126,7 @@ export async function exportMp4(
   options: ExportOptions = {},
 ): Promise<void> {
   const filename = `${project.platform}-chat.mp4`;
-  const frames = buildFramePlan(project.messages, project.participants);
+  const frames = buildFramePlan(project.messages, project.participants, project.playbackSpeed);
   const totalFrames = frames.length;
   const audioTrack = await tryEncodeMessageSoundTrack(project, totalFrames / FPS, options.includeSounds !== false);
   const totalOutputFrames = Math.ceil(totalFrames / FRAME_STEP);

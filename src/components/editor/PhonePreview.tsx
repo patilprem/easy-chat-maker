@@ -7,18 +7,21 @@ import { useEditorStore } from '../../lib/state/editorStore';
 import { playMessageSound } from '../../lib/media/messageSounds';
 import type { Message } from '../../lib/parser/types';
 
+const SPEED_OPTIONS = [1, 1.5, 2, 0.75];
+
 export const PhonePreview: React.FC = () => {
   const {
     project,
     updateMessage, setReaction, clearReaction, deleteMessage,
     addTextMessage, addImageMessage, addDateMessage, addSystemMessage, addCallMessage, addVoiceNoteMessage,
-    setTitle, setSubtitle, setParticipantAvatar, setGroupAvatar,
+    setTitle, setSubtitle, setParticipantAvatar, setGroupAvatar, setPlaybackSpeed,
   } = useEditorStore();
 
+  const speed = project.playbackSpeed ?? 1;
   const [isPlaying, setIsPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
   const [frame, setFrame] = useState(0);
-  const [framePlan, setFramePlan] = useState(() => buildFramePlan(project.messages, project.participants));
+  const [framePlan, setFramePlan] = useState(() => buildFramePlan(project.messages, project.participants, speed));
 
   const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
@@ -28,14 +31,14 @@ export const PhonePreview: React.FC = () => {
   const groupAvatarInputRef = useRef<HTMLInputElement>(null);
   const pendingAvatarParticipantId = useRef<string | null>(null);
 
-  // Rebuild frame plan when project messages change
+  // Rebuild frame plan when project messages or playback speed change
   useEffect(() => {
-    const plan = buildFramePlan(project.messages, project.participants);
+    const plan = buildFramePlan(project.messages, project.participants, speed);
     setFramePlan(plan);
     setFrame(0);
     frameRef.current = 0;
     lastTimeRef.current = 0;
-  }, [project.messages, project.participants]);
+  }, [project.messages, project.participants, speed]);
 
   // Animation loop
   useEffect(() => {
@@ -146,6 +149,16 @@ export const PhonePreview: React.FC = () => {
           }`}
         >
           {muted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+        </button>
+        <button
+          onClick={() => {
+            const next = SPEED_OPTIONS[(SPEED_OPTIONS.indexOf(speed) + 1) % SPEED_OPTIONS.length] ?? 1;
+            setPlaybackSpeed(next);
+          }}
+          title="Chat speed — how fast messages appear, in the preview and in exported videos"
+          className="flex items-center justify-center px-2 h-7 rounded-full bg-white/10 hover:bg-[#00FF87]/15 text-white text-xs font-semibold transition-colors tabular-nums"
+        >
+          {speed}x
         </button>
         <span className="text-white/40 text-xs">
           {currentPlan ? `${currentPlan.visibleCount} / ${project.messages.length} messages` : ''}
