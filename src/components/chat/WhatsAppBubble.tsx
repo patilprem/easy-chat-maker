@@ -221,13 +221,13 @@ export const WhatsAppBubble: React.FC<Props> = ({
       onMouseLeave={() => {
         if (!showMenu && !showReactionPicker) setShowActionStrip(false);
       }}
-      className={`group/message relative flex items-end gap-1.5 px-3 pt-0.5 ${reaction ? 'pb-3' : 'pb-0.5'} ${
+      className={`group/message relative flex items-start gap-1.5 px-3 pt-0.5 ${reaction ? 'pb-3' : 'pb-0.5'} ${
         isSelf ? 'flex-row-reverse' : 'flex-row'
       }`}
     >
       {/* Avatar — left side only, last in group */}
       {!isSelf && (
-        <div className="w-7 h-7 flex-shrink-0 mb-[1px]">
+        <div className="w-7 h-7 flex-shrink-0 mt-[1px]">
           {isLastInGroup && participant && (
             <img
               src={participant.avatarUrl}

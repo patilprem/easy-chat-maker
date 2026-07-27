@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useMemo } from 'react';
 import { ChevronLeft, Video, Phone, PhoneMissed, EllipsisVertical, Camera, Paperclip, Smile, Mic, Trash2, Play } from 'lucide-react';
 import { WhatsAppBubble } from './WhatsAppBubble';
 import { SystemChip } from './SystemChip';
@@ -46,9 +46,9 @@ const WhatsAppCallCard: React.FC<{
     : 'rounded-[8px]';
 
   return (
-    <div className={`flex items-end gap-1.5 px-3 py-0.5 group relative ${isSelf ? 'flex-row-reverse' : 'flex-row'}`}>
+    <div className={`flex items-start gap-1.5 px-3 py-0.5 group relative ${isSelf ? 'flex-row-reverse' : 'flex-row'}`}>
       {!isSelf && (
-        <div className="w-7 h-7 flex-shrink-0 mb-[1px]">
+        <div className="w-7 h-7 flex-shrink-0 mt-[1px]">
           {isLastInGroup && participant && (
             <img
               src={participant.avatarUrl}
@@ -127,9 +127,9 @@ const WhatsAppVoiceNoteCard: React.FC<{
     : 'rounded-[8px]';
 
   return (
-    <div className={`flex items-end gap-1.5 px-3 py-0.5 group relative ${isSelf ? 'flex-row-reverse' : 'flex-row'}`}>
+    <div className={`flex items-start gap-1.5 px-3 py-0.5 group relative ${isSelf ? 'flex-row-reverse' : 'flex-row'}`}>
       {!isSelf && (
-        <div className="w-7 h-7 flex-shrink-0 mb-[1px]">
+        <div className="w-7 h-7 flex-shrink-0 mt-[1px]">
           {isLastInGroup && participant && (
             <img
               src={participant.avatarUrl}
@@ -215,6 +215,36 @@ function isParticipantMessage(msg: Message | undefined): msg is TextMessage | Im
   return !!msg && (msg.kind === 'text' || msg.kind === 'image' || msg.kind === 'call' || msg.kind === 'voice');
 }
 
+/**
+ * The avatar sits with the last TEXT bubble in a consecutive run from the same
+ * sender, not just whatever happens to be the last message. Otherwise adding a
+ * photo (or a call/voice card) below someone's text pulls the avatar off the
+ * words and onto the attachment.
+ */
+function computeAvatarAnchorIds(messages: Message[]): Set<string> {
+  const anchors = new Set<string>();
+  let i = 0;
+  while (i < messages.length) {
+    const msg = messages[i];
+    if (!isParticipantMessage(msg)) {
+      i += 1;
+      continue;
+    }
+    const participantId = msg.participantId;
+    let j = i;
+    let lastTextIdx = -1;
+    while (j < messages.length) {
+      const m = messages[j];
+      if (!isParticipantMessage(m) || m.participantId !== participantId) break;
+      if (m.kind === 'text') lastTextIdx = j;
+      j += 1;
+    }
+    anchors.add(messages[lastTextIdx !== -1 ? lastTextIdx : j - 1].id);
+    i = j;
+  }
+  return anchors;
+}
+
 export const WhatsAppPreview: React.FC<Props> = ({
   project, mode,
   visibleCount, typingParticipantId, activeReactionIds = [],
@@ -235,6 +265,8 @@ export const WhatsAppPreview: React.FC<Props> = ({
   const displayMessages = allVisible
     ? project.messages
     : project.messages.slice(0, visibleCount);
+
+  const avatarAnchorIds = useMemo(() => computeAvatarAnchorIds(displayMessages), [displayMessages]);
 
   // Current typing participant
   const typingParticipant = typingParticipantId
@@ -346,11 +378,9 @@ export const WhatsAppPreview: React.FC<Props> = ({
             if (msg.kind === 'call') {
               const callMsg = msg as CallMessage;
               const prev = displayMessages[idx - 1];
-              const next = displayMessages[idx + 1];
               const prevBubble = isParticipantMessage(prev) ? prev : null;
-              const nextBubble = isParticipantMessage(next) ? next : null;
               const isFirstInGroup = !prevBubble || prevBubble.participantId !== callMsg.participantId;
-              const isLastInGroup = !nextBubble || nextBubble.participantId !== callMsg.participantId;
+              const isLastInGroup = avatarAnchorIds.has(callMsg.id);
 
               return (
                 <WhatsAppCallCard
@@ -368,11 +398,9 @@ export const WhatsAppPreview: React.FC<Props> = ({
               const voiceMsg = msg as VoiceNoteMessage;
               const participant = getParticipant(voiceMsg.participantId);
               const prev = displayMessages[idx - 1];
-              const next = displayMessages[idx + 1];
               const prevBubble = isParticipantMessage(prev) ? prev : null;
-              const nextBubble = isParticipantMessage(next) ? next : null;
               const isFirstInGroup = !prevBubble || prevBubble.participantId !== voiceMsg.participantId;
-              const isLastInGroup = !nextBubble || nextBubble.participantId !== voiceMsg.participantId;
+              const isLastInGroup = avatarAnchorIds.has(voiceMsg.id);
 
               return (
                 <WhatsAppVoiceNoteCard
@@ -393,11 +421,9 @@ export const WhatsAppPreview: React.FC<Props> = ({
 
             // Grouping
             const prev = displayMessages[idx - 1];
-            const next = displayMessages[idx + 1];
             const prevBubble = isParticipantMessage(prev) ? prev : null;
-            const nextBubble = isParticipantMessage(next) ? next : null;
             const isFirstInGroup = !prevBubble || prevBubble.participantId !== bubbleMsg.participantId;
-            const isLastInGroup = !nextBubble || nextBubble.participantId !== bubbleMsg.participantId;
+            const isLastInGroup = avatarAnchorIds.has(bubbleMsg.id);
 
             const showReaction = mode !== 'video' || activeReactionIds.includes(msg.id);
             const effectiveMsg = showReaction ? bubbleMsg : { ...bubbleMsg, reaction: undefined } as typeof bubbleMsg;
