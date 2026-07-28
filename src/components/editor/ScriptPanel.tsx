@@ -144,16 +144,16 @@ export const ScriptPanel: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowTutorial(true)}
-            className="flex items-center gap-1.5 rounded-lg border border-[#00FF87]/25 bg-[#00FF87]/10 px-2.5 py-1.5 text-xs font-semibold text-[#00FF87] hover:bg-[#00FF87]/15 transition-colors"
+            className="flex items-center gap-2 rounded-lg border border-[#00FF87]/25 bg-[#00FF87]/10 px-2.5 py-1.5 text-xs font-semibold text-[#00FF87] hover:bg-[#00FF87]/15 transition-colors"
           >
-            <Play size={12} fill="currentColor" />
+            <Play size={16} fill="currentColor" className="flex-shrink-0" />
             Watch tutorial
           </button>
           <button
             onClick={handleCopyPrompt}
-            className="flex items-center gap-1.5 rounded-lg border border-[#60EFFF]/25 bg-[#60EFFF]/10 px-2.5 py-1.5 text-xs font-semibold text-[#60EFFF] hover:bg-[#60EFFF]/15 transition-colors"
+            className="flex items-center gap-2 rounded-lg border border-[#60EFFF]/25 bg-[#60EFFF]/10 px-2.5 py-1.5 text-xs font-semibold text-[#60EFFF] hover:bg-[#60EFFF]/15 transition-colors"
           >
-            {copiedPrompt ? <Check size={13} /> : <Clipboard size={13} />}
+            {copiedPrompt ? <Check size={16} className="flex-shrink-0" /> : <Clipboard size={16} className="flex-shrink-0" />}
             {copiedPrompt ? 'Copied' : 'Copy Prompt Template'}
           </button>
         </div>
