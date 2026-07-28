@@ -212,7 +212,7 @@ export const PlatformSettings: React.FC = () => {
         }}
         className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl border border-red-500/20 text-red-400 hover:bg-red-500/10 text-xs font-medium transition-colors"
       >
-        <RotateCcw size={12} />
+        <RotateCcw size={14} />
         Reset to default
       </button>
     </div>

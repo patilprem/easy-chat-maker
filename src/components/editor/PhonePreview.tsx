@@ -138,7 +138,7 @@ export const PhonePreview: React.FC = () => {
           onClick={() => setIsPlaying(!isPlaying)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-[#00FF87]/15 text-white text-xs font-medium transition-colors"
         >
-          {isPlaying ? <Pause size={13} /> : <Play size={13} />}
+          {isPlaying ? <Pause size={14} /> : <Play size={14} />}
           {isPlaying ? 'Pause' : 'Play'}
         </button>
         <button
@@ -148,7 +148,7 @@ export const PhonePreview: React.FC = () => {
             muted ? 'bg-white/5 text-white/30 hover:text-white/60' : 'bg-white/10 text-white hover:bg-[#00FF87]/15'
           }`}
         >
-          {muted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+          {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
         </button>
         <button
           onClick={() => {
