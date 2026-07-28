@@ -1,6 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { HomeHeroPhone } from '../components/home/HomeHeroPhone';
+import { YouTubeFacade } from '../components/shared/YouTubeFacade';
+import { TUTORIAL_VIDEO_ID, TUTORIAL_VIDEO_TITLE } from '../lib/config/tutorialVideo';
 import BrandMark from '../components/site/BrandMark.astro';
 import SiteFooter from '../components/site/SiteFooter.astro';
 import '../styles/global.css';
@@ -238,6 +240,10 @@ const faqLd = JSON.stringify({
         Write it, style it, ship it — from idea to a share-ready image or clip in under a
         minute. No design skills, no signup.
       </p>
+
+      <div class="reveal mx-auto mt-10 max-w-2xl">
+        <YouTubeFacade client:visible videoId={TUTORIAL_VIDEO_ID} title={TUTORIAL_VIDEO_TITLE} className="shadow-2xl shadow-black/40" />
+      </div>
 
       <div class="mt-14 grid gap-5 md:grid-cols-3">
 

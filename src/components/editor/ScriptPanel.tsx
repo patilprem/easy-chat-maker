@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Check, ChevronDown, Clipboard, PenLine } from 'lucide-react';
+import { Check, ChevronDown, Clipboard, PenLine, Play, X } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
+import { YouTubeFacade } from '../shared/YouTubeFacade';
+import { TUTORIAL_VIDEO_ID, TUTORIAL_VIDEO_TITLE } from '../../lib/config/tutorialVideo';
 
 const PREMADE_SCRIPTS = [
   {
@@ -98,6 +100,7 @@ export const ScriptPanel: React.FC = () => {
   const characters = useMemo(() => getScriptCharacters(localScript), [localScript]);
   const [selfSpeaker, setSelfSpeaker] = useState('');
   const [copiedPrompt, setCopiedPrompt] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
     if (characters.length === 0) {
@@ -138,14 +141,42 @@ export const ScriptPanel: React.FC = () => {
           <PenLine size={16} className="text-[#60EFFF]" />
           <span className="text-white font-semibold text-sm">Script</span>
         </div>
-        <button
-          onClick={handleCopyPrompt}
-          className="flex items-center gap-1.5 rounded-lg border border-[#60EFFF]/25 bg-[#60EFFF]/10 px-2.5 py-1.5 text-xs font-semibold text-[#60EFFF] hover:bg-[#60EFFF]/15 transition-colors"
-        >
-          {copiedPrompt ? <Check size={13} /> : <Clipboard size={13} />}
-          {copiedPrompt ? 'Copied' : 'Copy Prompt Template'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowTutorial(true)}
+            className="flex items-center gap-1.5 rounded-lg border border-[#00FF87]/25 bg-[#00FF87]/10 px-2.5 py-1.5 text-xs font-semibold text-[#00FF87] hover:bg-[#00FF87]/15 transition-colors"
+          >
+            <Play size={12} fill="currentColor" />
+            Watch tutorial
+          </button>
+          <button
+            onClick={handleCopyPrompt}
+            className="flex items-center gap-1.5 rounded-lg border border-[#60EFFF]/25 bg-[#60EFFF]/10 px-2.5 py-1.5 text-xs font-semibold text-[#60EFFF] hover:bg-[#60EFFF]/15 transition-colors"
+          >
+            {copiedPrompt ? <Check size={13} /> : <Clipboard size={13} />}
+            {copiedPrompt ? 'Copied' : 'Copy Prompt Template'}
+          </button>
+        </div>
       </div>
+
+      {showTutorial && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setShowTutorial(false)}
+          />
+          <div className="relative w-full max-w-2xl rounded-2xl border border-white/10 bg-[#10172b] p-3 shadow-2xl">
+            <button
+              onClick={() => setShowTutorial(false)}
+              aria-label="Close video"
+              className="absolute -top-3 -right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#061116] shadow-lg hover:scale-105 transition-transform"
+            >
+              <X size={16} strokeWidth={2.5} />
+            </button>
+            <YouTubeFacade videoId={TUTORIAL_VIDEO_ID} title={TUTORIAL_VIDEO_TITLE} />
+          </div>
+        </div>
+      )}
 
       <textarea
         value={localScript}
