@@ -93,6 +93,11 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+/** Telegram's purple gradient for outgoing ("your character") bubbles. */
+const SELF_GRADIENT = 'linear-gradient(135deg, #7B4FD8 0%, #9450DF 52%, #A94FE8 100%)';
+/** The bubble tail sits at the gradient's right edge, so it matches that stop. */
+const SELF_GRADIENT_EDGE = '#A94FE8';
+
 const TELEGRAM_DOODLE_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><g fill="none" stroke="%232f5f5f" stroke-width="1.1" opacity="0.16"><path d="M20 28c8-10 22 4 12 12S10 38 20 28Z"/><path d="M72 24l22 9-16 14-2-11-11-3Z"/><path d="M24 86c10-8 22 6 12 14S14 94 24 86Z"/><circle cx="88" cy="84" r="13"/><path d="M81 86q7 7 14 0"/><path d="M52 56l5 10 10 5-10 5-5 10-5-10-10-5 10-5Z"/></g></svg>`;
 
 const TelegramBubble: React.FC<{
@@ -130,16 +135,13 @@ const TelegramBubble: React.FC<{
   const actionHideTimerRef = useRef<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const bubbleFill = isSelf
-    ? isDark ? '#4c82dc' : '#eeffde'
-    : isDark ? '#243244' : '#ffffff';
-  const bubbleBg = isSelf
-    ? isDark ? 'bg-[#4c82dc]' : 'bg-[#eeffde]'
-    : isDark ? 'bg-[#243244]' : 'bg-white';
-  const textPrimary = isDark ? 'text-white' : 'text-[#111111]';
+  const bubbleFill = isDark ? '#243244' : '#ffffff';
+  // Outgoing bubbles use Telegram's purple gradient in both themes, so the
+  // text on them is always white.
+  const textPrimary = isSelf || isDark ? 'text-white' : 'text-[#111111]';
   const timeColor = isSelf
-    ? isDark ? 'text-[#91b4d5]' : 'text-[#5f9c58]'
-    : isDark ? 'text-[#8795a6]' : 'text-[#9aa0a6]';
+    ? 'text-white/85'
+    : isDark ? 'text-[#aebbca]' : 'text-[#7d848b]';
   const senderColor = telegramNameColor(participant);
   const radius = isSelf
     ? 'rounded-[13px_13px_4px_13px]'
@@ -240,13 +242,13 @@ const TelegramBubble: React.FC<{
       <div ref={bubbleWrapRef} className={`relative flex max-w-[78%] flex-col ${isSelf ? 'items-end' : 'items-start'}`}>
         <div
           className={`relative min-w-[76px] max-w-full ${radius} px-3 py-2 shadow-sm`}
-          style={{ backgroundColor: bubbleFill }}
+          style={isSelf ? { backgroundImage: SELF_GRADIENT } : { backgroundColor: bubbleFill }}
         >
           {isLastInGroup && (
             <span
               className={`absolute bottom-0 h-3 w-3 ${isSelf ? '-right-[6px]' : '-left-[6px]'}`}
               style={{
-                backgroundColor: bubbleFill,
+                backgroundColor: isSelf ? SELF_GRADIENT_EDGE : bubbleFill,
                 clipPath: isSelf
                   ? 'polygon(0 0, 0 100%, 100% 100%)'
                   : 'polygon(100% 0, 0 100%, 100% 100%)',
@@ -289,7 +291,7 @@ const TelegramBubble: React.FC<{
                 document.execCommand('insertText', false, e.clipboardData.getData('text/plain'));
               }}
               className={`telegram-message-text ${textPrimary} text-[14px] leading-[18.5px] outline-none ${isEditor ? 'cursor-text' : 'select-none'}`}
-              style={{ overflowWrap: 'anywhere', whiteSpace: 'pre-wrap', '--telegram-time-space': isSelf ? '64px' : '50px' } as React.CSSProperties}
+              style={{ overflowWrap: 'anywhere', whiteSpace: 'pre-wrap', '--telegram-time-space': isSelf ? '70px' : '56px' } as React.CSSProperties}
             >
               {msg.kind === 'text' ? msg.text : ''}
             </div>
@@ -300,7 +302,7 @@ const TelegramBubble: React.FC<{
               value={msg.time}
               editable={isEditor}
               onEdit={(t) => onEditTime?.(msg.id, t)}
-              className="text-[10.5px] leading-none"
+              className="text-[11.5px] font-medium leading-none"
             />
             {isSelf && <CheckCheck size={14} strokeWidth={2.1} />}
           </div>
