@@ -549,7 +549,7 @@ export const TelegramPreview: React.FC<Props> = ({
           style={{
             backgroundImage: `url('${TELEGRAM_DOODLE_IMG}')`,
             backgroundRepeat: 'repeat',
-            backgroundSize: '360px auto',
+            backgroundSize: '300px auto',
             opacity: isDark ? 0.09 : 0.14,
             filter: isDark ? undefined : 'invert(1)',
           }}
