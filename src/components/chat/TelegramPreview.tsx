@@ -234,7 +234,9 @@ const TelegramBubble: React.FC<{
       }}
       onMouseLeave={scheduleActionHide}
     >
-      {!isSelf && (
+      {/* Telegram only shows sender avatars in groups — a 1:1 chat has no
+          avatar column at all, so incoming bubbles sit against the edge. */}
+      {!isSelf && project.isGroup && (
         <div className="w-8 flex-shrink-0">
           {isLastInGroup && participant ? (
             <img src={participant.avatarUrl} alt={participant.name} className="h-8 w-8 rounded-full object-cover" />
@@ -320,7 +322,7 @@ const TelegramBubble: React.FC<{
             title={isEditor ? 'Remove reaction' : undefined}
           >
             <span>{msg.reaction.emoji}</span>
-            {participant?.avatarUrl && (
+            {project.isGroup && participant?.avatarUrl && (
               <img src={participant.avatarUrl} alt="" className="h-4 w-4 rounded-full object-cover" />
             )}
           </button>
@@ -552,7 +554,7 @@ export const TelegramPreview: React.FC<Props> = ({
             // One tile exactly spans the width, so the pattern never shows a
             // vertical seam — whatever width the phone or the export renders at.
             backgroundSize: '100% auto',
-            opacity: isDark ? 0.09 : 0.14,
+            opacity: isDark ? 0.06 : 0.1,
             filter: isDark ? undefined : 'invert(1)',
           }}
         />
@@ -615,7 +617,9 @@ export const TelegramPreview: React.FC<Props> = ({
 
         {typingParticipant && (
           <div className="flex items-end gap-2 px-3 pt-2">
-            <img src={typingParticipant.avatarUrl} alt={typingParticipant.name} className="h-8 w-8 rounded-full object-cover" />
+            {project.isGroup && (
+              <img src={typingParticipant.avatarUrl} alt={typingParticipant.name} className="h-8 w-8 rounded-full object-cover" />
+            )}
             <div className={`${isDark ? 'bg-[#243244]' : 'bg-white'} rounded-[18px] px-1 shadow-sm`}>
               <TypingIndicator />
             </div>
