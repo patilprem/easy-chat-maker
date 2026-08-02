@@ -6,3 +6,8 @@
 // Over a light (beige) background, apply the CSS filter `invert(1)` so the
 // white lines render as dark doodles instead of washing out.
 export const DOODLE_IMG = '/whatsapp-bg.png';
+
+// Telegram doodle wallpaper — public/telegram-bg.png, same convention: white
+// line art on a transparent background, so it sits straight over the dark
+// navy chat background and gets `invert(1)` over the light gradient.
+export const TELEGRAM_DOODLE_IMG = '/telegram-bg.png';

@@ -5,6 +5,7 @@ import { DeviceStatusBar } from './DeviceStatusBar';
 import { EditableTime } from './EditableTime';
 import { TypingIndicator } from './TypingIndicator';
 import type { ChatProject, ImageMessage, Message, Participant, TextMessage } from '../../lib/parser/types';
+import { TELEGRAM_DOODLE_IMG } from '../../lib/doodlePattern';
 
 interface Props {
   project: ChatProject;
@@ -98,7 +99,9 @@ const SELF_GRADIENT = 'linear-gradient(135deg, #7B4FD8 0%, #9450DF 52%, #A94FE8 
 /** The bubble tail sits at the gradient's right edge, so it matches that stop. */
 const SELF_GRADIENT_EDGE = '#A94FE8';
 
-const TELEGRAM_DOODLE_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><g fill="none" stroke="%232f5f5f" stroke-width="1.1" opacity="0.16"><path d="M20 28c8-10 22 4 12 12S10 38 20 28Z"/><path d="M72 24l22 9-16 14-2-11-11-3Z"/><path d="M24 86c10-8 22 6 12 14S14 94 24 86Z"/><circle cx="88" cy="84" r="13"/><path d="M81 86q7 7 14 0"/><path d="M52 56l5 10 10 5-10 5-5 10-5-10-10-5 10-5Z"/></g></svg>`;
+/** Chat wallpaper: a yellow-green to teal gradient on light, flat navy on dark. */
+const WALLPAPER_LIGHT = 'linear-gradient(170deg, #C4C95B 0%, #BFC65F 20%, #A8BC6B 48%, #88B285 74%, #78AE95 100%)';
+const WALLPAPER_DARK = '#18222C';
 
 const TelegramBubble: React.FC<{
   msg: TextMessage | ImageMessage;
@@ -470,7 +473,6 @@ export const TelegramPreview: React.FC<Props> = ({
     ? ((project as any)._groupAvatarUrl ?? otherParticipant?.avatarUrl ?? project.participants[0]?.avatarUrl ?? '')
     : otherParticipant?.avatarUrl ?? project.participants[0]?.avatarUrl ?? '';
 
-  const pageBg = isDark ? 'bg-[#172331]' : 'bg-[#98c58f]';
   const headerPillBg = isDark ? 'bg-[#243244]' : 'bg-white/80 backdrop-blur-md';
   const circleBg = isDark ? 'bg-[#243244]' : 'bg-white/80 backdrop-blur-md';
   const textPrimary = isDark ? 'text-white' : 'text-[#111111]';
@@ -492,8 +494,23 @@ export const TelegramPreview: React.FC<Props> = ({
       : {};
 
   return (
-    <div className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden ${pageBg}`}>
-      <div className="absolute inset-0 opacity-45" style={{ backgroundImage: `url("${TELEGRAM_DOODLE_SVG}")`, backgroundRepeat: 'repeat', backgroundSize: '140px 140px' }} />
+    <div
+      className="relative flex h-full min-h-0 w-full flex-col overflow-hidden"
+      style={isDark ? { backgroundColor: WALLPAPER_DARK } : { backgroundImage: WALLPAPER_LIGHT }}
+    >
+      {/* Doodle wallpaper. The PNG is white line art on transparency, so it
+          reads straight over the dark navy and gets inverted to dark strokes
+          over the light gradient. Tiles on both axes as the feed scrolls. */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage: `url('${TELEGRAM_DOODLE_IMG}')`,
+          backgroundRepeat: 'repeat',
+          backgroundSize: '360px auto',
+          opacity: isDark ? 0.09 : 0.14,
+          filter: isDark ? undefined : 'invert(1)',
+        }}
+      />
       <DeviceStatusBar os={project.deviceOS} theme={project.theme} surface="telegram" />
 
       <div className="relative z-20 flex flex-shrink-0 items-center gap-2 px-3 pb-0.5 pt-0.5">

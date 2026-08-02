@@ -57,24 +57,23 @@ const AndroidBattery: React.FC = () => (
 
 export const DeviceStatusBar: React.FC<Props> = ({ os, theme, surface = 'whatsapp' }) => {
   const isDark = theme === 'dark';
-  const bgClass = isDark
+  // Telegram paints its own wallpaper edge to edge, so the bar sits on top of it.
+  const bgClass = surface === 'telegram'
+    ? 'bg-transparent'
+    : isDark
     ? surface === 'instagram' || surface === 'messenger' || surface === 'chatgpt'
       ? 'bg-black'
       : surface === 'slack'
         ? 'bg-[#1d1c21]'
         : surface === 'discord'
           ? 'bg-[#1e1f22]'
-        : surface === 'telegram'
-          ? 'bg-[#182432]'
         : surface === 'claude'
           ? 'bg-[#262624]'
         : surface === 'gemini'
           ? 'bg-[#131314]'
           : 'bg-[#202c33]'
-    : surface === 'telegram'
-      ? 'bg-[#9bc38f]'
-      : surface === 'claude'
-        ? 'bg-[#faf9f5]'
+    : surface === 'claude'
+      ? 'bg-[#faf9f5]'
       : 'bg-white';
   const textClass = isDark ? 'text-white' : 'text-[#111827]';
 
