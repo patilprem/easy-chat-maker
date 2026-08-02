@@ -549,7 +549,9 @@ export const TelegramPreview: React.FC<Props> = ({
           style={{
             backgroundImage: `url('${TELEGRAM_DOODLE_IMG}')`,
             backgroundRepeat: 'repeat',
-            backgroundSize: '300px auto',
+            // One tile exactly spans the width, so the pattern never shows a
+            // vertical seam — whatever width the phone or the export renders at.
+            backgroundSize: '100% auto',
             opacity: isDark ? 0.09 : 0.14,
             filter: isDark ? undefined : 'invert(1)',
           }}
