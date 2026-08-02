@@ -253,3 +253,26 @@ html {
 .dark .whatsapp-bubble-right::after {
   background-color: #005c4b;
 }
+
+/* Editable message timestamps (editor only) */
+.editable-time {
+  outline: none;
+  cursor: text;
+  min-width: 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+  /* stays selectable even inside select-none overlays (e.g. photo captions) */
+  user-select: text;
+  -webkit-user-select: text;
+}
+.editable-time:hover {
+  box-shadow: 0 0 0 1px rgba(96, 239, 255, 0.35);
+}
+.editable-time:focus {
+  box-shadow: 0 0 0 1px rgba(96, 239, 255, 0.75);
+}
+/* Ghost text so a cleared timestamp still has something to click */
+.editable-time:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.45;
+}

@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Smile, EllipsisVertical, MessageSquarePlus, ImagePlus, CalendarPlus, Zap, Trash2, Check, CheckCheck, Phone, PhoneMissed, Mic } from 'lucide-react';
 import { ReactionBadge } from './ReactionBadge';
+import { EditableTime } from './EditableTime';
 import type { TextMessage, ImageMessage, Participant, ChatProject } from '../../lib/parser/types';
 
 const SAFE_QUICK_REACTIONS = ['\u2764\uFE0F', '\uD83D\uDE02', '\uD83D\uDE2E', '\uD83D\uDE22', '\uD83D\uDC4D', '\uD83D\uDC4E', '\uD83D\uDD25', '\uD83D\uDE0D', '\uD83D\uDC4F'];
@@ -34,6 +35,7 @@ interface Props {
   isFirstInGroup: boolean;
   isLastInGroup: boolean;
   onEdit?: (id: string, text: string) => void;
+  onEditTime?: (id: string, time: string) => void;
   onReaction?: (id: string, emoji: string) => void;
   onClearReaction?: (id: string) => void;
   onDelete?: (id: string) => void;
@@ -73,7 +75,7 @@ function getActionOverlayStyle(anchor: DOMRect, isSelf: boolean): React.CSSPrope
 export const WhatsAppBubble: React.FC<Props> = ({
   msg, participant, project, mode,
   isFirstInGroup, isLastInGroup,
-  onEdit, onReaction, onClearReaction, onDelete,
+  onEdit, onEditTime, onReaction, onClearReaction, onDelete,
   onAddText, onAddImage, onAddDate, onAddSystem, onAddCall, onAddVoiceNote, showGroupName = false,
 }) => {
   const isSelf = participant?.isSelf ?? false;
@@ -368,7 +370,11 @@ export const WhatsAppBubble: React.FC<Props> = ({
               />
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/45 via-black/20 to-transparent z-10" />
               <div className="absolute bottom-1.5 right-1.5 flex items-center gap-0.5 text-white/95 text-[10px] select-none z-20 drop-shadow-sm">
-                <span>{msg.time}</span>
+                <EditableTime
+                  value={msg.time}
+                  editable={isEditor}
+                  onEdit={(t) => onEditTime?.(msg.id, t)}
+                />
                 {isSelf && (
                   status === 'read'
                     ? <CheckCheck size={12} className="text-[#53bdeb]" />
@@ -431,7 +437,12 @@ export const WhatsAppBubble: React.FC<Props> = ({
 
           {msg.kind !== 'image' && (
             <div className={`absolute bottom-[4px] right-[9px] flex items-center justify-end gap-0.5 whitespace-nowrap ${timeColor}`}>
-              <span className="text-[10.5px] leading-none">{msg.time}</span>
+              <EditableTime
+                value={msg.time}
+                editable={isEditor}
+                onEdit={(t) => onEditTime?.(msg.id, t)}
+                className="text-[10.5px] leading-none"
+              />
               {isSelf && (
                 status === 'read'
                   ? <CheckCheck size={14} className="text-[#53bdeb]" />

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CalendarPlus, CheckCheck, ChevronLeft, EllipsisVertical, ImagePlus, MessageSquarePlus, Mic, Paperclip, Smile, Trash2 } from 'lucide-react';
 import { DeviceStatusBar } from './DeviceStatusBar';
+import { EditableTime } from './EditableTime';
 import { TypingIndicator } from './TypingIndicator';
 import type { ChatProject, ImageMessage, Message, Participant, TextMessage } from '../../lib/parser/types';
 
@@ -102,6 +103,7 @@ const TelegramBubble: React.FC<{
   isFirstInGroup: boolean;
   isLastInGroup: boolean;
   onEdit?: (id: string, text: string) => void;
+  onEditTime?: (id: string, time: string) => void;
   onReaction?: (id: string, emoji: string) => void;
   onClearReaction?: (id: string) => void;
   onDelete?: (id: string) => void;
@@ -110,7 +112,7 @@ const TelegramBubble: React.FC<{
   onAddDate?: (afterId: string, label?: string) => void;
 }> = ({
   msg, participant, project, isEditor, isFirstInGroup, isLastInGroup,
-  onEdit, onReaction, onClearReaction, onDelete, onAddText, onAddImage, onAddDate,
+  onEdit, onEditTime, onReaction, onClearReaction, onDelete, onAddText, onAddImage, onAddDate,
 }) => {
   const isSelf = participant?.isSelf ?? false;
   const isDark = project.theme === 'dark';
@@ -294,7 +296,12 @@ const TelegramBubble: React.FC<{
           )}
 
           <div className={`absolute bottom-1.5 right-3 flex items-center gap-0.5 ${timeColor}`}>
-            <span className="text-[10.5px] leading-none">{msg.time ?? ''}</span>
+            <EditableTime
+              value={msg.time}
+              editable={isEditor}
+              onEdit={(t) => onEditTime?.(msg.id, t)}
+              className="text-[10.5px] leading-none"
+            />
             {isSelf && <CheckCheck size={14} strokeWidth={2.1} />}
           </div>
         </div>
@@ -567,6 +574,7 @@ export const TelegramPreview: React.FC<Props> = ({
               isFirstInGroup={isFirstInGroup}
               isLastInGroup={isLastInGroup}
               onEdit={(id, text) => onUpdateMessage?.(id, { text } as Partial<Message>)}
+              onEditTime={(id, time) => onUpdateMessage?.(id, { time: time || undefined } as Partial<Message>)}
               onReaction={onSetReaction}
               onClearReaction={onClearReaction}
               onDelete={onDeleteMessage}

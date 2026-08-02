@@ -4,6 +4,7 @@ import { WhatsAppBubble } from './WhatsAppBubble';
 import { SystemChip } from './SystemChip';
 import { TypingIndicator } from './TypingIndicator';
 import { DeviceStatusBar } from './DeviceStatusBar';
+import { EditableTime } from './EditableTime';
 import type { ChatProject, Message, Participant, TextMessage, ImageMessage, CallMessage, VoiceNoteMessage } from '../../lib/parser/types';
 import { DOODLE_IMG } from '../../lib/doodlePattern';
 
@@ -29,7 +30,8 @@ const WhatsAppCallCard: React.FC<{
   isFirstInGroup: boolean;
   isLastInGroup: boolean;
   onDelete?: (id: string) => void;
-}> = ({ msg, project, isEditor, isFirstInGroup, isLastInGroup, onDelete }) => {
+  onEditTime?: (id: string, time: string) => void;
+}> = ({ msg, project, isEditor, isFirstInGroup, isLastInGroup, onDelete, onEditTime }) => {
   const isDark = project.theme === 'dark';
   const isMissed = msg.status === 'missed';
   
@@ -81,10 +83,13 @@ const WhatsAppCallCard: React.FC<{
         </div>
         
         {/* Time */}
-        <span className={`absolute bottom-1.5 right-2.5 text-[10px] ${subColor}`}>
-          {msg.time}
-        </span>
-        
+        <EditableTime
+          value={msg.time}
+          editable={isEditor}
+          onEdit={(t) => onEditTime?.(msg.id, t)}
+          className={`absolute bottom-1.5 right-2.5 text-[10px] ${subColor}`}
+        />
+
         {/* Delete button (editor only) */}
         {isEditor && (
           <button
@@ -110,7 +115,8 @@ const WhatsAppVoiceNoteCard: React.FC<{
   isFirstInGroup: boolean;
   isLastInGroup: boolean;
   onDelete?: (id: string) => void;
-}> = ({ msg, participant, project, isEditor, isFirstInGroup, isLastInGroup, onDelete }) => {
+  onEditTime?: (id: string, time: string) => void;
+}> = ({ msg, participant, project, isEditor, isFirstInGroup, isLastInGroup, onDelete, onEditTime }) => {
   const isDark = project.theme === 'dark';
   const isSelf = participant?.isSelf ?? false;
   const bubbleBg = isSelf
@@ -156,7 +162,11 @@ const WhatsAppVoiceNoteCard: React.FC<{
           </div>
           <div className={`flex items-center justify-between mt-0.5 text-[10.5px] leading-none ${subColor}`}>
             <span>{msg.duration}</span>
-            <span>{msg.time}</span>
+            <EditableTime
+              value={msg.time}
+              editable={isEditor}
+              onEdit={(t) => onEditTime?.(msg.id, t)}
+            />
           </div>
         </div>
 
@@ -255,6 +265,12 @@ export const WhatsAppPreview: React.FC<Props> = ({
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
   const allVisible = visibleCount === undefined;
+
+  // Blank timestamp -> drop the field, so platform defaults can kick back in
+  const handleEditTime = useCallback(
+    (id: string, time: string) => onUpdateMessage?.(id, { time: time || undefined } as Partial<Message>),
+    [onUpdateMessage]
+  );
 
   const getParticipant = useCallback(
     (id: string): Participant | undefined => project.participants.find((p) => p.id === id),
@@ -391,6 +407,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
                   isFirstInGroup={isFirstInGroup}
                   isLastInGroup={isLastInGroup}
                   onDelete={onDeleteMessage}
+                  onEditTime={handleEditTime}
                 />
               );
             }
@@ -412,6 +429,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
                   isFirstInGroup={isFirstInGroup}
                   isLastInGroup={isLastInGroup}
                   onDelete={onDeleteMessage}
+                  onEditTime={handleEditTime}
                 />
               );
             }
@@ -439,6 +457,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
                 isLastInGroup={isLastInGroup}
                 showGroupName={project.isGroup}
                 onEdit={(id, text) => onUpdateMessage?.(id, { text } as Partial<Message>)}
+                onEditTime={handleEditTime}
                 onReaction={onSetReaction}
                 onClearReaction={onClearReaction}
                 onDelete={onDeleteMessage}

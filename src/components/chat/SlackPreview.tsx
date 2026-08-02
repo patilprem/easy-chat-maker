@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CalendarPlus, ChevronDown, ChevronLeft, EllipsisVertical, Headphones, ImagePlus, MessageSquarePlus, Mic, Plus, Smile, Trash2 } from 'lucide-react';
 import { DeviceStatusBar } from './DeviceStatusBar';
+import { EditableTime } from './EditableTime';
 import { TypingIndicator } from './TypingIndicator';
 import type { ChatProject, ImageMessage, Message, Participant, TextMessage } from '../../lib/parser/types';
 
@@ -250,6 +251,7 @@ const SlackMessageRow: React.FC<{
   isEditor: boolean;
   isFirstInGroup: boolean;
   onEdit?: (id: string, text: string) => void;
+  onEditTime?: (id: string, time: string) => void;
   onReaction?: (id: string, emoji: string) => void;
   onClearReaction?: (id: string) => void;
   onDelete?: (id: string) => void;
@@ -258,7 +260,7 @@ const SlackMessageRow: React.FC<{
   onAddDate?: (afterId: string, label?: string) => void;
 }> = ({
   msg, participant, project, isEditor, isFirstInGroup,
-  onEdit, onReaction, onClearReaction, onDelete, onAddText, onAddImage, onAddDate,
+  onEdit, onEditTime, onReaction, onClearReaction, onDelete, onAddText, onAddImage, onAddDate,
 }) => {
   const isDark = project.theme === 'dark';
   const [showMenu, setShowMenu] = useState(false);
@@ -318,9 +320,12 @@ const SlackMessageRow: React.FC<{
             <span className={`${textPrimary} truncate text-[15px] font-extrabold leading-[19px]`}>
               {participant.name}
             </span>
-            <span className={`${textMuted} flex-shrink-0 text-[12.5px] leading-[17px]`}>
-              {msg.time ?? '9:41 AM'}
-            </span>
+            <EditableTime
+              value={msg.time ?? '9:41 AM'}
+              editable={isEditor}
+              onEdit={(t) => onEditTime?.(msg.id, t)}
+              className={`${textMuted} flex-shrink-0 text-[12.5px] leading-[17px]`}
+            />
           </div>
         )}
 
@@ -630,6 +635,7 @@ export const SlackPreview: React.FC<Props> = ({
               isEditor={isEditor}
               isFirstInGroup={isFirstInGroup}
               onEdit={(id, text) => onUpdateMessage?.(id, { text } as Partial<Message>)}
+              onEditTime={(id, time) => onUpdateMessage?.(id, { time: time || undefined } as Partial<Message>)}
               onReaction={onSetReaction}
               onClearReaction={onClearReaction}
               onDelete={onDeleteMessage}
