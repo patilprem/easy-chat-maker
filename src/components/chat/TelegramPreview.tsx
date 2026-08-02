@@ -498,19 +498,6 @@ export const TelegramPreview: React.FC<Props> = ({
       className="relative flex h-full min-h-0 w-full flex-col overflow-hidden"
       style={isDark ? { backgroundColor: WALLPAPER_DARK } : { backgroundImage: WALLPAPER_LIGHT }}
     >
-      {/* Doodle wallpaper. The PNG is white line art on transparency, so it
-          reads straight over the dark navy and gets inverted to dark strokes
-          over the light gradient. Tiles on both axes as the feed scrolls. */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage: `url('${TELEGRAM_DOODLE_IMG}')`,
-          backgroundRepeat: 'repeat',
-          backgroundSize: '360px auto',
-          opacity: isDark ? 0.09 : 0.14,
-          filter: isDark ? undefined : 'invert(1)',
-        }}
-      />
       <DeviceStatusBar os={project.deviceOS} theme={project.theme} surface="telegram" />
 
       <div className="relative z-20 flex flex-shrink-0 items-center gap-2 px-3 pb-0.5 pt-0.5">
@@ -546,9 +533,29 @@ export const TelegramPreview: React.FC<Props> = ({
 
       <div
         ref={feedRef}
-        className="phone-chat-scroll relative z-10 min-h-0 flex-1 overflow-y-auto overflow-x-hidden pb-3"
+        className="phone-chat-scroll relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
         style={{ scrollBehavior: 'smooth' }}
       >
+        {/* Inner wrapper grows to the full scroll height so the wallpaper covers
+            the whole conversation and keeps tiling as you scroll, rather than
+            sitting still behind it. The padding lives here (not on the feed) so
+            the pattern reaches the feed's top and bottom edges. */}
+        <div className="relative min-h-full pb-3">
+        {/* Doodle wallpaper — telegram-bg.png is white line art on transparency,
+            so it reads straight over the dark navy and gets inverted to dark
+            strokes over the light gradient. */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage: `url('${TELEGRAM_DOODLE_IMG}')`,
+            backgroundRepeat: 'repeat',
+            backgroundSize: '360px auto',
+            opacity: isDark ? 0.09 : 0.14,
+            filter: isDark ? undefined : 'invert(1)',
+          }}
+        />
+
+        <div className="relative z-10">
         {displayMessages.map((msg, idx) => {
           if (msg.kind === 'date') {
             return (
@@ -612,6 +619,8 @@ export const TelegramPreview: React.FC<Props> = ({
             </div>
           </div>
         )}
+        </div>
+        </div>
       </div>
 
       <div data-chat-input className="relative z-20 flex-shrink-0 px-3 pb-2 pt-0.5">
