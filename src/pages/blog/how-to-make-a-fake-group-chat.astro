@@ -1,28 +1,56 @@
 ---
 import BlogPostLayout from '../../layouts/BlogPostLayout.astro';
+
+const faqs = [
+  {
+    q: 'How do I make a fake WhatsApp group chat?',
+    a: 'Write a script with three or more named people, one line per message in the form "Name: message", then pick which character is you and hit Generate Chat. Because more than one person other than you is speaking, the chat becomes a group automatically — with a member count, coloured sender names and group event chips.',
+  },
+  {
+    q: 'How do I name a fake group chat?',
+    a: 'Start your script with a system line in the form: System: Aisha created group "Launch Room". The name in quotes becomes the chat title automatically, emoji included. You can also click the title in the header and retype it.',
+  },
+  {
+    q: 'How many people can be in a fake group chat?',
+    a: 'As many as you name in the script. Avatar circles draw from seven colours and sender names from eight, so a very large group will eventually reuse one. Most chat stories work best with under five people.',
+  },
+  {
+    q: 'Why did my chat come out as a private chat instead of a group?',
+    a: 'That means only one participant besides you actually speaks. Someone mentioned in a System line but who never sends a message does not count — give every group member at least one line of dialogue.',
+  },
+  {
+    q: 'Which platforms support fake group chats?',
+    a: 'WhatsApp, Instagram, Messenger, Telegram, Slack and Discord all support group chats, each with that platform styling for member counts and sender names. The AI platforms — ChatGPT, Claude and Gemini — are always one-to-one.',
+  },
+  {
+    q: 'Can I add someone to the group mid-conversation?',
+    a: 'Yes. Put another System line partway down the script, such as: System: Aisha added Lina. The event chip appears mid-feed and their first message follows in a new colour. You can also insert one without the script using the "Add event below" item in the message menu.',
+  },
+];
 ---
 <BlogPostLayout
-  title="How to Make a Fake Group Chat (WhatsApp, Telegram, Discord & More)"
-  description="Step-by-step guide to creating a realistic fake group chat — group name, member count, coloured sender names, 'added to the group' events and a group photo. Free, no watermark, with zoomed-in screenshots."
-  heading="How to make a group chat"
+  title="How to Make a Fake Group Chat — WhatsApp, Instagram & Telegram"
+  description="Make a realistic fake group chat free — group name, member count, coloured sender names and join events. WhatsApp, Instagram, Telegram and Discord."
+  heading="How to make a fake group chat"
   published="2026-08-03"
   publishedLabel="August 3, 2026"
   readingTime="6 min read"
   ogImage="/blog/group-phone.webp"
+  faqs={faqs}
 >
   <p>
     Group chats are where the funniest and most dramatic conversations happen, which is why
-    they're the format most chat stories and memes use. They're also the format most fake-chat
-    tools handle badly — one colour for every sender, no "added to the group" lines, no member
-    count in the header.
+    they're the format most chat stories and memes use. They're also the format most
+    <strong>fake chat generators</strong> handle badly — one colour for every sender, no "added
+    to the group" lines, no member count in the header.
   </p>
   <p>
-    Here's how to build a proper one: group name, member count, coloured sender names, join
-    events mid-conversation and a group photo. It takes about two minutes and it's free, with no
-    watermark and no signup.
+    This guide shows how to build a proper <strong>fake WhatsApp group chat</strong> — group
+    name, member count, coloured sender names, join events mid-conversation and a group photo.
+    It takes about two minutes, it's free, and there's no watermark and no signup.
   </p>
 
-  <h2>The one rule: more than one other person</h2>
+  <h2>What turns a chat into a group chat</h2>
   <p>
     There's no "group mode" toggle to find. A chat becomes a group automatically the moment your
     script contains <strong>more than one person who isn't you</strong>. Three named speakers
@@ -36,13 +64,14 @@ import BlogPostLayout from '../../layouts/BlogPostLayout.astro';
 
   <h2>Step 1 — Write a script with three or more people</h2>
   <p>
-    Open the <a href="/editor?platform=whatsapp">editor</a> and write the conversation as plain
-    text, one line per message, <code>Name: message</code>. Or click the
-    <strong>Launch Room</strong> premade script to start from a working group and edit it.
+    Open the <a href="/fake-whatsapp-chat-generator">free WhatsApp chat generator</a> and write
+    the conversation as plain text, one line per message, <code>Name: message</code>. Or click
+    the <strong>Launch Room</strong> premade script to start from a working group chat and edit
+    it.
   </p>
   <figure>
-    <img src="/blog/group-script.webp" alt="The script panel in Easy Chat Maker containing a group chat script with System lines, a Date line, several speakers and a Reaction line" loading="lazy" width="623" height="414" />
-    <figcaption>A group script: System lines for events, Date for a day chip, one line per message.</figcaption>
+    <img src="/blog/group-script.webp" alt="A fake group chat script with System lines, a Date line, multiple speakers and a Reaction line" loading="lazy" width="623" height="414" />
+    <figcaption>A group chat script: System lines for events, Date for a day chip, one line per message.</figcaption>
   </figure>
   <p>Four special line types do the work that plain messages can't:</p>
   <pre><code>System: Aisha created group "Launch Room 🚀"
@@ -66,7 +95,7 @@ Kenji: Payment test passed in Japan and Germany.</code></pre>
     receipts. Everyone else appears on the left with their name and avatar.
   </p>
   <figure>
-    <img src="/blog/group-your-character.webp" alt="The 'Your character' dropdown in the editor with a script character selected" loading="lazy" width="617" height="123" />
+    <img src="/blog/group-your-character.webp" alt="The 'Your character' dropdown used to pick who you are in a fake group chat" loading="lazy" width="617" height="123" />
     <figcaption>Pick who "you" are — this decides which side each message lands on.</figcaption>
   </figure>
   <p>
@@ -74,7 +103,7 @@ Kenji: Payment test passed in Japan and Germany.</code></pre>
     <strong>Generate Chat</strong>.
   </p>
 
-  <h2>Step 3 — Name the group</h2>
+  <h2>Step 3 — Name the group and set the member count</h2>
   <p>
     If your script opens with a <code>System:</code> line in the form
     <code>X created group "Name"</code>, the name in quotes becomes the chat title automatically —
@@ -87,7 +116,7 @@ Kenji: Payment test passed in Japan and Germany.</code></pre>
     like everything else, so change it to whatever suits.
   </p>
   <figure>
-    <img src="/blog/group-header.webp" alt="A WhatsApp group chat header showing the group name 'Launch Room' with a rocket emoji, a group avatar and a 5 members subtitle" loading="lazy" width="540" height="162" />
+    <img src="/blog/group-header.webp" alt="A fake WhatsApp group chat header with the group name, group photo and 5 members count" loading="lazy" width="540" height="162" />
     <figcaption>Group name pulled from the script, member count filled in automatically.</figcaption>
   </figure>
   <p>
@@ -95,38 +124,38 @@ Kenji: Payment test passed in Japan and Germany.</code></pre>
     group's initials on a coloured circle.
   </p>
 
-  <h2>Step 4 — Group events</h2>
+  <h2>Step 4 — Add group events</h2>
   <p>
     The grey pills running down the middle of the feed are what sell a group chat as real. Every
     <code>System:</code> line in your script becomes one, and they can say anything — created the
     group, added someone, changed the photo, left.
   </p>
   <figure>
-    <img src="/blog/group-events.webp" alt="A WhatsApp group chat showing 'Aisha created group Launch Room' and 'Aisha added Mateo, Priya, Kenji' event chips followed by a date chip" loading="lazy" width="540" height="353" />
+    <img src="/blog/group-events.webp" alt="A fake WhatsApp group chat showing 'created group' and 'added Mateo, Priya, Kenji' event chips" loading="lazy" width="540" height="353" />
     <figcaption>Group event chips and a date separator at the top of the conversation.</figcaption>
   </figure>
 
   <h2>Step 5 — Coloured sender names</h2>
   <p>
-    In a group, each person's name appears above their first message in a run, in their own
+    In a group chat, each person's name appears above their first message in a run, in their own
     colour — exactly like the real app. The colour is derived from that person's identity in the
     chat, so it stays the same for them from the first message to the last. Their avatar circle
     is coloured separately, by position in the group, so the initials circles stay distinct even
     when two people's name colours are close.
   </p>
   <figure>
-    <img src="/blog/group-sender-names.webp" alt="Group chat messages from different senders, each with their name shown above the bubble in a distinct colour" loading="lazy" width="603" height="312" />
+    <img src="/blog/group-sender-names.webp" alt="Fake group chat messages with each sender's name shown above the bubble in a different colour" loading="lazy" width="603" height="312" />
     <figcaption>Each sender gets their own colour, shown above their first message in a run.</figcaption>
   </figure>
 
-  <h2>Step 6 — Add people mid-conversation</h2>
+  <h2>Step 6 — Add someone to the group mid-conversation</h2>
   <p>
     Real groups grow while people are talking, and that detail is worth copying. Drop another
     <code>System:</code> line partway down your script and the new person joins right there — the
     event chip appears mid-feed, and their first message follows in a fresh colour.
   </p>
   <figure>
-    <img src="/blog/group-mid-event.webp" alt="An 'Aisha added Lina' event chip in the middle of a group conversation, followed by Lina's first message in her own colour" loading="lazy" width="603" height="300" />
+    <img src="/blog/group-mid-event.webp" alt="An 'added Lina' event chip mid-conversation in a fake group chat, followed by her first message" loading="lazy" width="603" height="300" />
     <figcaption>Someone joining halfway through — one extra System line in the script.</figcaption>
   </figure>
 
@@ -138,29 +167,29 @@ Kenji: Payment test passed in Japan and Germany.</code></pre>
     message; click the chip and retype it to whatever you need.
   </p>
   <figure>
-    <img src="/blog/group-add-event.webp" alt="The message menu in a group chat showing the group-only 'Add event below' option alongside add message, reply, image, date, voice note and call options" loading="lazy" width="324" height="497" />
+    <img src="/blog/group-add-event.webp" alt="The message menu in a fake group chat showing the group-only 'Add event below' option" loading="lazy" width="324" height="497" />
     <figcaption>"Add event below" appears in the message menu only when the chat is a group.</figcaption>
   </figure>
   <p>
-    The rest of that menu works in groups exactly as it does in private chats — replies, images,
-    voice notes, call logs and date chips. There's a full walkthrough in
-    <a href="/blog/how-to-edit-a-chat-in-the-live-preview">how to edit a chat in the live
-    preview</a>.
+    The rest of that menu works in group chats exactly as it does in private ones — replies,
+    images, voice notes, call logs and date chips. There's a full walkthrough in
+    <a href="/blog/how-to-edit-a-fake-chat-screenshot">how to edit a fake chat screenshot</a>.
   </p>
 
-  <h2>Step 8 — Export</h2>
+  <h2>Step 8 — Export the group chat</h2>
   <p>
     Tick the box confirming the chat is fictional, then <strong>Export PNG</strong> for a
     screenshot or <strong>Export Video</strong> for an animated MP4 where the messages arrive one
     at a time with typing indicators. Both are watermark-free, and the video comes out sized for
-    TikTok, Reels and Shorts.
+    TikTok, Reels and Shorts — see the
+    <a href="/chat-story-video-maker">chat story video maker</a> for that workflow.
   </p>
   <figure>
     <img class="phone-shot" src="/blog/group-phone.webp" alt="A finished fake WhatsApp group chat with group events, coloured sender names, reactions and a member count" loading="lazy" width="540" height="1170" />
     <figcaption>The finished group chat — events, coloured names, reactions and read receipts.</figcaption>
   </figure>
 
-  <h2>Which platforms support groups?</h2>
+  <h2>Which platforms support fake group chats?</h2>
   <p>
     All six messaging and community platforms do:
     <a href="/fake-whatsapp-chat-generator">WhatsApp</a>,
@@ -180,22 +209,37 @@ Kenji: Payment test passed in Japan and Germany.</code></pre>
   </p>
 
   <h2>Common questions</h2>
-  <h3>How many people can be in the group?</h3>
+  <h3>How do I make a fake WhatsApp group chat?</h3>
+  <p>
+    Write a script with three or more named people, one line per message in the form
+    <code>Name: message</code>, then pick which character is you and hit Generate Chat. Because
+    more than one person other than you is speaking, the chat becomes a group automatically —
+    with a member count, coloured sender names and group event chips.
+  </p>
+  <h3>How do I name a fake group chat?</h3>
+  <p>
+    Start your script with a system line in the form:
+    <code>System: Aisha created group "Launch Room"</code>. The name in quotes becomes the chat
+    title automatically, emoji included. You can also click the title in the header and retype it.
+  </p>
+  <h3>How many people can be in a fake group chat?</h3>
   <p>
     As many as you name in the script. Avatar circles draw from seven colours and sender names
-    from eight, so a very large group will eventually reuse one. Most good chat stories stay
-    under five people anyway — past that, readers lose track of who's who.
+    from eight, so a very large group will eventually reuse one. Most chat stories work best with
+    under five people — past that, readers lose track of who's who.
   </p>
-  <h3>Can I change who "you" are after generating?</h3>
-  <p>
-    Change the <strong>Your character</strong> dropdown and hit Generate Chat again. That rebuilds
-    the conversation from the script, so make script changes before preview edits.
-  </p>
-  <h3>My chat came out as a private chat instead of a group</h3>
+  <h3>Why did my chat come out as a private chat instead of a group?</h3>
   <p>
     That means only one participant besides you actually speaks. Someone mentioned in a
-    <code>System:</code> line but who never sends a message doesn't count — give them at least one
-    line.
+    <code>System:</code> line but who never sends a message doesn't count — give every group
+    member at least one line of dialogue.
+  </p>
+  <h3>Can I add someone to the group mid-conversation?</h3>
+  <p>
+    Yes. Put another <code>System:</code> line partway down the script, such as
+    <code>System: Aisha added Lina</code>. The event chip appears mid-feed and their first message
+    follows in a new colour. You can also insert one without the script using the "Add event
+    below" item in the message menu.
   </p>
   <h3>Can I use real group photos and names?</h3>
   <p>
@@ -215,9 +259,9 @@ Kenji: Payment test passed in Japan and Germany.</code></pre>
   <div class="cta-box">
     <p><strong>Make your group chat</strong></p>
     <p>
-      Open the <a href="/editor?platform=whatsapp">free editor</a>, load the Launch Room premade
-      script, and edit it into your own conversation. No signup, no watermark, PNG and video
-      export included.
+      Open the <a href="/fake-whatsapp-chat-generator">free group chat generator</a>, load the
+      Launch Room premade script, and edit it into your own conversation. No signup, no
+      watermark, PNG and video export included.
     </p>
   </div>
 </BlogPostLayout>

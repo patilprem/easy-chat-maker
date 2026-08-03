@@ -1,0 +1,279 @@
+---
+import BlogPostLayout from '../../layouts/BlogPostLayout.astro';
+
+const faqs = [
+  {
+    q: 'How do I change the time on a fake WhatsApp chat?',
+    a: 'Click the timestamp under any message in the preview and type a new one — 9:41 am, 23:04 or even "Yesterday". Press Enter to save or Esc to cancel. Every message has its own timestamp, so you can vary the gaps between them.',
+  },
+  {
+    q: 'Can I add reactions to a fake chat?',
+    a: 'Yes. Hover a message and click the smiley button to open the reaction picker, then pick one of nine emoji — heart, laughing, wow, sad, thumbs up, thumbs down, fire, heart eyes or clapping. Click the reaction badge again to remove it.',
+  },
+  {
+    q: 'Can I add voice notes, photos and missed calls?',
+    a: 'Yes. Hover a message and open the three-dot menu. It can insert a photo, a voice note with a waveform, a completed call log, a missed call, a quoted reply, a date chip or another message — each placed directly below the message you opened the menu on.',
+  },
+  {
+    q: 'Can I reorder messages in the editor?',
+    a: 'There is no drag-and-drop yet. Every menu item inserts below the message you opened it on, so add each new message in the right place to begin with. For a large reshuffle it is faster to edit the script and generate the chat again.',
+  },
+  {
+    q: 'Can I edit a fake chat on my phone?',
+    a: 'Yes. The editor works on mobile, where the script and preview become tabs you switch between. Tap-to-edit works the same as click-to-edit, and the hover buttons appear on tap.',
+  },
+  {
+    q: 'Do my edits show up in the exported image and video?',
+    a: 'Yes. Everything visible in the preview is exported in both PNG and MP4, including reactions, voice notes, call logs and edited timestamps. There is no watermark on either.',
+  },
+];
+---
+<BlogPostLayout
+  title="How to Edit a Fake Chat Screenshot: Timestamps, Reactions & More"
+  description="Edit every detail of a fake WhatsApp chat screenshot — message text, timestamps, reactions, voice notes, calls and avatars. Free, no watermark, no signup."
+  heading="How to edit a fake chat screenshot"
+  published="2026-08-03"
+  publishedLabel="August 3, 2026"
+  readingTime="7 min read"
+  ogImage="/blog/editor-phone.webp"
+  faqs={faqs}
+>
+  <p>
+    Most fake chat generators give you a conversation and stop there. The details that make a
+    <strong>fake WhatsApp chat screenshot</strong> look genuine — a timestamp that isn't a round
+    number, a reaction on the right message, a missed call just before the apology — are things
+    you add afterwards, by clicking directly on the phone preview.
+  </p>
+  <p>
+    This guide covers every field you can edit and every element you can add: message text,
+    timestamps, reactions, photos, voice notes, call logs, replies, avatars and the chat header.
+    It's free, there's no signup and no watermark. Open the <a href="/editor">free chat
+    editor</a> in another tab and follow along.
+  </p>
+
+  <h2>Two ways to edit a fake chat</h2>
+  <p>Everything in the preview works one of two ways:</p>
+  <ul>
+    <li><strong>Click text and type.</strong> If it's text on screen, it's editable in place.</li>
+    <li><strong>Hover a message for the buttons.</strong> Two round buttons appear next to the
+      bubble — one for reactions, one for a menu of things to add.</li>
+  </ul>
+  <figure>
+    <img src="/blog/editor-hover-actions.webp" alt="Hovering a fake WhatsApp message bubble reveals a reaction button and a three-dot edit menu" loading="lazy" width="798" height="159" />
+    <figcaption>Hover any message and two buttons appear: reactions (left) and the message menu (right).</figcaption>
+  </figure>
+
+  <h2>How to edit the message text</h2>
+  <p>
+    Click into a bubble and it behaves like a text box — type, select, paste, delete. The bubble
+    resizes as you go, so you can see immediately whether a line wraps awkwardly on a phone
+    screen.
+  </p>
+  <figure>
+    <img src="/blog/editor-inline-text.webp" alt="Editing the text of a fake WhatsApp chat bubble directly in the live preview" loading="lazy" width="618" height="147" />
+    <figcaption>Message text is edited in place — click, select, retype.</figcaption>
+  </figure>
+
+  <h2>How to change the timestamp on each message</h2>
+  <p>
+    Every message carries its own timestamp, and every one is editable. Click it, type whatever
+    you want — <code>9:41 am</code>, <code>23:04</code>, <code>Yesterday</code> — then press
+    <strong>Enter</strong> to save or <strong>Esc</strong> to cancel.
+  </p>
+  <p>
+    This matters more than it sounds. Generated times are evenly spaced three minutes apart,
+    which no real conversation ever is. Breaking that rhythm — two messages in the same minute,
+    then a forty-minute gap — is the single cheapest way to make a fake chat screenshot look
+    real.
+  </p>
+  <figure>
+    <img src="/blog/editor-timestamp.webp" alt="Changing the timestamp on a fake WhatsApp message by clicking it in the preview" loading="lazy" width="618" height="138" />
+    <figcaption>Timestamps are individually editable. Enter saves, Esc cancels.</figcaption>
+  </figure>
+
+  <h2>How to change the contact name and status</h2>
+  <p>
+    The header title and the line under it are both editable. The status line is whatever the
+    platform would show — <code>online</code>, <code>last seen recently</code>,
+    <code>Active now</code>, or a member count in a group chat — and you can replace it with
+    anything. Click the avatar beside it to upload your own picture.
+  </p>
+  <figure>
+    <img src="/blog/editor-header.webp" alt="Editing the contact name, status line and profile picture in a fake WhatsApp chat header" loading="lazy" width="540" height="162" />
+    <figcaption>Name, status line and profile picture — all editable from the header.</figcaption>
+  </figure>
+  <p>
+    The grey pills in the feed are editable too: date separators like <code>Monday</code> and
+    group events like <code>Aisha added Lina</code>. Click and retype.
+  </p>
+
+  <h2>How to add a reaction to a message</h2>
+  <p>
+    Hover a message and click the smiley. Nine quick reactions appear — ❤️ 😂 😮 😢 👍 👎 🔥 😍 👏 —
+    and clicking one attaches it to that message. To remove a reaction, click the badge itself.
+  </p>
+  <figure>
+    <img src="/blog/editor-reaction-picker.webp" alt="The emoji reaction picker open above a fake WhatsApp chat bubble with nine reaction options" loading="lazy" width="753" height="234" />
+    <figcaption>Nine one-click emoji reactions — click the badge again to remove one.</figcaption>
+  </figure>
+  <p>
+    Use them sparingly. Two or three reactions across a conversation reads as real; a reaction on
+    every message reads as a demo.
+  </p>
+
+  <h2>How to add photos, voice notes, calls and replies</h2>
+  <p>
+    The three-dot button is where the rest of the chat lives. Every item inserts directly
+    <strong>below</strong> the message you opened it on, so you're always placing things exactly
+    where the story needs them rather than appending to the end.
+  </p>
+  <figure>
+    <img src="/blog/editor-message-menu.webp" alt="The edit menu on a fake chat message showing options to add a message, reply, image, date, voice note, voice call and missed call" loading="lazy" width="324" height="455" />
+    <figcaption>The full message menu. In a group chat, an extra "Add event below" item appears.</figcaption>
+  </figure>
+  <ul>
+    <li><strong>Add message below</strong> — a new empty bubble. Click it and type.</li>
+    <li><strong>Reply to this</strong> — a new message with the quoted-reply block attached,
+      like tapping reply in the real app.</li>
+    <li><strong>Add image below</strong> — opens a file picker and inserts your photo as an
+      image message.</li>
+    <li><strong>Add date below</strong> — a date chip in numeric form, e.g. <code>3/8/2026</code>.</li>
+    <li><strong>Add day below</strong> — a day chip instead, e.g. <code>Monday</code>.</li>
+    <li><strong>Add voice note below</strong> — a voice message with a real waveform and an
+      editable duration.</li>
+    <li><strong>Add voice call below</strong> — a completed call log entry.</li>
+    <li><strong>Add missed call below</strong> — the red missed-call entry.</li>
+    <li><strong>Add event below</strong> — group events like "X added Y". Group chats only.</li>
+    <li><strong>Delete</strong> — removes that message.</li>
+  </ul>
+  <p>Here's what a voice note and a missed call look like once they're in the feed:</p>
+  <figure>
+    <img src="/blog/editor-added-items.webp" alt="A fake WhatsApp chat with a missed voice call entry and a voice note with a waveform added" loading="lazy" width="540" height="450" />
+    <figcaption>A missed call and a voice note — with editable durations and timestamps.</figcaption>
+  </figure>
+
+  <h2>How to change avatars and profile pictures</h2>
+  <p>
+    Click any profile picture in the feed to upload an image for that person. Until you do,
+    everyone gets a coloured circle with their initials, and each participant is assigned a
+    distinct colour — so a four-person group chat never ends up with two identical avatars.
+  </p>
+  <p>
+    In a group chat, clicking the avatar in the header sets the <em>group</em> photo instead of
+    an individual's.
+  </p>
+
+  <h2>How to preview the chat as an animated video</h2>
+  <p>
+    Above the phone there's a small playback bar. <strong>Play</strong> runs the conversation the
+    way the exported video will — messages appearing one at a time with typing indicators, the
+    feed scrolling as it fills. The speaker button mutes the message sounds, and the speed button
+    cycles through 1x, 1.5x, 2x and 0.75x.
+  </p>
+  <figure>
+    <img src="/blog/editor-playback.webp" alt="The chat preview playback bar with play, mute and speed controls" loading="lazy" width="623" height="90" />
+    <figcaption>Play, mute and speed — the speed setting also applies to the exported video.</figcaption>
+  </figure>
+  <p>
+    That speed setting isn't just for the preview: it changes the pacing of the exported MP4 too.
+    If your <a href="/chat-story-video-maker">chat story video</a> feels slow on TikTok, bump it
+    to 1.5x here before exporting.
+  </p>
+
+  <h2>How to switch platform, theme and device</h2>
+  <p>
+    The right-hand panel restyles the whole conversation without touching your text:
+  </p>
+  <ul>
+    <li><strong>Platform</strong> — the same conversation rendered as
+      <a href="/fake-whatsapp-chat-generator">WhatsApp</a>,
+      <a href="/fake-instagram-dm-generator">Instagram</a>,
+      <a href="/fake-messenger-chat-generator">Messenger</a>,
+      <a href="/fake-telegram-chat-generator">Telegram</a>,
+      <a href="/fake-slack-conversation-generator">Slack</a>,
+      <a href="/fake-discord-chat-generator">Discord</a>,
+      <a href="/fake-chatgpt-conversation-generator">ChatGPT</a>,
+      <a href="/fake-claude-conversation-generator">Claude</a> or
+      <a href="/fake-gemini-chat-generator">Gemini</a>. One click swaps the entire look.</li>
+    <li><strong>Theme</strong> — light or dark mode.</li>
+    <li><strong>Device</strong> — an iOS status bar with a notch, or Android with a punch-hole.</li>
+  </ul>
+
+  <h2>Your work saves itself</h2>
+  <p>
+    Edits are saved to your browser automatically, so closing the tab by accident doesn't cost
+    you the conversation. Nothing is uploaded — the chat, the avatars and the images all stay on
+    your device, which is also why there's no account to make.
+  </p>
+
+  <h2>The fastest order to do it in</h2>
+  <ol>
+    <li>Write or paste the script, pick your character, hit <strong>Generate Chat</strong>.</li>
+    <li>Fix the timestamps first — it's the detail that gives away a generated chat.</li>
+    <li>Add reactions to the two or three messages that deserve them, not every message.</li>
+    <li>Insert the extras — a photo, a voice note, a missed call — where the story needs them.</li>
+    <li>Upload avatars, then set the chat name and status line.</li>
+    <li>Press <strong>Play</strong> and watch it once. Awkward pacing is obvious in motion and
+      invisible in a still.</li>
+    <li>Export a PNG screenshot, or an MP4 for a chat story video.</li>
+  </ol>
+
+  <figure>
+    <img class="phone-shot" src="/blog/editor-phone.webp" alt="A finished fake WhatsApp chat screenshot with reactions, read receipts and edited timestamps" loading="lazy" width="540" height="1170" />
+    <figcaption>The finished result — every element here was edited directly in the preview.</figcaption>
+  </figure>
+
+  <h2>Common questions</h2>
+  <h3>How do I change the time on a fake WhatsApp chat?</h3>
+  <p>
+    Click the timestamp under any message in the preview and type a new one — <code>9:41 am</code>,
+    <code>23:04</code> or even "Yesterday". Press Enter to save or Esc to cancel. Every message
+    has its own timestamp, so you can vary the gaps between them.
+  </p>
+  <h3>Can I add reactions to a fake chat?</h3>
+  <p>
+    Yes. Hover a message and click the smiley button to open the reaction picker, then pick one of
+    nine emoji — heart, laughing, wow, sad, thumbs up, thumbs down, fire, heart eyes or clapping.
+    Click the reaction badge again to remove it.
+  </p>
+  <h3>Can I add voice notes, photos and missed calls?</h3>
+  <p>
+    Yes. Hover a message and open the three-dot menu. It can insert a photo, a voice note with a
+    waveform, a completed call log, a missed call, a quoted reply, a date chip or another message —
+    each placed directly below the message you opened the menu on.
+  </p>
+  <h3>Can I reorder messages in the editor?</h3>
+  <p>
+    There's no drag-and-drop yet. Every menu item inserts below the message you opened it on, so
+    add each new message in the right place to begin with. For a large reshuffle it's faster to
+    edit the script and generate the chat again.
+  </p>
+  <h3>Can I edit a fake chat on my phone?</h3>
+  <p>
+    Yes. The editor works on mobile, where the script and preview become tabs you switch between.
+    Tap-to-edit works the same as click-to-edit, and the hover buttons appear on tap.
+  </p>
+  <h3>Do my edits show up in the exported image and video?</h3>
+  <p>
+    Yes. Everything visible in the preview is exported in both PNG and MP4, including reactions,
+    voice notes, call logs and edited timestamps. There's no watermark on either.
+  </p>
+
+  <h2 id="ethics">Use it responsibly</h2>
+  <p>
+    Fake chat tools are for <strong>clearly fictional</strong> content: stories, skits, memes,
+    product demos, presentations and teaching examples. Don't use them to impersonate real
+    people, fabricate evidence, or mislead anyone — that can be illegal, and it's why the export
+    asks you to confirm your chat is fictional. If you're publishing somewhere it could be taken
+    for a real conversation, label it as a mockup.
+  </p>
+
+  <div class="cta-box">
+    <p><strong>Try it on a real conversation</strong></p>
+    <p>
+      Open the <a href="/editor">free chat editor</a>, load a premade script, and spend two
+      minutes clicking around the preview. No signup, no watermark. Making a group chat instead?
+      See <a href="/blog/how-to-make-a-fake-group-chat">how to make a fake group chat</a>.
+    </p>
+  </div>
+</BlogPostLayout>
