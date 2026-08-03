@@ -90,7 +90,10 @@ const faqLd = JSON.stringify({
     style="box-shadow: 0 0 12px rgba(0,255,135,0.5)"
   />
 
-  <div class="min-h-screen overflow-x-clip bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
+  <div class="relative isolate min-h-screen overflow-x-clip bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
+    {/* Dot grid across the whole page. Negative z-index keeps it above the
+        gradient but behind every section, so translucent sections show it through. */}
+    <div class="page-grid pointer-events-none absolute inset-0 -z-10" aria-hidden="true" />
     <!-- Nav -->
     <header class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5">
       <BrandMark />
@@ -132,7 +135,6 @@ const faqLd = JSON.stringify({
 
     <!-- Hero -->
     <section id="hero" class="relative mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-10 md:grid-cols-[1.15fr_1fr] md:pt-16">
-      <div class="hero-grid pointer-events-none absolute -inset-x-10 -top-24 bottom-0" />
       <div class="hero-blob pointer-events-none absolute -left-40 top-10 h-96 w-96 rounded-full bg-[#00FF87]/10 blur-[120px]" />
       <div class="hero-blob-2 pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-[#60EFFF]/10 blur-[120px]" />
       <div class="hero-blob-3 pointer-events-none absolute left-1/3 top-1/4 h-80 w-80 rounded-full bg-[#8B5CF6]/[0.08] blur-[130px]" />
@@ -581,14 +583,16 @@ const faqLd = JSON.stringify({
       -webkit-mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
     }
 
-    /* Hero decorations */
-    .hero-grid {
+    /* Page-wide dot grid. Lighter than the old hero-only grid because it now
+       runs the full page — at the previous weight it read as noise over the
+       long content sections. */
+    .page-grid {
       background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px);
       background-size: 28px 28px;
       opacity: 0.45;
-      mask-image: radial-gradient(ellipse 75% 65% at 50% 35%, #000 15%, transparent 72%);
-      -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 35%, #000 15%, transparent 72%);
     }
+
+    /* Hero decorations */
     .hero-shimmer {
       background-size: 200% auto;
       animation: hero-shimmer 5s linear infinite;
