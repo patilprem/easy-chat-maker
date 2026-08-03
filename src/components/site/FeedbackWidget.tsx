@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { DOODLE_IMG } from '../../lib/doodlePattern';
 
 // Web3Forms access keys are meant to be used client-side — this key only
 // lets people submit the feedback form, it can't read or manage anything.
@@ -97,16 +96,8 @@ export const FeedbackWidget: React.FC = () => {
             </button>
           </div>
 
-          <div ref={scrollRef} className="relative flex-1 overflow-y-auto px-4 py-4">
-            {/* Inner wrapper grows to full scroll height so the wallpaper
-                covers the whole thread, not just the first screen */}
-            <div className="relative min-h-full">
-            {/* WhatsApp doodle wallpaper (white doodles) — subtle on the dark panel */}
-            <div
-              className="pointer-events-none absolute inset-0 opacity-[0.06]"
-              style={{ backgroundImage: `url('${DOODLE_IMG}')`, backgroundRepeat: 'repeat', backgroundSize: '340px auto' }}
-            />
-            <div className="relative z-10 space-y-3">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
+            <div className="space-y-3">
             <ChatBubble from="bot">{QUESTIONS.q1}</ChatBubble>
             {answer1 && <ChatBubble from="user">{answer1}</ChatBubble>}
             {(step === 'q2' || step === 'sending' || step === 'done' || step === 'error') && (
@@ -126,7 +117,6 @@ export const FeedbackWidget: React.FC = () => {
                 instead?
               </ChatBubble>
             )}
-            </div>
             </div>
           </div>
 
@@ -168,6 +158,16 @@ export const FeedbackWidget: React.FC = () => {
               </button>
             </div>
           )}
+
+          {/* Quiet self-serve escape hatch — a lot of people open this widget
+              because they're stuck, and the guides answer it faster than we can. */}
+          <a
+            href="/blog"
+            className="group flex items-center justify-center gap-1.5 border-t border-white/10 px-4 py-2.5 text-[11.5px] text-white/35 transition-colors hover:bg-white/[0.03] hover:text-white/70"
+          >
+            Stuck on something? Read the guides
+            <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">→</span>
+          </a>
         </div>
       )}
 
