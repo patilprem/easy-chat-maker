@@ -150,6 +150,169 @@ be genuinely useful on its own. Paste, tweak a line to sound like you, post.
 
 ---
 
+## Part 1b — Quora Batch 2 (found August 2026, after Batch 1 was posted)
+
+Seven more live questions. Deliberately weighted toward **video / TikTok**, since
+half of all exports are MP4 and 63% are WhatsApp/Instagram/Messenger — that's
+where the people who actually use the tool are.
+
+Same rules as Batch 1: answer the question first, link second, and space these
+out 2–3 per week. Verify each question is still open before you write — Quora
+merges and closes questions without warning.
+
+### Q8 — Turning a text story into a TikTok video
+🔗 https://www.quora.com/What-are-different-efficient-ways-to-turn-a-text-love-story-into-an-engaging-TikTok-video-I-have-some-good-texts-with-voices-but-I-am-not-sure-how-to-efficiently-turn-those-into-videos-efficiently
+
+> There are three formats that work for this, and the right one depends on
+> whether your story is *told* or *texted*.
+>
+> 1. **Chat-story format** — if the story is a conversation, render it as a
+>    phone chat that plays out message by message. This is the highest-retention
+>    version because the viewer reads ahead and waits for the reply.
+> 2. **Voiceover + b-roll** — your existing voices over stock footage or a
+>    gameplay clip. Fast, but it lives or dies on the first three seconds.
+> 3. **POV captions** — a single text block on screen that you cut between.
+>    Cheapest, and it looks like everything else on the algorithm.
+>
+> Since you already have the text, format 1 is the least work per video. I use
+> easychatmaker.com/chat-story-video-maker — you paste the conversation as a
+> script, it animates each message with typing bubbles, and exports a 9:16 MP4.
+> Free, no watermark. Your voice clips can go on top in CapCut afterwards.
+>
+> Whichever you pick: cut the setup. Open on the message where it goes wrong.
+
+### Q9 — Animating text on TikTok videos
+🔗 https://www.quora.com/How-do-I-animate-text-on-my-TikTok-videos
+
+> For normal captions, you don't need anything extra — TikTok's own text tool has
+> animation presets (tap the text, then "Animation"), and CapCut gives you more
+> control over the in/out effects plus auto-captions that match the audio.
+>
+> The one case where those fall short is a *conversation* — text-message stories
+> where messages appear one at a time with typing indicators. Animating that by
+> hand is dozens of keyframes per video. A chat-story generator does it in one
+> pass: easychatmaker.com/chat-story-video-maker (free, no watermark, exports
+> 9:16). Only worth it if that's the format you're making.
+
+### Q10 — Making fake text messages to yourself in an app
+🔗 https://www.quora.com/Can-you-make-fake-text-messages-to-yourself-in-an-app
+
+> Yes — the category is "chat generators," and they're mostly free browser tools
+> now rather than apps. You type both sides of the conversation and it renders a
+> pixel-accurate screenshot of whichever messenger you picked.
+>
+> I use easychatmaker.com — WhatsApp, Instagram, Messenger, Telegram, Discord,
+> Slack, plus ChatGPT/Claude/Gemini if you want an AI conversation. Exports a
+> clean PNG or an animated video, no watermark, no signup, and nothing leaves
+> your browser.
+>
+> Fine for memes, stories, mockups and pranks between friends. Not fine for
+> passing off as a real conversation with someone — that stops being a joke fast.
+
+### Q11 — Can you fake screenshots?
+🔗 https://www.quora.com/Can-you-fake-screenshots
+
+> Trivially, yes. There are two routes: edit a real screenshot in Photoshop/GIMP,
+> or generate one from scratch with a chat mockup tool. The second is faster and
+> looks *better*, because nothing is being cloned or retouched — the UI is
+> rendered fresh, so there are no compression artifacts or font mismatches to
+> spot.
+>
+> I build one of these (easychatmaker.com), so to be direct about what that
+> means: a convincing fake WhatsApp screenshot takes about 30 seconds and no
+> skill. Which is exactly why **a screenshot on its own is not evidence of
+> anything**. If it matters, ask for the message export from the app itself, or
+> to see the conversation on the device.
+>
+> The legitimate uses are the boring ones — memes, fiction and chat-story videos,
+> app demos, design mockups, support documentation. That's what these tools are
+> built for.
+
+### Q12 — How easy is it to fabricate screenshots?
+🔗 https://www.quora.com/How-easy-is-it-to-fabricate-screenshots
+
+> Easier than most people assume. I make a chat mockup tool, so here's the honest
+> version: producing a WhatsApp screenshot with the right font, bubble shape,
+> tails, timestamps, read receipts and battery icon takes well under a minute,
+> free, in a browser, with no image editing involved.
+>
+> What that means practically:
+>
+> - **Screenshots are not proof.** Treat one as a claim, not evidence.
+> - **The old tells are gone.** Misaligned text, wrong fonts and cloning smudges
+>   only show up when someone edits a real image. Generated ones have none.
+> - **What still holds up:** an in-app export/chat backup, the message visible on
+>   the device, or corroboration from the other party's account.
+> - **Video is harder to fake than a still**, though not impossible any more.
+>
+> If you're on the receiving end of a disputed screenshot, ask for the export.
+> Anyone who has the real conversation can produce one in two taps.
+
+### Q13 — Tools for storytelling animated videos on YouTube
+🔗 https://www.quora.com/Which-tool-can-we-use-to-create-storytelling-animated-videos-for-YouTube
+
+> Depends which "storytelling animation" you mean, and the tools don't overlap
+> much:
+>
+> - **Whiteboard / explainer** — Doodly, VideoScribe, or Canva's animation
+>   presets.
+> - **Character animation** — Blender (free, steep) or After Effects with a rig.
+> - **Text/kinetic typography** — After Effects, or CapCut for the simple version.
+> - **Chat / texting stories** — a dedicated chat-story generator. Animating a
+>   conversation by hand is dozens of keyframes per video; these do it in one
+>   pass, with typing indicators and message sounds. I use
+>   easychatmaker.com/chat-story-video-maker (free, no watermark, exports 9:16
+>   for Shorts).
+>
+> For a channel, pick the format with the lowest cost per video and the highest
+> retention — the chat format wins on both if your stories are conversations,
+> because the viewer keeps reading to see the reply.
+
+### Q14 — Presenting app screenshots attractively
+🔗 https://www.quora.com/How-do-I-represent-my-app-screenshots-in-an-attractive-manner
+
+> Three things do most of the work:
+>
+> 1. **Device frames.** A raw screenshot looks like a bug report; the same image
+>    inside a phone frame reads as a product. Figma has free frame kits.
+> 2. **Real-looking content, not placeholder junk.** "Lorem ipsum" and
+>    `test@test.com` make a good app look unfinished. Write content that shows
+>    the app doing its actual job.
+> 3. **Crop to one idea per image.** One feature, one screenshot.
+>
+> Point 2 is where people get stuck if the app has a messaging or inbox screen,
+> because you need a conversation that looks real without exposing anyone's data.
+> Generating it is easier than staging it — I use easychatmaker.com for chat
+> screens, which exports a clean PNG with names, avatars and timestamps you
+> control. Write-up of the approach:
+> easychatmaker.com/blog/fake-chat-screenshots-for-product-demos
+>
+> If it's going in front of customers, label it as an illustration. Mockups are
+> normal in marketing; mockups presented as real user data are not.
+
+### Questions to skip (found, deliberately not answered)
+
+These rank for our keywords but attract the wrong intent. Answering them puts the
+brand next to fraud, risks Quora moderation, and brings people who will never
+come back:
+
+- "How to make a realistic looking fake Instagram profile" — catfishing.
+- "Websites to create fake identities or credentials" — document fraud.
+- "How do I send a free working spoofed SMS" / "send a text that looks like it
+  came from someone else's number" — actual wire fraud, not mockups.
+
+One **bonus** question worth answering with *no link at all* — a brand mention
+only, which reads as credibility rather than promotion:
+
+🔗 https://www.quora.com/How-can-I-prove-that-a-screenshot-of-a-WhatsApp-chat-is-forged
+Answer it as the person who builds the tools: explain what generated fakes look
+like versus edited ones, and that the reliable move is requesting the in-app
+chat export. Mention Easy Chat Maker only as "I build one of these." Nothing
+sells a mockup tool to the *right* audience better than being straight about
+what it can't be used for.
+
+---
+
 ## Part 2 — Reddit Q&A (find threads, then answer)
 
 Reddit blocks automated search, so find live threads yourself — it takes 5
@@ -252,13 +415,28 @@ Use the long-form "faceless format" post already written in
 | | Quora | Q5 app-for-fake-conversation | /editor | |
 | | Quora | Q6 video-of-a-text-story | /chat-story-video-maker | |
 | | Quora | Q7 story-videos-animated-text | /chat-story-video-maker | |
+| | Quora | Q8 text-love-story-to-tiktok | /chat-story-video-maker | |
+| | Quora | Q9 animate-text-on-tiktok | /chat-story-video-maker | |
+| | Quora | Q10 fake-texts-to-yourself-app | /editor | |
+| | Quora | Q11 can-you-fake-screenshots | homepage | |
+| | Quora | Q12 how-easy-fabricate-screenshots | none (brand mention) | |
+| | Quora | Q13 storytelling-animated-youtube | /chat-story-video-maker | |
+| | Quora | Q14 present-app-screenshots | /blog/fake-chat-screenshots-for-product-demos | |
+| | Quora | Bonus: prove-whatsapp-screenshot-forged | none (brand mention) | |
 | | Reddit | r/SideProject "I built this" | homepage + /blog | |
 | | Reddit | r/InternetIsBeautiful | homepage | |
 
 ## Suggested 2-week cadence
 
-- **Week 1:** Quora Q1, Q2, Q3 (Mon/Wed/Fri). r/SideProject post one evening.
-- **Week 2:** Quora Q4, Q5, Q6 (Mon/Wed/Fri). r/InternetIsBeautiful post.
-- **Week 3+:** Q7, then work the `site:reddit.com` searches with Templates A/B/C,
-  2–3 per week. Reply to every comment — replies are a ranking signal and a
-  second natural touchpoint.
+Batch 1 (Q1–Q7) and both Reddit posts were the original plan; Quora Batch 1 was
+completed in **August 2026**. Batch 2 picks up from there.
+
+- ~~**Week 1:** Quora Q1, Q2, Q3 (Mon/Wed/Fri). r/SideProject post one evening.~~
+- ~~**Week 2:** Quora Q4, Q5, Q6 (Mon/Wed/Fri). r/InternetIsBeautiful post.~~
+- **Week 3:** Q8, Q9, Q13 (Mon/Wed/Fri) — the video cluster, where the usage is.
+- **Week 4:** Q10, Q11, Q14. Then Q12 + the bonus forgery question the week
+  after; those two build credibility rather than clicks, so don't bunch them
+  with the promotional ones.
+- **Ongoing:** work the `site:reddit.com` searches with Templates A/B/C, 2–3 per
+  week. Reply to every comment — replies are a ranking signal and a second
+  natural touchpoint.
