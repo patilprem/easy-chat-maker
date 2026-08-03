@@ -18,8 +18,17 @@ interface Props {
    * the text must match what's actually on the page.
    */
   faqs?: Array<{ q: string; a: string }>;
+  /** Contextual preview banner (1200x630), shown under the title and used as the og:image. */
+  bannerSrc?: string;
+  bannerAlt?: string;
 }
-const { title, description, heading, published, publishedLabel, readingTime, ogImage, faqs } = Astro.props;
+const {
+  title, description, heading, published, publishedLabel, readingTime, ogImage, faqs,
+  bannerSrc, bannerAlt,
+} = Astro.props;
+
+// The banner doubles as the share image unless one is set explicitly.
+const shareImage = ogImage ?? bannerSrc;
 
 const articleSchema = JSON.stringify({
   '@context': 'https://schema.org',
@@ -45,7 +54,7 @@ const faqSchema = faqs?.length
     })
   : null;
 ---
-<Layout title={title} description={description} ogImage={ogImage}>
+<Layout title={title} description={description} ogImage={shareImage}>
   <div class="min-h-screen bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
     <header class="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
       <BrandMark />
@@ -67,6 +76,17 @@ const faqSchema = faqs?.length
         </p>
         <h1 class="mt-2 text-[32px] font-bold leading-tight md:text-[40px]">{heading}</h1>
         <p class="mt-3 text-[13px] text-white/40">{publishedLabel} · {readingTime}</p>
+        {bannerSrc && (
+          <img
+            src={bannerSrc}
+            alt={bannerAlt}
+            width="1200"
+            height="630"
+            class="mt-7 w-full rounded-2xl border border-white/10 shadow-[0_24px_60px_rgba(0,0,0,0.4)]"
+            loading="eager"
+            fetchpriority="high"
+          />
+        )}
         <div class="blog-prose mt-8">
           <slot />
         </div>
