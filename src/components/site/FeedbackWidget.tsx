@@ -163,10 +163,13 @@ export const FeedbackWidget: React.FC = () => {
               because they're stuck, and the guides answer it faster than we can. */}
           <a
             href="/blog"
-            className="group flex items-center justify-center gap-1.5 border-t border-white/10 px-4 py-2.5 text-[11.5px] text-white/35 transition-colors hover:bg-white/[0.03] hover:text-white/70"
+            className="group flex items-center justify-center gap-1.5 border-t border-white/10 px-4 py-3 text-[12px] transition-colors hover:bg-white/[0.04]"
           >
-            Stuck on something? Read the guides
-            <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">→</span>
+            <span className="text-white/45">Stuck on something?</span>
+            <span className="font-semibold text-[#60EFFF] underline decoration-[#60EFFF]/40 underline-offset-[3px] transition-colors group-hover:decoration-[#60EFFF]">
+              Read the guides
+            </span>
+            <span aria-hidden="true" className="text-[#60EFFF] transition-transform group-hover:translate-x-0.5">→</span>
           </a>
         </div>
       )}
