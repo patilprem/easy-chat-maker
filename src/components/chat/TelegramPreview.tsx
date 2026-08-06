@@ -625,6 +625,12 @@ export const TelegramPreview: React.FC<Props> = ({
             </div>
           </div>
         )}
+
+        {/* Breathing room under the typing bubble. Video pins the feed to its
+            exact bottom every frame, so without this the dots sit flush against
+            the input bar — the editor only hides it because its smooth scroll
+            lags behind the true bottom. */}
+        {typingParticipant && <div className="h-16" aria-hidden="true" />}
         </div>
         </div>
       </div>

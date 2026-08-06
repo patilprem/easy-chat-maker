@@ -654,6 +654,10 @@ export const SlackPreview: React.FC<Props> = ({
             </div>
           </div>
         )}
+
+        {/* Keeps the typing dots off the input bar once video pins the feed
+            to its exact bottom. */}
+        {typingParticipant && <div className="h-16" aria-hidden="true" />}
       </div>
 
       <div data-chat-input className={`${bg} flex-shrink-0 px-0 pt-1`}>
