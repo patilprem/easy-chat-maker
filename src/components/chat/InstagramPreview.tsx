@@ -222,7 +222,7 @@ export const InstagramPreview: React.FC<Props> = ({
           </div>
         )}
 
-        {typingParticipant && <div className="h-16" aria-hidden="true" />}
+        {typingParticipant && <div className="h-16" data-typing-tail aria-hidden="true" />}
       </div>
 
       <div data-chat-input className={`${bg} px-2.5 pt-1.5 pb-2 flex-shrink-0`}>

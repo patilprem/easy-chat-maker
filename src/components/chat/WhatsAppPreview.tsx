@@ -486,7 +486,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
           </div>
         )}
 
-        {typingParticipant && <div className="h-16 relative z-10" aria-hidden="true" />}
+        {typingParticipant && <div className="h-16 relative z-10" data-typing-tail aria-hidden="true" />}
 
         {/* Empty state */}
         {project.messages.length === 0 && isEditor && (

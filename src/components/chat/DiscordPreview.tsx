@@ -593,7 +593,7 @@ export const DiscordPreview: React.FC<Props> = ({
 
         {/* Keeps the typing dots off the input bar once video pins the feed
             to its exact bottom. */}
-        {typingParticipant && <div className="h-16" aria-hidden="true" />}
+        {typingParticipant && <div className="h-16" data-typing-tail aria-hidden="true" />}
       </div>
 
       <div data-chat-input className={`${isDark ? 'bg-[#1e1f22]' : 'bg-white'} flex flex-shrink-0 items-center gap-2 border-t px-3 py-2 ${isDark ? 'border-[#2b2d31]' : 'border-[#e3e5e8]'}`}>

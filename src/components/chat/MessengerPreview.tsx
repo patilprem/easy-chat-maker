@@ -583,7 +583,7 @@ export const MessengerPreview: React.FC<Props> = ({
           </div>
         )}
 
-        {typingParticipant && <div className="h-16" aria-hidden="true" />}
+        {typingParticipant && <div className="h-16" data-typing-tail aria-hidden="true" />}
       </div>
 
       <div data-chat-input className={`${bg} flex flex-shrink-0 items-center gap-3 px-3 pb-3 pt-2 ${accent}`}>

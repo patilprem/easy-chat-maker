@@ -630,7 +630,7 @@ export const TelegramPreview: React.FC<Props> = ({
             exact bottom every frame, so without this the dots sit flush against
             the input bar — the editor only hides it because its smooth scroll
             lags behind the true bottom. */}
-        {typingParticipant && <div className="h-16" aria-hidden="true" />}
+        {typingParticipant && <div className="h-16" data-typing-tail aria-hidden="true" />}
         </div>
         </div>
       </div>

@@ -331,9 +331,18 @@ export async function exportCompositeMp4(
     // Full-phone typing overlay (Gemini's aurora shimmer): captured once and
     // pulsed via globalAlpha during typing frames.
     let typingOverlay: { canvas: HTMLCanvasElement; x: number; y: number } | null = null;
+    // Previews reserve extra space under the typing row so the dots don't sit
+    // on the input bar. It only exists while someone is typing, so padBottom —
+    // measured on a no-typing frame — never sees it, and composed scrolling
+    // would jam the dots against the bar. Measure it on a live typing frame.
+    let typingTailH = 0;
     for (const pid of typingPids) {
       await setFrame({ visibleCount: 0, typingParticipantId: pid, activeReactionIds: [], scrollY: 0 });
       await sleep(120);
+      if (!typingTailH) {
+        const tail = doc.querySelector<HTMLElement>('[data-typing-tail]');
+        if (tail) typingTailH = tail.getBoundingClientRect().height;
+      }
       if (!typingOverlay) {
         const overlayEl = doc.querySelector<HTMLElement>('[data-export-typing-overlay]');
         if (overlayEl) {
@@ -443,7 +452,7 @@ export async function exportCompositeMp4(
       }
       const rowsBottom = rc > 0 ? (yS - lastTrailingGapS) / SCALE : padTop;
       const typingTop = rc > 0 ? yS / SCALE : padTop;
-      const contentBottom = typing ? typingTop + typing.height : rowsBottom;
+      const contentBottom = typing ? typingTop + typing.height + typingTailH : rowsBottom;
       const targetScroll = Math.max(0, contentBottom + padBottom - feedH);
       scroll = scroll < 0 ? targetScroll : scroll + (targetScroll - scroll) * (1 - Math.exp(-(1 / FPS) / SCROLL_SMOOTHING_S));
 
