@@ -647,7 +647,7 @@ export const SlackPreview: React.FC<Props> = ({
         })}
 
         {typingParticipant && (
-          <div className="flex gap-3 px-4 pt-3">
+          <div data-typing-row className="flex gap-3 px-4 pt-3">
             <SlackAvatar participant={typingParticipant} participants={project.participants} />
             <div className={`${isDark ? 'bg-[#2a2b2f]' : 'bg-[#f6f6f6]'} rounded-xl px-2`}>
               <TypingIndicator />

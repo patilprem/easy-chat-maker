@@ -370,8 +370,16 @@ export async function exportCompositeMp4(
       // findMessageLayer here: with the typing row as the feed's only flow
       // child it walks INTO the row and we'd capture just the bubble,
       // losing the avatar next to it.
-      let row: HTMLElement = dot;
-      while (row.parentElement && row.parentElement !== feed && row.parentElement !== layer) row = row.parentElement;
+      // Previews tag the row directly. The walk-up below is only a fallback:
+      // it stops at whichever ancestor sits in `feed` or `layer`, and when the
+      // typing row is a SIBLING of the row layer (WhatsApp) that ancestor is
+      // the full-height wrapper — so `height` came back as the whole feed and
+      // the sprite blanked the conversation.
+      let row = doc.querySelector<HTMLElement>('[data-typing-row]');
+      if (!row) {
+        row = dot;
+        while (row.parentElement && row.parentElement !== feed && row.parentElement !== layer) row = row.parentElement;
+      }
       const rowRect = row.getBoundingClientRect();
       const canvases: HTMLCanvasElement[] = [];
       for (let k = 0; k < 3; k++) {

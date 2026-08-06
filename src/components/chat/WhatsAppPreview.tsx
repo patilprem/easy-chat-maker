@@ -475,7 +475,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
 
         {/* Typing indicator */}
         {typingParticipant && (
-          <div className="flex items-end gap-1.5 px-3 py-0.5 relative z-10">
+          <div data-typing-row className="flex items-end gap-1.5 px-3 py-0.5 relative z-10">
             <img
               src={typingParticipant.avatarUrl}
               alt={typingParticipant.name}

@@ -617,7 +617,7 @@ export const TelegramPreview: React.FC<Props> = ({
         })}
 
         {typingParticipant && (
-          <div className="flex items-end gap-2 px-3 pt-2">
+          <div data-typing-row className="flex items-end gap-2 px-3 pt-2">
             {project.isGroup && (
               <img src={typingParticipant.avatarUrl} alt={typingParticipant.name} className="h-8 w-8 rounded-full object-cover" />
             )}

@@ -210,7 +210,7 @@ export const InstagramPreview: React.FC<Props> = ({
 
         {/* Typing indicator */}
         {typingParticipant && (
-          <div className="flex items-end gap-2 px-3 py-0.5">
+          <div data-typing-row className="flex items-end gap-2 px-3 py-0.5">
             <img
               src={typingParticipant.avatarUrl}
               alt={typingParticipant.name}

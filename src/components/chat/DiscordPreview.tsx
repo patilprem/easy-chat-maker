@@ -583,7 +583,7 @@ export const DiscordPreview: React.FC<Props> = ({
         })}
 
         {typingParticipant && (
-          <div className="flex items-end gap-3 px-4 pt-3">
+          <div data-typing-row className="flex items-end gap-3 px-4 pt-3">
             <DiscordAvatar participant={typingParticipant} participants={project.participants} size={42} />
             <div className={`${isDark ? 'bg-[#2b2d31]' : 'bg-[#f2f3f5]'} rounded-[18px] px-2 py-0.5`}>
               <TypingIndicator />

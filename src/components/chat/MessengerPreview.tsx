@@ -575,7 +575,7 @@ export const MessengerPreview: React.FC<Props> = ({
         })}
 
         {typingParticipant && (
-          <div className="flex items-end gap-2 px-3 pt-2">
+          <div data-typing-row className="flex items-end gap-2 px-3 pt-2">
             <img src={typingParticipant.avatarUrl} alt={typingParticipant.name} className="h-7 w-7 rounded-full object-cover" />
             <div className={`${isDark ? 'bg-[#303030]' : 'bg-[#f0f2f5]'} rounded-[20px] px-1`}>
               <TypingIndicator />
