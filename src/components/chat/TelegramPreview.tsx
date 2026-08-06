@@ -547,6 +547,7 @@ export const TelegramPreview: React.FC<Props> = ({
             so it reads straight over the dark navy and gets inverted to dark
             strokes over the light gradient. */}
         <div
+          data-chat-wallpaper
           className="pointer-events-none absolute inset-0"
           style={{
             backgroundImage: `url('${TELEGRAM_DOODLE_IMG}')`,

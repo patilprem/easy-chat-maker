@@ -65,11 +65,15 @@ function waitForFrame(win: Window | null): Promise<void> {
 function freezeFeedAtScrollPosition(feed: HTMLElement, scrollTop: number): void {
   // Translate the `.z-10` message layer up to reproduce the live scroll (the
   // rasterizer, html-to-image, can't capture a live scrollTop). Translate the
-  // message layer ITSELF — not any full-height wrapper around it — so the
-  // decorative wallpaper (a sibling of the rows) stays fixed and, crucially,
-  // so the transform sits on a plain element html-to-image reproduces
-  // reliably (a transform on a `min-height:100%` wrapper does not survive the
-  // clone, which pinned every export to the top).
+  // message layer ITSELF, not the full-height wrapper around it: a transform
+  // on a `min-height:100%` wrapper does not survive the clone, which pinned
+  // every export to the top.
+  //
+  // The wallpaper is a sibling of the rows inside that same wrapper, so it
+  // spans the whole conversation and scrolls with it in the live preview.
+  // Leaving it behind here would export a different slice of the pattern than
+  // the preview shows, so it gets the same shift — it's an absolutely
+  // positioned plain div, so its transform clones fine.
   let messageLayer: HTMLElement | null = feed.querySelector<HTMLElement>('.z-10');
 
   if (!messageLayer) {
@@ -89,6 +93,13 @@ function freezeFeedAtScrollPosition(feed: HTMLElement, scrollTop: number): void 
   messageLayer.style.transform = `translateY(-${scrollTop}px)`;
   messageLayer.style.transformOrigin = 'top left';
   messageLayer.style.willChange = 'transform';
+
+  for (const wallpaper of Array.from(
+    feed.querySelectorAll<HTMLElement>('[data-chat-wallpaper]')
+  )) {
+    wallpaper.style.transform = `translateY(-${scrollTop}px)`;
+    wallpaper.style.transformOrigin = 'top left';
+  }
 }
 
 function triggerDownload(blob: Blob, filename: string): void {

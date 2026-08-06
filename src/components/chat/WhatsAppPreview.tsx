@@ -365,6 +365,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
         {/* WhatsApp wallpaper doodle pattern (whatsapp-bg.png — white doodles;
             inverted on the light theme so they read dark on the beige bg) */}
         <div
+          data-chat-wallpaper
           className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage: `url('${DOODLE_IMG}')`,
