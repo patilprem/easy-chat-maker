@@ -523,7 +523,8 @@ export const MessengerPreview: React.FC<Props> = ({
       <ChatBackgroundLayer project={project} />
       <div
         ref={feedRef}
-        className={`phone-chat-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden ${hasBackground ? '' : bg} py-2`}
+        data-has-background={hasBackground ? '' : undefined}
+        className={`phone-chat-scroll relative z-[1] min-h-0 flex-1 overflow-y-auto overflow-x-hidden ${hasBackground ? '' : bg} py-2`}
         style={{ scrollBehavior: 'smooth' }}
       >
         {displayMessages.map((msg, idx) => {

@@ -146,7 +146,8 @@ export const InstagramPreview: React.FC<Props> = ({
       <ChatBackgroundLayer project={project} />
       <div
         ref={feedRef}
-        className={`phone-chat-scroll flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${hasBackground ? '' : bg} py-2`}
+        data-has-background={hasBackground ? '' : undefined}
+        className={`phone-chat-scroll relative z-[1] flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${hasBackground ? '' : bg} py-2`}
         style={{ scrollBehavior: 'smooth' }}
       >
         {displayMessages.map((msg, idx) => {

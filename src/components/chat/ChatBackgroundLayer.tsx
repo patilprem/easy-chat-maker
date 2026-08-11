@@ -37,7 +37,12 @@ export const ChatBackgroundLayer: React.FC<{ project: ChatProject }> = ({ projec
   const css = backgroundCss(project);
 
   return (
-    <div data-chat-background className="pointer-events-none absolute inset-0 overflow-hidden">
+    // `z-0` matters: an absolutely positioned element paints ABOVE in-flow
+    // siblings, so without it the wallpaper covered the feed it is meant to sit
+    // behind — hiding the scroll bar and any unpositioned row (date chips) on
+    // the platforms whose feed is not itself positioned. The feed opts into
+    // `relative z-[1]` to stay on top.
+    <div data-chat-background className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
       {imageUrl ? (
         tileHeight > 0 ? (
           <div className="absolute inset-x-0 top-0 flex flex-col">

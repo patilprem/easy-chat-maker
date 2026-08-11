@@ -550,7 +550,8 @@ export const TelegramPreview: React.FC<Props> = ({
 
       <div
         ref={feedRef}
-        className="phone-chat-scroll relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
+        data-has-background={hasBackground ? '' : undefined}
+        className="phone-chat-scroll relative z-[1] min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
         style={{ scrollBehavior: 'smooth' }}
       >
         {/* Inner wrapper grows to the full scroll height so the wallpaper covers
