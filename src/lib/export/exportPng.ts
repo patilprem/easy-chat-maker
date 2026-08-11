@@ -135,6 +135,38 @@ function fitPixelRatio(width: number, height: number, desired: number): number {
   return Math.max(1, Math.min(desired, byDim, byArea));
 }
 
+/** Resolve when `promise` settles, or after `ms` — whichever comes first. */
+function withTimeout(promise: Promise<unknown>, ms: number): Promise<unknown> {
+  return Promise.race([promise, new Promise((r) => setTimeout(r, ms))]);
+}
+
+/**
+ * Wait for the render iframe to actually show a phone, polling rather than
+ * trusting the load event (see the call site for why). "Shown" means the export
+ * wrapper exists AND has laid out with a real height — the element appears in
+ * the DOM a frame or two before React has committed the chat into it.
+ */
+async function waitForExportElement(iframe: HTMLIFrameElement, timeoutMs: number): Promise<HTMLElement> {
+  const deadline = Date.now() + timeoutMs;
+  let sawDocument = false;
+
+  while (Date.now() < deadline) {
+    const doc = iframe.contentDocument;
+    if (doc) {
+      sawDocument = true;
+      const el = doc.getElementById('phone-screen-export');
+      if (el && el.clientHeight > 0 && doc.querySelector('.phone-chat-scroll')) return el;
+    }
+    await new Promise((r) => setTimeout(r, 100));
+  }
+
+  throw new Error(
+    sawDocument
+      ? 'The chat preview took too long to render. Please try again.'
+      : 'Could not open the export renderer. Please reload the page and try again.'
+  );
+}
+
 function triggerDownload(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -185,32 +217,33 @@ export async function exportPng(project: ChatProject, scope: PngScope = 'preview
   document.body.appendChild(iframe);
 
   try {
-    await new Promise<void>((resolve, reject) => {
-      iframe.onload = () => resolve();
-      iframe.onerror = () => reject(new Error('Iframe load failed'));
-      setTimeout(() => reject(new Error('Iframe timeout')), 12000);
-    });
-
+    // Readiness is "the phone has rendered with a real height", NOT the iframe's
+    // load event. Waiting on `load` first was fragile in two ways that both show
+    // up as a failed export: one stalled third-party request (the Google Fonts
+    // stylesheet) holds `load` open indefinitely even though the chat rendered
+    // fine, and on a phone — especially against a dev server, which ships React
+    // as hundreds of unbundled modules — hydration routinely takes longer than
+    // the old two-second grace period. Poll for the element instead and give it
+    // room; a fast connection still resolves on the first tick.
+    const el = await waitForExportElement(iframe, 45000);
     const iframeDoc = iframe.contentDocument;
     if (!iframeDoc) throw new Error('Iframe inaccessible');
 
-    let el: HTMLElement | null = null;
-    for (let i = 0; i < 40; i++) {
-      el = iframeDoc.getElementById('phone-screen-export');
-      if (el) break;
-      await new Promise((r) => setTimeout(r, 50));
-    }
-    if (!el) throw new Error('Export element not found in iframe');
     forceRenderSize(iframeDoc, el, exportSize);
     await waitForFrame(iframe.contentWindow);
 
-    // Wait for the hidden render document to finish laying out its own fonts/images.
-    await Promise.allSettled([
-      iframeDoc.fonts?.ready ?? Promise.resolve(),
-      ...Array.from(iframeDoc.images).map(
-        (img) => new Promise((r) => { img.complete ? r(null) : (img.onload = img.onerror = r); })
-      ),
-    ]);
+    // Let the render document settle its fonts/images — but never block on them.
+    // `fonts.ready` never resolves when a webfont request hangs, which would
+    // leave the export spinning forever with no error to show.
+    await withTimeout(
+      Promise.allSettled([
+        iframeDoc.fonts?.ready ?? Promise.resolve(),
+        ...Array.from(iframeDoc.images).map(
+          (img) => new Promise((r) => { img.complete ? r(null) : (img.onload = img.onerror = r); })
+        ),
+      ]),
+      8000,
+    );
 
     const feed = iframeDoc.querySelector<HTMLElement>('.phone-chat-scroll');
 
