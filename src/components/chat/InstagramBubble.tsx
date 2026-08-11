@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Smile, EllipsisVertical, MessageSquarePlus, ImagePlus, CalendarPlus, Trash2 } from 'lucide-react';
 import { ReactionBadge } from './ReactionBadge';
+import { selfBubbleBackground } from '../../lib/backgrounds';
 import type { TextMessage, ImageMessage, Participant, ChatProject } from '../../lib/parser/types';
 
 const QUICK_REACTIONS = ['❤️', '😂', '😮', '😢', '👍', '👎', '🔥', '😍', '👏'];
@@ -150,9 +151,14 @@ export const InstagramBubble: React.FC<Props> = ({
   const isDark = project.theme === 'dark';
   const reaction = (msg.kind === 'text' || msg.kind === 'image') ? msg.reaction : undefined;
 
-  const bubbleBg = isSelf
-    ? 'bg-gradient-to-b from-[#d800d8] via-[#ba21e8] to-[#8738f2]'
-    : isDark ? 'bg-[#1f1f1f]' : 'bg-[#efefef]';
+  // A chat theme recolours the outgoing bubble, the way picking one does in the
+  // real app. Without a theme this is the stock Instagram gradient.
+  const themeBubble = isSelf ? selfBubbleBackground(project) : undefined;
+  const bubbleBg = themeBubble
+    ? ''
+    : isSelf
+      ? 'bg-gradient-to-b from-[#d800d8] via-[#ba21e8] to-[#8738f2]'
+      : isDark ? 'bg-[#1f1f1f]' : 'bg-[#efefef]';
 
   const textColor = isSelf ? 'text-white' : isDark ? 'text-white' : 'text-black';
   const nameColor = isDark ? 'text-[#a8a8a8]' : 'text-[#737373]';
@@ -295,7 +301,7 @@ export const InstagramBubble: React.FC<Props> = ({
           onChange={(e) => { const f = e.target.files?.[0]; if (f) onAddImage?.(msg.id, f); e.target.value = ''; }} />
 
         {/* Bubble body */}
-        <div className={`${bubbleBg} ${br} overflow-hidden`}>
+        <div className={`${bubbleBg} ${br} overflow-hidden`} style={themeBubble ? { background: themeBubble } : undefined}>
           {msg.kind === 'image' && msg.objectUrl ? (
             <div className="relative max-w-[210px] overflow-hidden rounded-[6px]">
               <img src={msg.objectUrl} alt="" className="block w-full object-cover" />

@@ -47,6 +47,11 @@ interface EditorState {
   setReaction: (msgId: string, emoji: string) => void;
   clearReaction: (msgId: string) => void;
   setExportConsent: (v: boolean) => void;
+  setBackgroundPreset: (presetId: string | null) => void;
+  setBackgroundImage: (file: File) => Promise<void>;
+  setBackgroundDoodle: (on: boolean) => void;
+  setBackgroundDim: (dim: number) => void;
+  clearBackground: () => void;
   resolveImageUrls: () => Promise<void>;
   reset: () => void;
   hydrateFromStorage: () => void;
@@ -116,6 +121,9 @@ export const useEditorStore = create<EditorState>((set, get) => {
           m.kind === 'image' ? { ...m, objectUrl: undefined } : m
         ),
         participants: project.participants.map((p) => ({ ...p })),
+        background: project.background
+          ? { ...project.background, imageUrl: undefined }
+          : undefined,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
     } catch { /* ignore quota errors */ }
@@ -409,6 +417,32 @@ export const useEditorStore = create<EditorState>((set, get) => {
 
     setExportConsent: (v) => update((p) => ({ ...p, exportConsentAccepted: v })),
 
+    // Picking a preset drops any uploaded photo (and vice versa) — the real
+    // apps let one wallpaper win, not both stacked.
+    setBackgroundPreset: (presetId) => update((p) => (
+      presetId
+        ? { ...p, background: { ...p.background, presetId, mediaId: undefined, imageUrl: undefined } }
+        : { ...p, background: { ...p.background, presetId: undefined } }
+    )),
+
+    setBackgroundImage: async (file) => {
+      const item = await saveMedia(file);
+      const objectUrl = URL.createObjectURL(item.blob);
+      update((p) => ({
+        ...p,
+        background: { ...p.background, presetId: undefined, mediaId: item.id, imageUrl: objectUrl },
+      }));
+    },
+
+    setBackgroundDoodle: (on) => update((p) => ({ ...p, background: { ...p.background, doodle: on } })),
+
+    setBackgroundDim: (dim) => update((p) => ({
+      ...p,
+      background: { ...p.background, dim: Math.min(1, Math.max(0, dim)) },
+    })),
+
+    clearBackground: () => update((p) => ({ ...p, background: undefined })),
+
     resolveImageUrls: async () => {
       const { project } = get();
       const resolved = await Promise.all(
@@ -429,8 +463,18 @@ export const useEditorStore = create<EditorState>((set, get) => {
           return pp;
         })
       );
+      const bg = project.background;
+      const resolvedBackground = bg?.mediaId && !bg.imageUrl?.startsWith('blob:')
+        ? { ...bg, imageUrl: await resolveObjectUrl(bg.mediaId) }
+        : bg;
+
       set((s) => ({
-        project: { ...s.project, messages: resolved as Message[], participants: resolvedParticipants },
+        project: {
+          ...s.project,
+          messages: resolved as Message[],
+          participants: resolvedParticipants,
+          background: resolvedBackground,
+        },
       }));
     },
 

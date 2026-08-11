@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { ImageDown, Clapperboard, Volume2 } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ImageDown, Clapperboard, Volume2, ChevronDown, Smartphone, ScrollText } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
-import { exportPng } from '../../lib/export/exportPng';
+import { exportPng, type PngScope } from '../../lib/export/exportPng';
 import { exportMp4, type ProgressState } from '../../lib/export/exportMp4';
 import { exportCompositeMp4 } from '../../lib/export/exportComposite';
 import { exportPlaywrightVideo, RecorderUnavailableError } from '../../lib/export/exportPlaywrightVideo';
@@ -30,13 +30,25 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
   const [mp4Progress, setMp4Progress] = useState<{ state: ProgressState; pct: number; msg: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [includeSounds, setIncludeSounds] = useState(true);
+  const [pngMenuOpen, setPngMenuOpen] = useState(false);
+  const pngMenuRef = useRef<HTMLDivElement>(null);
 
-  const handleExportPng = async () => {
+  useEffect(() => {
+    if (!pngMenuOpen) return;
+    const close = (e: MouseEvent) => {
+      if (!pngMenuRef.current?.contains(e.target as Node)) setPngMenuOpen(false);
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [pngMenuOpen]);
+
+  const handleExportPng = async (scope: PngScope = 'preview') => {
     if (!project.exportConsentAccepted) return;
     setError(null);
+    setPngMenuOpen(false);
     setPngLoading(true);
     try {
-      await exportPng(project);
+      await exportPng(project, scope);
       trackExport('png', project.platform);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'PNG export failed');
@@ -147,22 +159,61 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
         )}
 
         <div className="flex gap-2">
-          <button
-            onClick={handleExportPng}
-            disabled={!project.exportConsentAccepted || pngLoading || isMp4Running}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#00FF87] hover:bg-[#35FFA1] disabled:opacity-40 disabled:cursor-not-allowed text-[#061116] text-xs font-semibold transition-colors"
-          >
-            {pngLoading ? (
-              <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 border-2 border-[#061116]/20 border-t-[#061116] rounded-full animate-spin" />
-                Cooking...
-              </span>
-            ) : (
-              <>
-                <ImageDown size={14} /> Export PNG
-              </>
+          {/* Split button: the main action keeps exporting exactly what the
+              preview shows; the caret offers the full-chat screenshot. */}
+          <div ref={pngMenuRef} className="relative flex flex-1">
+            <button
+              onClick={() => handleExportPng('preview')}
+              disabled={!project.exportConsentAccepted || pngLoading || isMp4Running}
+              className="flex flex-1 items-center justify-center gap-1.5 py-2 rounded-l-xl bg-[#00FF87] hover:bg-[#35FFA1] disabled:opacity-40 disabled:cursor-not-allowed text-[#061116] text-xs font-semibold transition-colors"
+            >
+              {pngLoading ? (
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 border-2 border-[#061116]/20 border-t-[#061116] rounded-full animate-spin" />
+                  Cooking...
+                </span>
+              ) : (
+                <>
+                  <ImageDown size={14} /> Export PNG
+                </>
+              )}
+            </button>
+            <button
+              onClick={() => setPngMenuOpen((v) => !v)}
+              disabled={!project.exportConsentAccepted || pngLoading || isMp4Running}
+              title="PNG export options"
+              aria-label="PNG export options"
+              aria-expanded={pngMenuOpen}
+              className="flex items-center justify-center px-1.5 rounded-r-xl bg-[#00FF87] hover:bg-[#35FFA1] disabled:opacity-40 disabled:cursor-not-allowed text-[#061116] border-l border-[#061116]/15 transition-colors"
+            >
+              <ChevronDown size={14} className={pngMenuOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
+            </button>
+
+            {pngMenuOpen && (
+              <div className="absolute bottom-full left-0 z-40 mb-2 w-56 overflow-hidden rounded-xl border border-white/10 bg-[#111a2e] shadow-xl">
+                <button
+                  onClick={() => handleExportPng('preview')}
+                  className="flex w-full items-start gap-2 px-3 py-2.5 text-left hover:bg-white/5 transition-colors"
+                >
+                  <Smartphone size={14} className="mt-0.5 flex-shrink-0 text-[#00FF87]" />
+                  <span>
+                    <span className="block text-[12px] font-semibold text-white">Preview</span>
+                    <span className="block text-[10.5px] text-white/45">One screen, as shown now</span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => handleExportPng('full')}
+                  className="flex w-full items-start gap-2 border-t border-white/5 px-3 py-2.5 text-left hover:bg-white/5 transition-colors"
+                >
+                  <ScrollText size={14} className="mt-0.5 flex-shrink-0 text-[#60EFFF]" />
+                  <span>
+                    <span className="block text-[12px] font-semibold text-white">Full chat</span>
+                    <span className="block text-[10.5px] text-white/45">Every message, one tall image</span>
+                  </span>
+                </button>
+              </div>
             )}
-          </button>
+          </div>
 
           <button
             onClick={handleExportMp4}

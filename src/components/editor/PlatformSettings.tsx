@@ -1,6 +1,13 @@
-import React from 'react';
-import { Bot, Moon, RotateCcw, Settings2, Sun } from 'lucide-react';
+import React, { useRef } from 'react';
+import { Bot, ImagePlus, Moon, RotateCcw, Settings2, Sun, X } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
+import {
+  presetSwatch,
+  presetsForPlatform,
+  supportsBackground,
+  supportsDoodle,
+  showDoodle,
+} from '../../lib/backgrounds';
 import type { Platform } from '../../lib/parser/types';
 
 const WaIcon: React.FC = () => (
@@ -82,7 +89,18 @@ const AppleLogoIcon: React.FC = () => (
 );
 
 export const PlatformSettings: React.FC = () => {
-  const { project, setPlatform, setTheme, setDeviceOS, reset } = useEditorStore();
+  const {
+    project, setPlatform, setTheme, setDeviceOS, reset,
+    setBackgroundPreset, setBackgroundImage, setBackgroundDoodle, setBackgroundDim, clearBackground,
+  } = useEditorStore();
+  const bgFileRef = useRef<HTMLInputElement>(null);
+  const [bgError, setBgError] = React.useState<string | null>(null);
+
+  const backgroundAvailable = supportsBackground(project.platform);
+  const presets = presetsForPlatform(project.platform);
+  const activePresetId = project.background?.presetId;
+  const bgImageUrl = project.background?.imageUrl;
+  const isThemedPlatform = project.platform === 'instagram' || project.platform === 'messenger';
 
   const platformGroups: Array<{
     label: string;
@@ -205,6 +223,125 @@ export const PlatformSettings: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {backgroundAvailable && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-white/50 text-xs font-medium">
+              {isThemedPlatform ? 'Chat theme' : 'Wallpaper'}
+            </label>
+            {(activePresetId || bgImageUrl) && (
+              <button
+                onClick={() => { clearBackground(); setBgError(null); }}
+                className="text-white/40 hover:text-white/80 text-[11px] font-medium transition-colors"
+              >
+                Reset
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-6 gap-1.5">
+            <button
+              onClick={() => setBackgroundPreset(null)}
+              title="Default"
+              className={`aspect-square rounded-lg border transition-all ${
+                !activePresetId && !bgImageUrl
+                  ? 'border-[#60EFFF] ring-1 ring-[#60EFFF]/50'
+                  : 'border-white/15 hover:border-white/40'
+              }`}
+            >
+              <span className="flex h-full w-full items-center justify-center text-[9px] font-bold uppercase text-white/45">
+                Off
+              </span>
+            </button>
+
+            {presets.map((preset) => (
+              <button
+                key={preset.id}
+                onClick={() => setBackgroundPreset(preset.id)}
+                title={preset.name}
+                style={{ background: presetSwatch(preset, project.theme) }}
+                className={`aspect-square rounded-lg border transition-all ${
+                  activePresetId === preset.id
+                    ? 'border-[#60EFFF] ring-1 ring-[#60EFFF]/50'
+                    : 'border-white/15 hover:border-white/40'
+                }`}
+              />
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => bgFileRef.current?.click()}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] py-1.5 text-[11.5px] font-medium text-white/70 transition-colors hover:border-white/25 hover:text-white"
+            >
+              <ImagePlus size={13} />
+              {bgImageUrl ? 'Change photo' : 'Use my photo'}
+            </button>
+            {bgImageUrl && (
+              <div className="relative h-8 w-8 flex-shrink-0">
+                <img src={bgImageUrl} alt="" className="h-8 w-8 rounded-lg object-cover" />
+                <button
+                  onClick={() => { clearBackground(); setBgError(null); }}
+                  title="Remove photo"
+                  className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white"
+                >
+                  <X size={9} strokeWidth={3} />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {bgError && <p className="text-[11px] text-red-400">{bgError}</p>}
+
+          {bgImageUrl && (
+            <label className="flex items-center gap-2">
+              <span className="text-white/45 text-[11px] whitespace-nowrap">Dim</span>
+              <input
+                type="range"
+                min={0}
+                max={70}
+                step={5}
+                value={Math.round((project.background?.dim ?? 0) * 100)}
+                onChange={(e) => setBackgroundDim(Number(e.target.value) / 100)}
+                className="h-1 flex-1 accent-[#60EFFF]"
+              />
+            </label>
+          )}
+
+          {supportsDoodle(project.platform) && (
+            <label className="flex cursor-pointer items-center gap-2">
+              <input
+                type="checkbox"
+                checked={showDoodle(project)}
+                onChange={(e) => setBackgroundDoodle(e.target.checked)}
+                className="h-3.5 w-3.5 flex-shrink-0 rounded accent-[#00FF87]"
+              />
+              <span className="text-white/45 text-[11px]">
+                {project.platform === 'telegram' ? 'Pattern overlay' : 'Doodle overlay'}
+              </span>
+            </label>
+          )}
+
+          <input
+            ref={bgFileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              e.target.value = '';
+              if (!file) return;
+              setBgError(null);
+              try {
+                await setBackgroundImage(file);
+              } catch (err) {
+                setBgError(err instanceof Error ? err.message : 'Could not use that image');
+              }
+            }}
+          />
+        </div>
+      )}
 
       <button
         onClick={() => {

@@ -8,6 +8,7 @@ import { DiscordPreview } from './DiscordPreview';
 import { ChatGPTPreview } from './ChatGPTPreview';
 import { ClaudePreview } from './ClaudePreview';
 import { GeminiPreview } from './GeminiPreview';
+import { BackgroundTileProvider } from './ChatBackgroundLayer';
 import type { ChatProject, Message } from '../../lib/parser/types';
 
 interface Props {
@@ -33,12 +34,20 @@ interface Props {
   feedRef?: React.RefObject<HTMLDivElement | null>;
   id?: string;
   style?: React.CSSProperties;
+  /**
+   * Full-chat PNG export only: the height of one phone screen, so a photo
+   * wallpaper repeats per screen down the tall render instead of stretching.
+   */
+  backgroundTileHeight?: number;
 }
 
-export const ChatPreview: React.FC<Props> = ({ project, mode, id, feedRef, style, ...rest }) => {
+export const ChatPreview: React.FC<Props> = ({
+  project, mode, id, feedRef, style, backgroundTileHeight = 0, ...rest
+}) => {
   const wrapperId = id ?? (mode === 'editor' ? 'phone-screen' : 'phone-screen-export');
 
   return (
+    <BackgroundTileProvider value={backgroundTileHeight}>
     <div
       id={wrapperId}
       className="w-full h-full min-h-0 overflow-hidden"
@@ -64,5 +73,6 @@ export const ChatPreview: React.FC<Props> = ({ project, mode, id, feedRef, style
         <MessengerPreview project={project} mode={mode} feedRef={feedRef} {...rest} />
       )}
     </div>
+    </BackgroundTileProvider>
   );
 };

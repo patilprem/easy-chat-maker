@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { CalendarPlus, ChevronLeft, EllipsisVertical, ImagePlus, MessageSquarePlus, Smile, Trash2 } from 'lucide-react';
 import { DeviceStatusBar } from './DeviceStatusBar';
 import { TypingIndicator } from './TypingIndicator';
+import { ChatBackgroundLayer } from './ChatBackgroundLayer';
+import { hasCustomBackground, selfBubbleBackground } from '../../lib/backgrounds';
 import type { ChatProject, ImageMessage, Message, Participant, TextMessage } from '../../lib/parser/types';
 
 interface Props {
@@ -175,7 +177,11 @@ const MessengerBubble: React.FC<{
   const reactionRef = useRef<HTMLDivElement>(null);
   const bubbleWrapRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const bubbleBg = isSelf ? 'bg-[#0084ff]' : isDark ? 'bg-[#303030]' : 'bg-[#f0f2f5]';
+  // A chat theme recolours the outgoing bubble, as picking one does in the app.
+  const themeBubble = isSelf ? selfBubbleBackground(project) : undefined;
+  const bubbleBg = themeBubble
+    ? ''
+    : isSelf ? 'bg-[#0084ff]' : isDark ? 'bg-[#303030]' : 'bg-[#f0f2f5]';
   const textColor = isSelf ? 'text-white' : isDark ? 'text-white' : 'text-[#050505]';
 
   const updateActionAnchor = useCallback(() => {
@@ -335,7 +341,11 @@ const MessengerBubble: React.FC<{
               document.execCommand('insertText', false, e.clipboardData.getData('text/plain'));
             }}
             className={`${bubbleBg} ${textColor} ${radius} px-[14px] py-[8px] text-[15.5px] leading-[20px] outline-none shadow-none ${isEditor ? 'cursor-text' : 'select-none'}`}
-            style={{ overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}
+            style={{
+              overflowWrap: 'anywhere',
+              whiteSpace: 'pre-wrap',
+              ...(themeBubble ? { background: themeBubble } : {}),
+            }}
           >
             {msg.kind === 'text' ? msg.text : ''}
           </div>
@@ -442,6 +452,7 @@ export const MessengerPreview: React.FC<Props> = ({
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
   const allVisible = visibleCount === undefined;
+  const hasBackground = hasCustomBackground(project);
 
   const getParticipant = useCallback(
     (id: string): Participant | undefined => project.participants.find((p) => p.id === id),
@@ -506,9 +517,13 @@ export const MessengerPreview: React.FC<Props> = ({
         </div>
       </div>
 
+      {/* Chat feed — a chat theme paints behind the scroller (and tints the
+          outgoing bubbles), leaving the header and composer chrome alone. */}
+      <div className="relative flex min-h-0 flex-1 flex-col">
+      <ChatBackgroundLayer project={project} />
       <div
         ref={feedRef}
-        className={`phone-chat-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden ${bg} py-2`}
+        className={`phone-chat-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden ${hasBackground ? '' : bg} py-2`}
         style={{ scrollBehavior: 'smooth' }}
       >
         {displayMessages.map((msg, idx) => {
@@ -584,6 +599,7 @@ export const MessengerPreview: React.FC<Props> = ({
         )}
 
         {typingParticipant && <div className="h-16" data-typing-tail aria-hidden="true" />}
+      </div>
       </div>
 
       <div data-chat-input className={`${bg} flex flex-shrink-0 items-center gap-3 px-3 pb-3 pt-2 ${accent}`}>

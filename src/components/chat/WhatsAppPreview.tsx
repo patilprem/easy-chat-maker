@@ -7,6 +7,8 @@ import { DeviceStatusBar } from './DeviceStatusBar';
 import { EditableTime } from './EditableTime';
 import type { ChatProject, Message, Participant, TextMessage, ImageMessage, CallMessage, VoiceNoteMessage } from '../../lib/parser/types';
 import { DOODLE_IMG } from '../../lib/doodlePattern';
+import { ChatBackgroundLayer } from './ChatBackgroundLayer';
+import { hasCustomBackground, showDoodle } from '../../lib/backgrounds';
 
 function generateGroupInitials(title: string): string {
   const words = title.replace(/[^\w\s]/g, '').trim().split(/\s+/).filter(Boolean);
@@ -265,6 +267,8 @@ export const WhatsAppPreview: React.FC<Props> = ({
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
   const allVisible = visibleCount === undefined;
+  const hasBackground = hasCustomBackground(project);
+  const doodleOn = showDoodle(project);
 
   // Blank timestamp -> drop the field, so platform defaults can kick back in
   const handleEditTime = useCallback(
@@ -351,19 +355,24 @@ export const WhatsAppPreview: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Chat feed */}
+      {/* Chat feed — the wallpaper sits in this wrapper, BEHIND the scroller,
+          so it stays put while messages scroll over it, exactly like the real
+          app (and so neither exporter has to compensate for it). */}
+      <div className="relative flex flex-1 min-h-0 flex-col">
+      <ChatBackgroundLayer project={project} />
       <div
         ref={feedRef}
-        className={`phone-chat-scroll flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${bg} relative`}
+        className={`phone-chat-scroll flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${hasBackground ? '' : bg} relative`}
         style={{ scrollBehavior: 'smooth' }}
       >
-        {/* Inner wrapper grows to the full scroll height so the wallpaper
-            covers the whole conversation, not just the first screen. The
-            vertical padding lives here (not on the feed) so the wallpaper
-            reaches the feed's top and bottom edges with no bare strip. */}
+        {/* Inner wrapper grows to the full scroll height so the doodle covers
+            the whole conversation, not just the first screen. The vertical
+            padding lives here (not on the feed) so the pattern reaches the
+            feed's top and bottom edges with no bare strip. */}
         <div className="relative min-h-full py-2">
-        {/* WhatsApp wallpaper doodle pattern (whatsapp-bg.png — white doodles;
-            inverted on the light theme so they read dark on the beige bg) */}
+        {/* WhatsApp doodle overlay (whatsapp-bg.png — white doodles; inverted
+            on the light theme so they read dark on the beige bg) */}
+        {doodleOn && (
         <div
           data-chat-wallpaper
           className="absolute inset-0 pointer-events-none"
@@ -375,6 +384,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
             filter: isDark ? undefined : 'invert(1)',
           }}
         />
+        )}
 
         <div className="relative z-10 space-y-1 px-1">
           {displayMessages.map((msg, idx) => {
@@ -496,6 +506,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
           </div>
         )}
         </div>
+      </div>
       </div>
 
       {/* Input bar matching the Android UI layout */}

@@ -3,6 +3,8 @@ import { BadgeCheck, Camera, ChevronLeft, CirclePlus, ImageIcon, Mic, Phone, Smi
 import { InstagramBubble } from './InstagramBubble';
 import { TypingIndicator } from './TypingIndicator';
 import { DeviceStatusBar } from './DeviceStatusBar';
+import { ChatBackgroundLayer } from './ChatBackgroundLayer';
+import { hasCustomBackground } from '../../lib/backgrounds';
 import type { ChatProject, Message, Participant, TextMessage, ImageMessage } from '../../lib/parser/types';
 
 interface Props {
@@ -34,6 +36,7 @@ export const InstagramPreview: React.FC<Props> = ({
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
   const allVisible = visibleCount === undefined;
+  const hasBackground = hasCustomBackground(project);
 
   const getParticipant = useCallback(
     (id: string): Participant | undefined => project.participants.find((p) => p.id === id),
@@ -137,10 +140,13 @@ export const InstagramPreview: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Chat feed */}
+      {/* Chat feed — a chat theme paints behind the scroller (and tints the
+          outgoing bubbles), leaving the header and composer chrome alone. */}
+      <div className="relative flex flex-1 min-h-0 flex-col">
+      <ChatBackgroundLayer project={project} />
       <div
         ref={feedRef}
-        className={`phone-chat-scroll flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${bg} py-2`}
+        className={`phone-chat-scroll flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${hasBackground ? '' : bg} py-2`}
         style={{ scrollBehavior: 'smooth' }}
       >
         {displayMessages.map((msg, idx) => {
@@ -223,6 +229,7 @@ export const InstagramPreview: React.FC<Props> = ({
         )}
 
         {typingParticipant && <div className="h-16" data-typing-tail aria-hidden="true" />}
+      </div>
       </div>
 
       <div data-chat-input className={`${bg} px-2.5 pt-1.5 pb-2 flex-shrink-0`}>

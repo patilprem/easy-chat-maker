@@ -77,6 +77,24 @@ export interface DateMessage {
 
 export type Message = TextMessage | ImageMessage | CallMessage | VoiceNoteMessage | SystemMessage | DateMessage;
 
+/**
+ * Chat background ("wallpaper" on WhatsApp/Telegram, "chat theme" on
+ * Instagram/Messenger). Every field is optional so projects saved before this
+ * feature existed keep loading unchanged.
+ */
+export interface ChatBackground {
+  /** Preset id from lib/backgrounds.ts. Cleared when a photo is used. */
+  presetId?: string;
+  /** IndexedDB key for an uploaded wallpaper photo. */
+  mediaId?: string;
+  /** Transient blob: URL for the photo — never persisted, re-resolved on load. */
+  imageUrl?: string;
+  /** Doodle/pattern overlay. Undefined = platform default (see showDoodle). */
+  doodle?: boolean;
+  /** 0–1 scrim over a photo wallpaper so bubbles stay readable. */
+  dim?: number;
+}
+
 export interface ChatProject {
   id: string;
   platform: Platform;
@@ -91,6 +109,8 @@ export interface ChatProject {
   exportConsentAccepted: boolean;
   /** Playback/export pacing multiplier (1 = normal). Optional for backward compat with saved projects. */
   playbackSpeed?: number;
+  /** Chat wallpaper / theme. Undefined = the platform's stock background. */
+  background?: ChatBackground;
 }
 
 export interface ParsedChatResult {

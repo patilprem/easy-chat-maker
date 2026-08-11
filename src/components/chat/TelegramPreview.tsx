@@ -6,6 +6,8 @@ import { EditableTime } from './EditableTime';
 import { TypingIndicator } from './TypingIndicator';
 import type { ChatProject, ImageMessage, Message, Participant, TextMessage } from '../../lib/parser/types';
 import { TELEGRAM_DOODLE_IMG } from '../../lib/doodlePattern';
+import { ChatBackgroundLayer } from './ChatBackgroundLayer';
+import { hasCustomBackground, showDoodle } from '../../lib/backgrounds';
 
 interface Props {
   project: ChatProject;
@@ -463,6 +465,8 @@ export const TelegramPreview: React.FC<Props> = ({
   const isDark = project.theme === 'dark';
   const allVisible = visibleCount === undefined;
   const displayMessages = allVisible ? project.messages : project.messages.slice(0, visibleCount);
+  const hasBackground = hasCustomBackground(project);
+  const doodleOn = showDoodle(project);
 
   const getParticipant = useCallback(
     (id: string): Participant | undefined => project.participants.find((p) => p.id === id),
@@ -498,8 +502,19 @@ export const TelegramPreview: React.FC<Props> = ({
   return (
     <div
       className="relative flex h-full min-h-0 w-full flex-col overflow-hidden"
-      style={isDark ? { backgroundColor: WALLPAPER_DARK } : { backgroundImage: WALLPAPER_LIGHT }}
+      style={
+        hasBackground
+          ? undefined
+          : isDark
+            ? { backgroundColor: WALLPAPER_DARK }
+            : { backgroundImage: WALLPAPER_LIGHT }
+      }
     >
+      {/* Telegram paints the wallpaper edge to edge, with the header pill and
+          composer floating over it — so the layer covers the whole screen and
+          the chrome is lifted above it. */}
+      <ChatBackgroundLayer project={project} />
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col">
       <DeviceStatusBar os={project.deviceOS} theme={project.theme} surface="telegram" />
 
       <div className="relative z-20 flex flex-shrink-0 items-center gap-2 px-3 pb-0.5 pt-0.5">
@@ -543,9 +558,10 @@ export const TelegramPreview: React.FC<Props> = ({
             sitting still behind it. The padding lives here (not on the feed) so
             the pattern reaches the feed's top and bottom edges. */}
         <div className="relative min-h-full pb-3">
-        {/* Doodle wallpaper — telegram-bg.png is white line art on transparency,
+        {/* Doodle pattern — telegram-bg.png is white line art on transparency,
             so it reads straight over the dark navy and gets inverted to dark
             strokes over the light gradient. */}
+        {doodleOn && (
         <div
           data-chat-wallpaper
           className="pointer-events-none absolute inset-0"
@@ -559,6 +575,7 @@ export const TelegramPreview: React.FC<Props> = ({
             filter: isDark ? undefined : 'invert(1)',
           }}
         />
+        )}
 
         <div className="relative z-10">
         {displayMessages.map((msg, idx) => {
@@ -645,6 +662,7 @@ export const TelegramPreview: React.FC<Props> = ({
             <Mic size={22} strokeWidth={2.2} />
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

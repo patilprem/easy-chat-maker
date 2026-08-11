@@ -13,11 +13,13 @@ function getRuntimeConfig(fallbackMode: Props['mode']): {
   height: number;
   scale: number;
   autoplay: boolean;
+  /** Full-chat PNG export: one screen's height, so photo wallpapers repeat. */
+  tile: number;
 } {
   if (typeof window === 'undefined') {
     return fallbackMode === 'video'
-      ? { mode: 'video', width: 390, height: 844, scale: 1, autoplay: false }
-      : { mode: 'export', width: 370, height: 824, scale: 1, autoplay: false };
+      ? { mode: 'video', width: 390, height: 844, scale: 1, autoplay: false, tile: 0 }
+      : { mode: 'export', width: 370, height: 824, scale: 1, autoplay: false, tile: 0 };
   }
 
   const params = new URLSearchParams(window.location.search);
@@ -25,6 +27,7 @@ function getRuntimeConfig(fallbackMode: Props['mode']): {
   const requestedWidth = Number(params.get('w'));
   const requestedHeight = Number(params.get('h'));
   const requestedScale = Number(params.get('scale'));
+  const requestedTile = Number(params.get('tile'));
   const fallback = mode === 'video'
     ? { width: 390, height: 844 }
     : { width: 370, height: 824 };
@@ -35,6 +38,7 @@ function getRuntimeConfig(fallbackMode: Props['mode']): {
     height: Number.isFinite(requestedHeight) && requestedHeight > 0 ? requestedHeight : fallback.height,
     scale: Number.isFinite(requestedScale) && requestedScale > 0 ? requestedScale : 1,
     autoplay: params.get('autoplay') === '1',
+    tile: Number.isFinite(requestedTile) && requestedTile > 0 ? requestedTile : 0,
   };
 }
 
@@ -226,6 +230,7 @@ export const RenderChatApp: React.FC<Props> = ({ mode }) => {
       visibleCount={currentFrame?.visibleCount}
       typingParticipantId={currentFrame?.typingParticipantId}
       activeReactionIds={currentFrame?.activeReactionIds}
+      backgroundTileHeight={runtimeConfig.tile}
       feedRef={feedRef}
     />
     </div>
