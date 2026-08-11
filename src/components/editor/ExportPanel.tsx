@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ImageDown, Clapperboard, Volume2, ChevronDown, Smartphone, ScrollText } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { exportPng, type PngScope } from '../../lib/export/exportPng';
@@ -24,6 +25,28 @@ function getLoadingMsg(pct: number): string {
   return LOADING_MESSAGES.find((message) => pct >= message.from && pct <= message.to)?.text ?? 'Starting the chat...';
 }
 
+/**
+ * The mobile export bar is `position: sticky` at the bottom of a short strip
+ * (checkbox rows + the button row). Anchoring the PNG menu with a plain
+ * `absolute bottom-full` inside that strip meant the menu — taller than the
+ * strip's own content above the button — poked out above the bar's
+ * translucent backdrop into the raw, independently-scrolled Script panel
+ * behind it, so it read as a stray box colliding with unrelated content
+ * instead of a menu. Compute a `fixed` position from the caret's own rect
+ * instead (the same approach every other floating menu in this app already
+ * uses — see `getMenuOverlayStyle` in TelegramPreview/MessengerPreview), so
+ * it always sits directly above the caret and never depends on how much
+ * room its narrow ancestor happens to have.
+ */
+function getPngMenuStyle(anchor: DOMRect): React.CSSProperties {
+  const width = 224;
+  const height = 116;
+  const gap = 8;
+  const left = Math.max(8, Math.min(anchor.left, window.innerWidth - width - 8));
+  const top = Math.max(8, anchor.top - height - gap);
+  return { position: 'fixed', left, top, width, zIndex: 9999 };
+}
+
 export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }) => {
   const { project, setExportConsent } = useEditorStore();
   const [pngLoading, setPngLoading] = useState(false);
@@ -31,15 +54,36 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
   const [error, setError] = useState<string | null>(null);
   const [includeSounds, setIncludeSounds] = useState(true);
   const [pngMenuOpen, setPngMenuOpen] = useState(false);
+  const [pngMenuAnchor, setPngMenuAnchor] = useState<DOMRect | null>(null);
+  const pngButtonGroupRef = useRef<HTMLDivElement>(null);
+  const pngCaretRef = useRef<HTMLButtonElement>(null);
   const pngMenuRef = useRef<HTMLDivElement>(null);
+
+  const openPngMenu = useCallback(() => {
+    setPngMenuAnchor(pngCaretRef.current?.getBoundingClientRect() ?? null);
+    setPngMenuOpen((v) => !v);
+  }, []);
 
   useEffect(() => {
     if (!pngMenuOpen) return;
+
+    const reposition = () => setPngMenuAnchor(pngCaretRef.current?.getBoundingClientRect() ?? null);
+    // The menu is portaled to <body>, so its own ref must be checked too —
+    // otherwise every click inside it (e.g. "Full chat") would be treated as
+    // an outside click and close the menu before the item's onClick runs.
     const close = (e: MouseEvent) => {
-      if (!pngMenuRef.current?.contains(e.target as Node)) setPngMenuOpen(false);
+      const target = e.target as Node;
+      if (pngButtonGroupRef.current?.contains(target) || pngMenuRef.current?.contains(target)) return;
+      setPngMenuOpen(false);
     };
     document.addEventListener('mousedown', close);
-    return () => document.removeEventListener('mousedown', close);
+    window.addEventListener('resize', reposition);
+    window.addEventListener('scroll', reposition, true);
+    return () => {
+      document.removeEventListener('mousedown', close);
+      window.removeEventListener('resize', reposition);
+      window.removeEventListener('scroll', reposition, true);
+    };
   }, [pngMenuOpen]);
 
   const handleExportPng = async (scope: PngScope = 'preview') => {
@@ -161,7 +205,7 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
         <div className="flex gap-2">
           {/* Split button: the main action keeps exporting exactly what the
               preview shows; the caret offers the full-chat screenshot. */}
-          <div ref={pngMenuRef} className="relative flex flex-1">
+          <div ref={pngButtonGroupRef} className="flex flex-1">
             <button
               onClick={() => handleExportPng('preview')}
               disabled={!project.exportConsentAccepted || pngLoading || isMp4Running}
@@ -179,7 +223,8 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
               )}
             </button>
             <button
-              onClick={() => setPngMenuOpen((v) => !v)}
+              ref={pngCaretRef}
+              onClick={openPngMenu}
               disabled={!project.exportConsentAccepted || pngLoading || isMp4Running}
               title="PNG export options"
               aria-label="PNG export options"
@@ -188,32 +233,37 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
             >
               <ChevronDown size={14} className={pngMenuOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
             </button>
-
-            {pngMenuOpen && (
-              <div className="absolute bottom-full left-0 z-40 mb-2 w-56 overflow-hidden rounded-xl border border-white/10 bg-[#111a2e] shadow-xl">
-                <button
-                  onClick={() => handleExportPng('preview')}
-                  className="flex w-full items-start gap-2 px-3 py-2.5 text-left hover:bg-white/5 transition-colors"
-                >
-                  <Smartphone size={14} className="mt-0.5 flex-shrink-0 text-[#00FF87]" />
-                  <span>
-                    <span className="block text-[12px] font-semibold text-white">Preview</span>
-                    <span className="block text-[10.5px] text-white/45">One screen, as shown now</span>
-                  </span>
-                </button>
-                <button
-                  onClick={() => handleExportPng('full')}
-                  className="flex w-full items-start gap-2 border-t border-white/5 px-3 py-2.5 text-left hover:bg-white/5 transition-colors"
-                >
-                  <ScrollText size={14} className="mt-0.5 flex-shrink-0 text-[#60EFFF]" />
-                  <span>
-                    <span className="block text-[12px] font-semibold text-white">Full chat</span>
-                    <span className="block text-[10.5px] text-white/45">Every message, one tall image</span>
-                  </span>
-                </button>
-              </div>
-            )}
           </div>
+
+          {pngMenuOpen && pngMenuAnchor && typeof document !== 'undefined' && createPortal(
+            <div
+              ref={pngMenuRef}
+              style={getPngMenuStyle(pngMenuAnchor)}
+              className="overflow-hidden rounded-xl border border-white/10 bg-[#111a2e] shadow-xl"
+            >
+              <button
+                onClick={() => handleExportPng('preview')}
+                className="flex w-full items-start gap-2 px-3 py-2.5 text-left hover:bg-white/5 transition-colors"
+              >
+                <Smartphone size={14} className="mt-0.5 flex-shrink-0 text-[#00FF87]" />
+                <span>
+                  <span className="block text-[12px] font-semibold text-white">Preview</span>
+                  <span className="block text-[10.5px] text-white/45">One screen, as shown now</span>
+                </span>
+              </button>
+              <button
+                onClick={() => handleExportPng('full')}
+                className="flex w-full items-start gap-2 border-t border-white/5 px-3 py-2.5 text-left hover:bg-white/5 transition-colors"
+              >
+                <ScrollText size={14} className="mt-0.5 flex-shrink-0 text-[#60EFFF]" />
+                <span>
+                  <span className="block text-[12px] font-semibold text-white">Full chat</span>
+                  <span className="block text-[10.5px] text-white/45">Every message, one tall image</span>
+                </span>
+              </button>
+            </div>,
+            document.body
+          )}
 
           <button
             onClick={handleExportMp4}
