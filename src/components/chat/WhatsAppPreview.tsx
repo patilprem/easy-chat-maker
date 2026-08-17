@@ -9,10 +9,10 @@ import type { ChatProject, Message, Participant, TextMessage, ImageMessage, Call
 import { DOODLE_IMG } from '../../lib/doodlePattern';
 import { ChatBackgroundLayer } from './ChatBackgroundLayer';
 import { hasCustomBackground, showDoodle } from '../../lib/backgrounds';
+import { escapeXml, initialsFrom, svgDataUri } from '../../lib/svgText';
 
 function generateGroupInitials(title: string): string {
-  const words = title.replace(/[^\w\s]/g, '').trim().split(/\s+/).filter(Boolean);
-  const initials = words.slice(0, 2).map((w) => w[0]?.toUpperCase() ?? '').join('');
+  const initials = escapeXml(initialsFrom(title));
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
     <defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#00a884"/><stop offset="100%" style="stop-color:#005c4b"/>
@@ -21,7 +21,7 @@ function generateGroupInitials(title: string): string {
     <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle"
       font-family="system-ui,sans-serif" font-size="15" font-weight="700" fill="white">${initials}</text>
   </svg>`;
-  return `data:image/svg+xml;base64,${btoa(svg)}`;
+  return svgDataUri(svg);
 }
 
 // Custom Call Card Bubble as seen in Ashwini ❤️ chat screenshot

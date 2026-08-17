@@ -1,5 +1,6 @@
 import { nanoid } from 'nanoid';
 import type { Participant, Message, ParsedChatResult, TextMessage } from './types';
+import { escapeXml, initialsFrom, svgDataUri } from '../svgText';
 
 /**
  * `index` is the participant's stable position in the chat (e.g. the order
@@ -9,11 +10,7 @@ import type { Participant, Message, ParsedChatResult, TextMessage } from './type
  * a fixed slot per participant never does).
  */
 function generateInitialsAvatar(name: string, isSelf: boolean, index = 0): string {
-  const initials = name
-    .split(' ')
-    .map((w) => w[0]?.toUpperCase() ?? '')
-    .join('')
-    .slice(0, 2);
+  const initials = escapeXml(initialsFrom(name));
 
   const colors = isSelf
     ? ['#075E54', '#128C7E']
@@ -26,7 +23,7 @@ function generateInitialsAvatar(name: string, isSelf: boolean, index = 0): strin
       font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="white">${initials}</text>
   </svg>`;
 
-  return `data:image/svg+xml;base64,${btoa(svg)}`;
+  return svgDataUri(svg);
 }
 
 function formatTime(index: number): string {
