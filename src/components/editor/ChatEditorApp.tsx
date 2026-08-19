@@ -5,6 +5,7 @@ import { ExportPanel } from './ExportPanel';
 import { PhonePreview } from './PhonePreview';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { AI_PLATFORMS } from '../../lib/parser/types';
+import { trackEditorOpened } from '../../lib/track';
 import type { Platform } from '../../lib/parser/types';
 
 type Tab = 'script' | 'preview';
@@ -20,14 +21,21 @@ export const ChatEditorApp: React.FC = () => {
     // Deep links from landing pages: /editor?platform=whatsapp or /editor?scenario=testimonial
     const params = new URLSearchParams(window.location.search);
     const scenario = params.get('scenario');
+    const requested = params.get('platform') as Platform | null;
+    const isPlatformLink = !!requested && VALID_PLATFORMS.includes(requested);
+
     if (scenario) {
       useEditorStore.getState().loadScenario(scenario);
-      return;
-    }
-    const requested = params.get('platform') as Platform | null;
-    if (requested && VALID_PLATFORMS.includes(requested)) {
+    } else if (isPlatformLink) {
       useEditorStore.getState().setPlatform(requested);
     }
+
+    // Fired after the deep link is applied so `platform` is the one the user
+    // actually lands on, not the stored default.
+    trackEditorOpened(
+      useEditorStore.getState().project.platform,
+      scenario ? 'scenario' : isPlatformLink ? 'platform_link' : 'direct'
+    );
   }, [hydrateFromStorage]);
 
   const tabCls = (active: boolean) =>

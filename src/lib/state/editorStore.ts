@@ -5,6 +5,7 @@ import { saveMedia, resolveObjectUrl } from '../media/mediaStore';
 import { PRESETS } from '../templates/presets';
 import { SCENARIOS } from '../templates/scenarios';
 import { isAiPlatform } from '../parser/types';
+import { trackChatGenerated, trackTemplateLoaded } from '../track';
 import type { ChatProject, Message, Participant, Reaction } from '../parser/types';
 
 const STORAGE_KEY = 'ecm:v1:project';
@@ -163,6 +164,9 @@ export const useEditorStore = create<EditorState>((set, get) => {
         subtitle: defaultSubtitleForPlatform(p.platform, isGroup, result.participants.length),
       }));
       set({ warnings: result.warnings });
+      // Below the early return above, so this only counts a parse that actually
+      // produced a chat.
+      trackChatGenerated(get().project.platform, result.messages.length);
     },
 
     loadPreset: (id) => {
@@ -170,6 +174,7 @@ export const useEditorStore = create<EditorState>((set, get) => {
       if (!preset) return;
       update(() => ({ ...preset, id: nanoid(), exportConsentAccepted: false }));
       set({ scriptInput: '', warnings: [] });
+      trackTemplateLoaded('preset', id, get().project.platform);
     },
 
     loadScenario: (id) => {
@@ -177,6 +182,7 @@ export const useEditorStore = create<EditorState>((set, get) => {
       if (!scenario) return;
       update(() => ({ ...scenario, id: nanoid(), exportConsentAccepted: false }));
       set({ scriptInput: '', warnings: [] });
+      trackTemplateLoaded('scenario', id, get().project.platform);
     },
 
     setPlatform: (platform) => update((p) => {

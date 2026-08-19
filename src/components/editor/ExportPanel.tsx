@@ -6,7 +6,12 @@ import { exportPng, type PngScope } from '../../lib/export/exportPng';
 import { exportMp4, type ProgressState } from '../../lib/export/exportMp4';
 import { exportCompositeMp4 } from '../../lib/export/exportComposite';
 import { exportPlaywrightVideo, RecorderUnavailableError } from '../../lib/export/exportPlaywrightVideo';
-import { trackExport } from '../../lib/track';
+import {
+  trackConsentAccepted,
+  trackExportCompleted,
+  trackExportFailed,
+  trackExportStarted,
+} from '../../lib/track';
 
 const LOADING_MESSAGES = [
   { from: 0, to: 10, text: 'Starting the chat...' },
@@ -91,11 +96,14 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
     setError(null);
     setPngMenuOpen(false);
     setPngLoading(true);
+    trackExportStarted('png', project.platform, scope);
     try {
       await exportPng(project, scope);
-      trackExport('png', project.platform);
+      trackExportCompleted('png', project.platform, scope);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'PNG export failed');
+      const message = e instanceof Error ? e.message : 'PNG export failed';
+      trackExportFailed('png', project.platform, message);
+      setError(message);
     } finally {
       setPngLoading(false);
     }
@@ -105,6 +113,7 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
     if (!project.exportConsentAccepted) return;
     setError(null);
     setMp4Progress({ state: 'preparing', pct: 0, msg: getLoadingMsg(0) });
+    trackExportStarted('mp4', project.platform);
     let simulatedPct = 0;
     const progressTimer = window.setInterval(() => {
       const step = simulatedPct < 84 ? 2 : 0.75;
@@ -121,6 +130,10 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
       setMp4Progress({ state, pct, msg: getLoadingMsg(pct) });
     };
 
+    // Which renderer produced the file, reported alongside the completed event
+    // so a silent slide down the fallback chain is visible in the data.
+    let renderer: 'recorder' | 'composite' | 'frames' = 'recorder';
+
     try {
       // Prefer the local Playwright recorder (used by the desktop Run App.bat
       // workflow). On the live site, render in-browser instead: the sprite
@@ -131,15 +144,19 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
       } catch (e) {
         if (!(e instanceof RecorderUnavailableError)) throw e;
         try {
+          renderer = 'composite';
           await exportCompositeMp4(project, onProgress, { includeSounds });
         } catch (compositeError) {
           console.warn('Composite export failed, using frame capture:', compositeError);
+          renderer = 'frames';
           await exportMp4(project, onProgress, { includeSounds });
         }
       }
-      trackExport('mp4', project.platform);
+      trackExportCompleted('mp4', project.platform, renderer);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'MP4 export failed');
+      const message = e instanceof Error ? e.message : 'MP4 export failed';
+      trackExportFailed('mp4', project.platform, `${renderer}: ${message}`);
+      setError(message);
     } finally {
       window.clearInterval(progressTimer);
       setMp4Progress(null);
@@ -159,7 +176,11 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
               type="checkbox"
               id="export-consent"
               checked={project.exportConsentAccepted}
-              onChange={(e) => setExportConsent(e.target.checked)}
+              onChange={(e) => {
+                setExportConsent(e.target.checked);
+                // Only the tick — unticking isn't a funnel step.
+                if (e.target.checked) trackConsentAccepted(project.platform);
+              }}
               className="w-4 h-4 rounded accent-[#00FF87] cursor-pointer"
             />
           </div>

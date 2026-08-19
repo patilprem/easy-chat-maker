@@ -45,6 +45,14 @@
   chat generator") — intentional split to cover both keyword families.
 - Analytics: GA4 tag G-2GLC7YPJLK in Layout.astro, production builds only
   (dev/local sessions are not tracked). Verified working July 2026.
+- Editor funnel events live in `src/lib/track.ts` and go to **two** sinks:
+  GA4 (segmentable by channel/country/device — prod only) and the Worker's
+  Durable Object counter at `/api/event`, which backs `/stats`. Only
+  `export_completed` hits the Worker, and its payload shape (`{format,
+  platform}`) must stay as-is or the historical `/stats` counters stop being
+  comparable. Funnel: `editor_opened` → `template_loaded` → `chat_generated`
+  → `consent_accepted` → `export_started` → `export_completed` /
+  `export_failed`. Mark `export_completed` as a key event in the GA4 UI.
 
 ## Project shape
 
