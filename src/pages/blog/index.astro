@@ -79,6 +79,20 @@ const posts = [
     image: '/blog/banner-whatsapp-guide.png',
   },
 ];
+
+const GENERATORS = [
+  { href: '/fake-whatsapp-chat-generator', label: 'WhatsApp chat generator' },
+  { href: '/fake-instagram-dm-generator', label: 'Instagram DM generator' },
+  { href: '/fake-messenger-chat-generator', label: 'Messenger chat generator' },
+  { href: '/fake-telegram-chat-generator', label: 'Telegram chat generator' },
+  { href: '/fake-slack-conversation-generator', label: 'Slack conversation generator' },
+  { href: '/fake-discord-chat-generator', label: 'Discord chat generator' },
+  { href: '/fake-chatgpt-conversation-generator', label: 'ChatGPT conversation generator' },
+  { href: '/fake-claude-conversation-generator', label: 'Claude conversation generator' },
+  { href: '/fake-gemini-chat-generator', label: 'Gemini chat generator' },
+  { href: '/texting-story-maker', label: 'Texting story maker' },
+  { href: '/chat-story-video-maker', label: 'Chat story video maker' },
+];
 ---
 <Layout
   title="Blog — Easy Chat Maker"
@@ -124,6 +138,24 @@ const posts = [
           </a>
         ))}
       </div>
+
+      {/* The posts above are the draw; these are what a reader wants next. The
+          blog index otherwise dead-ends into /editor, passing nothing to the
+          per-platform pages. */}
+      <section class="mt-16 rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+        <h2 class="text-[19px] font-bold">Make one now</h2>
+        <p class="mt-2 text-[14px] leading-relaxed text-white/55">
+          Every chat style has a guide of its own, with examples and a one-click start.
+        </p>
+        <div class="mt-5 flex flex-wrap gap-x-4 gap-y-2.5">
+          {GENERATORS.map((g) => (
+            <a
+              href={g.href}
+              class="text-[13.5px] text-white/60 underline decoration-white/15 underline-offset-4 transition-colors hover:text-white hover:decoration-white/40"
+            >{g.label}</a>
+          ))}
+        </div>
+      </section>
     </main>
 
     <SiteFooter />
