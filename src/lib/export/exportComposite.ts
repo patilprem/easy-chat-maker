@@ -194,6 +194,19 @@ export async function exportCompositeMp4(
     const feedH = feed.clientHeight;
     const feedW = feed.clientWidth;
     const layerOffX = layerRect.left - feedRect.left;
+    // The row layer usually sits inside a padded wrapper (WhatsApp's feed
+    // wrapper is pt-4 pb-2). Row geometry below is layer-relative, and this
+    // exporter composes the feed itself instead of scrolling the live one, so
+    // it has to re-add that padding at both ends — otherwise the first
+    // message renders flush against the header and the last one against the
+    // composer.
+    const layerOffY = layerRect.top - feedRect.top + feed.scrollTop;
+    let feedPadBottom = 0;
+    for (let el: HTMLElement | null = layer; el && el !== feed; el = el.parentElement) {
+      const parent = el.parentElement;
+      if (!parent) break;
+      feedPadBottom += parseFloat(win.getComputedStyle(parent).paddingBottom) || 0;
+    }
     const layerW = layerRect.width;
     const layerH = layer.scrollHeight || layerRect.height;
     const rowTops = rows.map((r) => r.getBoundingClientRect().top - layerRect.top);
@@ -461,7 +474,7 @@ export async function exportCompositeMp4(
       const rowsBottom = rc > 0 ? (yS - lastTrailingGapS) / SCALE : padTop;
       const typingTop = rc > 0 ? yS / SCALE : padTop;
       const contentBottom = typing ? typingTop + typing.height + typingTailH : rowsBottom;
-      const targetScroll = Math.max(0, contentBottom + padBottom - feedH);
+      const targetScroll = Math.max(0, layerOffY + contentBottom + padBottom + feedPadBottom - feedH);
       scroll = scroll < 0 ? targetScroll : scroll + (targetScroll - scroll) * (1 - Math.exp(-(1 / FPS) / SCROLL_SMOOTHING_S));
 
       ctx.drawImage(k > 0 ? baseConv : baseEmpty, 0, 0, VIDEO_W, VIDEO_H);
@@ -472,7 +485,9 @@ export async function exportCompositeMp4(
 
       const destX = Math.round((feedX + layerOffX) * SCALE);
       const layerWS = Math.round(layerW * SCALE);
-      const feedTopS = Math.round((feedY - scroll) * SCALE); // scroll offset, snapped once per frame
+      // Row/typing/badge positions are layer-relative, so the layer's own
+      // offset inside the feed rides along with the scroll offset here.
+      const feedTopS = Math.round((feedY + layerOffY - scroll) * SCALE); // snapped once per frame
 
       for (const pl of placed) {
         const dTop = feedTopS + pl.yS;

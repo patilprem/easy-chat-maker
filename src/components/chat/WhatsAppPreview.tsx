@@ -378,7 +378,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
             the whole conversation, not just the first screen. The vertical
             padding lives here (not on the feed) so the pattern reaches the
             feed's top and bottom edges with no bare strip. */}
-        <div className="relative min-h-full py-2">
+        <div className="relative min-h-full pt-4 pb-2">
         {/* WhatsApp doodle overlay (whatsapp-bg.png — white doodles; inverted
             on the light theme so they read dark on the beige bg) */}
         {doodleOn && (
