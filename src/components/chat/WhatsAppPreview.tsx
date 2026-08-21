@@ -217,6 +217,7 @@ interface Props {
   onAddVoiceNote?: (afterId: string, duration?: string) => void;
   onUpdateTitle?: (t: string) => void;
   onUpdateSubtitle?: (s: string) => void;
+  onUpdateStatusTime?: (t: string) => void;
   onAvatarClick?: (participantId: string) => void;
   onGroupAvatarClick?: () => void;
   feedRef?: React.RefObject<HTMLDivElement | null>;
@@ -262,7 +263,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
   visibleCount, typingParticipantId, activeReactionIds = [],
   onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage,
   onAddText, onAddImage, onAddDate, onAddSystem, onAddCall, onAddVoiceNote,
-  onUpdateTitle, onUpdateSubtitle, onAvatarClick, onGroupAvatarClick, feedRef,
+  onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, onGroupAvatarClick, feedRef,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -323,7 +324,14 @@ export const WhatsAppPreview: React.FC<Props> = ({
 
   return (
     <div className={`flex flex-col h-full min-h-0 w-full overflow-hidden ${isDark ? 'dark' : ''}`}>
-      <DeviceStatusBar os={project.deviceOS} theme={project.theme} surface="whatsapp" />
+      <DeviceStatusBar
+        os={project.deviceOS}
+        theme={project.theme}
+        surface="whatsapp"
+        time={project.statusBarTime}
+        editable={isEditor}
+        onEditTime={onUpdateStatusTime}
+      />
 
       {/* Header */}
       <div className={`${headerBg} flex items-center gap-2 px-2 py-2 flex-shrink-0 shadow-sm`}>

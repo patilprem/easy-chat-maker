@@ -29,6 +29,7 @@ interface Props {
   onAddVoiceNote?: (afterId: string, duration?: string) => void;
   onUpdateTitle?: (t: string) => void;
   onUpdateSubtitle?: (s: string) => void;
+  onUpdateStatusTime?: (t: string) => void;
   onAvatarClick?: (participantId: string) => void;
   onGroupAvatarClick?: () => void;
   feedRef?: React.RefObject<HTMLDivElement | null>;

@@ -18,6 +18,7 @@ interface Props {
   onAddDate?: (afterId: string, label?: string) => void;
   onUpdateTitle?: (t: string) => void;
   onUpdateSubtitle?: (s: string) => void;
+  onUpdateStatusTime?: (t: string) => void;
   onAvatarClick?: (participantId: string) => void;
   onGroupAvatarClick?: () => void;
   feedRef?: React.RefObject<HTMLDivElement | null>;
@@ -60,7 +61,7 @@ export const AiMessageActions: React.FC<{
 
 export const ChatGPTPreview: React.FC<Props> = ({
   project, mode, visibleCount, typingParticipantId,
-  onUpdateMessage, onDeleteMessage, onAddText,
+  onUpdateMessage, onDeleteMessage, onAddText, onUpdateStatusTime,
   feedRef,
 }) => {
   const isEditor = mode === 'editor';
@@ -89,7 +90,14 @@ export const ChatGPTPreview: React.FC<Props> = ({
 
   return (
     <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden ${pageBg}`}>
-      <DeviceStatusBar os={project.deviceOS} theme={project.theme} surface="chatgpt" />
+      <DeviceStatusBar
+        os={project.deviceOS}
+        theme={project.theme}
+        surface="chatgpt"
+        time={project.statusBarTime}
+        editable={isEditor}
+        onEditTime={onUpdateStatusTime}
+      />
 
       {/* Header */}
       <div className="flex flex-shrink-0 items-center justify-between px-3 pb-1.5 pt-1.5">

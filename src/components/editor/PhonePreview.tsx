@@ -14,7 +14,7 @@ export const PhonePreview: React.FC = () => {
     project,
     updateMessage, setReaction, clearReaction, deleteMessage,
     addTextMessage, addImageMessage, addDateMessage, addSystemMessage, addCallMessage, addVoiceNoteMessage,
-    setTitle, setSubtitle, setParticipantAvatar, setGroupAvatar, setPlaybackSpeed,
+    setTitle, setSubtitle, setParticipantAvatar, setGroupAvatar, setPlaybackSpeed, setStatusBarTime,
   } = useEditorStore();
 
   const speed = project.playbackSpeed ?? 1;
@@ -209,6 +209,7 @@ export const PhonePreview: React.FC = () => {
             onAddVoiceNote={(afterId, duration) => addVoiceNoteMessage(afterId, undefined, duration)}
             onUpdateTitle={setTitle}
             onUpdateSubtitle={setSubtitle}
+            onUpdateStatusTime={setStatusBarTime}
             onAvatarClick={handleAvatarClick}
             onGroupAvatarClick={handleGroupAvatarClick}
             feedRef={feedRef}

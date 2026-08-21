@@ -19,6 +19,7 @@ interface Props {
   onAddDate?: (afterId: string, label?: string) => void;
   onUpdateTitle?: (t: string) => void;
   onUpdateSubtitle?: (s: string) => void;
+  onUpdateStatusTime?: (t: string) => void;
   onAvatarClick?: (participantId: string) => void;
   onGroupAvatarClick?: () => void;
   feedRef?: React.RefObject<HTMLDivElement | null>;
@@ -47,7 +48,7 @@ const GeminiStar: React.FC<{ size?: number }> = ({ size = 26 }) => (
 
 export const GeminiPreview: React.FC<Props> = ({
   project, mode, visibleCount, typingParticipantId,
-  onUpdateMessage, onDeleteMessage, onAddText, onUpdateSubtitle,
+  onUpdateMessage, onDeleteMessage, onAddText, onUpdateStatusTime, onUpdateSubtitle,
   feedRef,
 }) => {
   const isEditor = mode === 'editor';
@@ -105,7 +106,14 @@ export const GeminiPreview: React.FC<Props> = ({
         }
       `}</style>
 
-      <DeviceStatusBar os={project.deviceOS} theme={project.theme} surface="gemini" />
+      <DeviceStatusBar
+        os={project.deviceOS}
+        theme={project.theme}
+        surface="gemini"
+        time={project.statusBarTime}
+        editable={isEditor}
+        onEditTime={onUpdateStatusTime}
+      />
 
       {/* Header */}
       <div className="flex flex-shrink-0 items-center justify-between px-3.5 pb-1.5 pt-2">

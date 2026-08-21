@@ -21,6 +21,7 @@ interface Props {
   onAddDate?: (afterId: string, label?: string) => void;
   onUpdateTitle?: (t: string) => void;
   onUpdateSubtitle?: (s: string) => void;
+  onUpdateStatusTime?: (t: string) => void;
   onAvatarClick?: (participantId: string) => void;
   feedRef?: React.RefObject<HTMLDivElement | null>;
 }
@@ -478,7 +479,7 @@ const SlackMessageRow: React.FC<{
 export const SlackPreview: React.FC<Props> = ({
   project, mode, visibleCount, typingParticipantId,
   onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage, onAddText, onAddImage, onAddDate,
-  onUpdateTitle, onUpdateSubtitle, onAvatarClick, feedRef,
+  onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, feedRef,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -515,7 +516,14 @@ export const SlackPreview: React.FC<Props> = ({
 
   return (
     <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden ${bg}`}>
-      <DeviceStatusBar os={project.deviceOS} theme={project.theme} surface="slack" />
+      <DeviceStatusBar
+        os={project.deviceOS}
+        theme={project.theme}
+        surface="slack"
+        time={project.statusBarTime}
+        editable={isEditor}
+        onEditTime={onUpdateStatusTime}
+      />
 
       <div className={`${headerBg} flex flex-shrink-0 items-center gap-3 border-b px-3 py-2`}>
         <ChevronLeft size={29} strokeWidth={2.4} className={`${textPrimary} flex-shrink-0`} />

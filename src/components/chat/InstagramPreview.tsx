@@ -22,6 +22,7 @@ interface Props {
   onAddDate?: (afterId: string, label?: string) => void;
   onUpdateTitle?: (t: string) => void;
   onUpdateSubtitle?: (s: string) => void;
+  onUpdateStatusTime?: (t: string) => void;
   onAvatarClick?: (participantId: string) => void;
   feedRef?: React.RefObject<HTMLDivElement | null>;
 }
@@ -31,7 +32,7 @@ export const InstagramPreview: React.FC<Props> = ({
   visibleCount, typingParticipantId, activeReactionIds = [],
   onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage,
   onAddText, onAddImage, onAddDate,
-  onUpdateTitle, onUpdateSubtitle, onAvatarClick, feedRef,
+  onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, feedRef,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -79,7 +80,14 @@ export const InstagramPreview: React.FC<Props> = ({
 
   return (
     <div className={`flex flex-col h-full min-h-0 w-full overflow-hidden ${isDark ? 'dark' : ''}`}>
-      <DeviceStatusBar os={project.deviceOS} theme={project.theme} surface="instagram" />
+      <DeviceStatusBar
+        os={project.deviceOS}
+        theme={project.theme}
+        surface="instagram"
+        time={project.statusBarTime}
+        editable={isEditor}
+        onEditTime={onUpdateStatusTime}
+      />
 
       <div className={`${headerBg} flex items-center gap-3 px-3 pt-2 pb-2.5 flex-shrink-0`}>
         <ChevronLeft size={26} strokeWidth={2.2} className={`${textPrimary} flex-shrink-0`} />

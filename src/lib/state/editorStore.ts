@@ -31,6 +31,7 @@ interface EditorState {
   setTheme: (t: ChatProject['theme']) => void;
   setDeviceOS: (os: ChatProject['deviceOS']) => void;
   setPlaybackSpeed: (speed: number) => void;
+  setStatusBarTime: (time: string) => void;
   setTitle: (title: string) => void;
   setSubtitle: (sub: string) => void;
   setSelfParticipant: (participantId: string) => void;
@@ -198,6 +199,8 @@ export const useEditorStore = create<EditorState>((set, get) => {
     setTheme: (theme) => update((p) => ({ ...p, theme })),
     setDeviceOS: (deviceOS) => update((p) => ({ ...p, deviceOS })),
     setPlaybackSpeed: (playbackSpeed) => update((p) => ({ ...p, playbackSpeed })),
+    // Blank clears the override, so the bar falls back to the OS default clock.
+    setStatusBarTime: (time) => update((p) => ({ ...p, statusBarTime: time.trim() || undefined })),
     setTitle: (title) => update((p) => ({ ...p, title })),
     setSubtitle: (subtitle) => update((p) => ({ ...p, subtitle })),
 

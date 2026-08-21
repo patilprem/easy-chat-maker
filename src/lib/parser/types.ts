@@ -109,6 +109,12 @@ export interface ChatProject {
   exportConsentAccepted: boolean;
   /** Playback/export pacing multiplier (1 = normal). Optional for backward compat with saved projects. */
   playbackSpeed?: number;
+  /**
+   * Clock shown in the phone's status bar, e.g. "9:41" or "21:07". Undefined
+   * or blank falls back to the stock time for the device OS
+   * (see DEFAULT_STATUS_BAR_TIME).
+   */
+  statusBarTime?: string;
   /** Chat wallpaper / theme. Undefined = the platform's stock background. */
   background?: ChatBackground;
 }

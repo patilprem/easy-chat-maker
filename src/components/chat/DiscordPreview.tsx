@@ -37,6 +37,7 @@ interface Props {
   onAddDate?: (afterId: string, label?: string) => void;
   onUpdateTitle?: (t: string) => void;
   onUpdateSubtitle?: (s: string) => void;
+  onUpdateStatusTime?: (t: string) => void;
   onAvatarClick?: (participantId: string) => void;
   feedRef?: React.RefObject<HTMLDivElement | null>;
 }
@@ -445,7 +446,7 @@ const DiscordMessageRow: React.FC<{
 export const DiscordPreview: React.FC<Props> = ({
   project, mode, visibleCount, typingParticipantId, activeReactionIds = [],
   onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage, onAddText, onAddImage, onAddDate,
-  onUpdateTitle, onUpdateSubtitle, onAvatarClick, feedRef,
+  onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, feedRef,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -481,7 +482,14 @@ export const DiscordPreview: React.FC<Props> = ({
 
   return (
     <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden ${bg}`}>
-      <DeviceStatusBar os={project.deviceOS} theme={project.theme} surface="discord" />
+      <DeviceStatusBar
+        os={project.deviceOS}
+        theme={project.theme}
+        surface="discord"
+        time={project.statusBarTime}
+        editable={isEditor}
+        onEditTime={onUpdateStatusTime}
+      />
 
       <div className={`${headerBg} flex flex-shrink-0 items-center gap-2 border-b px-3 py-1.5`}>
         <button className={`${textPrimary} flex h-8 w-7 flex-shrink-0 items-center justify-center`}>

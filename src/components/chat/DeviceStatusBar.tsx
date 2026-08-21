@@ -1,10 +1,28 @@
 import React from 'react';
+import { EditableTime } from './EditableTime';
 import type { DeviceOS, Theme } from '../../lib/parser/types';
+
+/** Stock clock each OS ships in its marketing screenshots. */
+export const DEFAULT_STATUS_BAR_TIME: Record<DeviceOS, string> = {
+  ios: '9:41',
+  android: '9:55',
+};
+
+/** The clock to paint: the project's own time, or the OS default when blank. */
+export function statusBarTimeFor(os: DeviceOS, time?: string): string {
+  const trimmed = time?.trim();
+  return trimmed ? trimmed : DEFAULT_STATUS_BAR_TIME[os];
+}
 
 interface Props {
   os: DeviceOS;
   theme: Theme;
   surface?: 'whatsapp' | 'instagram' | 'messenger' | 'slack' | 'telegram' | 'discord' | 'chatgpt' | 'claude' | 'gemini';
+  /** Clock text. Blank = the OS default. */
+  time?: string;
+  /** Editor only: click the clock to retype it. */
+  editable?: boolean;
+  onEditTime?: (time: string) => void;
 }
 
 const IOSCellular: React.FC = () => (
@@ -55,7 +73,9 @@ const AndroidBattery: React.FC = () => (
   </svg>
 );
 
-export const DeviceStatusBar: React.FC<Props> = ({ os, theme, surface = 'whatsapp' }) => {
+export const DeviceStatusBar: React.FC<Props> = ({
+  os, theme, surface = 'whatsapp', time, editable = false, onEditTime,
+}) => {
   const isDark = theme === 'dark';
   // Telegram paints its own wallpaper edge to edge, so the bar sits on top of it.
   const bgClass = surface === 'telegram'
@@ -80,7 +100,13 @@ export const DeviceStatusBar: React.FC<Props> = ({ os, theme, surface = 'whatsap
   if (os === 'ios') {
     return (
       <div className={`${bgClass} ${textClass} h-[31px] flex items-start justify-between px-[18px] pt-[8px] flex-shrink-0`}>
-        <span className="text-[14px] leading-none font-semibold tracking-normal">9:41</span>
+        <EditableTime
+          value={statusBarTimeFor('ios', time)}
+          placeholder={DEFAULT_STATUS_BAR_TIME.ios}
+          editable={editable}
+          onEdit={onEditTime}
+          className="text-[14px] leading-none font-semibold tracking-normal"
+        />
         <div className="flex items-center gap-[5px]">
           <IOSCellular />
           <IOSWifi />
@@ -92,7 +118,13 @@ export const DeviceStatusBar: React.FC<Props> = ({ os, theme, surface = 'whatsap
 
   return (
     <div className={`${bgClass} ${textClass} h-[28px] flex items-start justify-between px-[18px] pt-[7px] flex-shrink-0`}>
-      <span className="text-[12px] leading-none font-medium tracking-normal">9:55</span>
+      <EditableTime
+        value={statusBarTimeFor('android', time)}
+        placeholder={DEFAULT_STATUS_BAR_TIME.android}
+        editable={editable}
+        onEdit={onEditTime}
+        className="text-[12px] leading-none font-medium tracking-normal"
+      />
       <div className="flex items-center gap-[5px]">
         <AndroidCellular />
         <AndroidWifi />

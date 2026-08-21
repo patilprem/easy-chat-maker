@@ -24,6 +24,7 @@ interface Props {
   onAddDate?: (afterId: string, label?: string) => void;
   onUpdateTitle?: (t: string) => void;
   onUpdateSubtitle?: (s: string) => void;
+  onUpdateStatusTime?: (t: string) => void;
   onAvatarClick?: (participantId: string) => void;
   onGroupAvatarClick?: () => void;
   feedRef?: React.RefObject<HTMLDivElement | null>;
@@ -459,7 +460,7 @@ const TelegramBubble: React.FC<{
 export const TelegramPreview: React.FC<Props> = ({
   project, mode, visibleCount, typingParticipantId, activeReactionIds = [],
   onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage, onAddText, onAddImage, onAddDate,
-  onUpdateTitle, onUpdateSubtitle, onAvatarClick, onGroupAvatarClick, feedRef,
+  onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, onGroupAvatarClick, feedRef,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -515,7 +516,14 @@ export const TelegramPreview: React.FC<Props> = ({
           the chrome is lifted above it. */}
       <ChatBackgroundLayer project={project} />
       <div className="relative z-10 flex min-h-0 flex-1 flex-col">
-      <DeviceStatusBar os={project.deviceOS} theme={project.theme} surface="telegram" />
+      <DeviceStatusBar
+        os={project.deviceOS}
+        theme={project.theme}
+        surface="telegram"
+        time={project.statusBarTime}
+        editable={isEditor}
+        onEditTime={onUpdateStatusTime}
+      />
 
       <div className="relative z-20 flex flex-shrink-0 items-center gap-2 px-3 pb-0.5 pt-0.5">
         <button className={`${circleBg} ${textPrimary} flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full shadow-sm ring-1 ring-white/20`}>
