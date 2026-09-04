@@ -233,7 +233,81 @@ of traffic**. Keep GROWTH-PLAN.md as the main lever; monetization rides on it.
 - Cloud render for phones that can't encode locally.
 - 4K export.
 
-## 7. KPIs
+## 8. Is there real demand? (added Sept 2026)
+
+Two different questions hide in "is there demand": demand for the *category*
+(people wanting fake chats and chat-story videos) and demand to *pay* for it.
+The first is large and proven. The second is real but thin, and every data
+point we could find says the same thing.
+
+### Demand for the category — big, proven, growing
+
+| Signal | Number | Source |
+|---|---|---|
+| fakedetail.com traffic | ~439k visits / month | Semrush, June 2026 |
+| zeoob.com traffic | ~200k visits / month | Semrush, June 2026 |
+| fakewhats.com traffic | ~80k visits / month | Similarweb (243k / 3 months) |
+| TextingStory installs | ~30k / month, 10M+ lifetime | Google Play, Sensor Tower |
+| Text-story TikTok niche | ranked as a faceless niche earning $200–$2k / month per channel; #textstory clips regularly clear 3M views | creator-economy roundups |
+| Trend direction | "fake text message story" videos still called one of the dominant short-form formats in 2025–26 | clippie.ai, CapCut resources |
+
+So the search demand our GROWTH-PLAN is chasing is real: the three biggest
+free competitors alone pull ~700k visits a month, and the video format that
+`/chat-story-video-maker` targets is still growing.
+
+### Demand to pay — real, but small at every price point we can see
+
+| Who | What they charge | What they actually make |
+|---|---|---|
+| **TextingStory** (mobile, 10M+ installs) | $0.99–$59.99 one-time; now a $4.99/wk–$49.99/yr subscription | **< $5k / month** per store/country (Sensor Tower). Reviews: "you have to pay for everything now", 2 of 3 recent reviews negative — but several reviewers say they *bought lifetime access*, so a paying minority exists. |
+| **Convoclip** (web, launched 2025, $15/mo credits) | $15 / month | **$504 all-time, 2 active subscriptions, $26 in the last 30 days** (verified Stripe on TrustMRR). Direct web competitor with an aggressive paywall. |
+| **Chatimator** (web) | Free = 1 watermarked 720p export/month; Pro $5.99/mo = unlimited 1080p60, no watermark | No public numbers. Note the *exact* line we proposed (1080p as the Pro unlock) is what they sell. |
+| **Zeoob** (web, ~200k visits/mo) | Free with display ads + ~$10 one-time unlock | No public numbers; the ads are the business, the unlock is a side line. |
+| **textstory.chat** | Premium: no watermark, Full HD/4K | No public numbers. |
+
+Reading of that table:
+
+1. **The bulk of the category is casual** — prank, meme, one screenshot for a
+   deck. That audience does not pay; it's why the biggest sites monetize with
+   ads and why TextingStory converts at roughly $0.15 per install.
+2. **The paying minority is creators posting videos at volume** (daily
+   text-story channels) and businesses that need commercial rights. Both are
+   segments we already attract (`/chat-story-video-maker`, `/texting-story-maker`
+   for creators; Slack/AI-chat pages for businesses). Serious text-story
+   creators earn $200–$2k / month from the format, so a one-time $29 is an
+   easy yes for them — they are just not numerous.
+3. **A hard paywall on a new web tool goes nowhere** — Convoclip is the
+   cautionary tale: $500 lifetime revenue with a credits paywall. Our
+   "free, no watermark" positioning is the right call for *growth*; the paid
+   tier has to sit on top of it, never in front of it.
+4. **Ceiling.** With the traffic of a mid-size competitor (~200k visits/mo)
+   and a 0.5–1% conversion of *video exporters*, Pro lands in the
+   **$500–$3k / month** range. Display ads on landing/blog pages at that
+   traffic would add a comparable **$400–$1k / month** (niche RPM $2–5). That
+   is the realistic prize: a solid side income, not a business that replaces
+   a job. TextingStory, with 10M installs, never got past that either.
+
+### What we still don't know — and how to find out cheaply
+
+- **Our own numbers.** This container can't reach `/stats` or GA4. The two
+  figures that matter: monthly `export_completed` split by `format` (MP4
+  exporters are the buyers) and the share of visitors who export at all.
+  → **[You]** paste last 30 days of `/stats` + GA4 `export_completed` into §4.
+- **Willingness to pay from *our* users** — the only number that settles the
+  question. The Phase 0 fake-door test ("Export in 1080p — Pro, coming soon;
+  would you pay $29 once?") gives it in two weeks for a few hours of work.
+  Decision rule: **≥5% of MP4 exporters click, and ≥30% of those say yes →
+  build Phase 1. Below that → keep everything free, ride the growth plan, and
+  revisit at 50k+ monthly visits with ads on the landing pages instead.**
+- **Commercial-license demand** — cheapest possible test: add a "Need a
+  commercial license? Email us" line to `/terms` and the About page and count
+  the emails for a month. Zero code.
+
+**Bottom line:** demand for the tool is real and worth chasing; demand to pay
+is a small slice of it, concentrated in video creators and businesses. Build
+the rails only after the fake-door test says our users are in that slice.
+
+## 9. KPIs
 
 | Metric | Where | Target |
 |---|---|---|
