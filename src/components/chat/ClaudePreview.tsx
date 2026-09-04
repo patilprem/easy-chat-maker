@@ -23,6 +23,8 @@ interface Props {
   onAvatarClick?: (participantId: string) => void;
   onGroupAvatarClick?: () => void;
   feedRef?: React.RefObject<HTMLDivElement | null>;
+  /** Story mode: no status bar, header or input bar — bubbles only. */
+  chromeless?: boolean;
 }
 
 const CLAUDE_ORANGE = '#d97757';
@@ -46,7 +48,7 @@ function greeting(): string {
 export const ClaudePreview: React.FC<Props> = ({
   project, mode, visibleCount, typingParticipantId,
   onUpdateMessage, onDeleteMessage, onAddText, onUpdateStatusTime, onUpdateSubtitle,
-  feedRef,
+  feedRef, chromeless = false,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -70,6 +72,14 @@ export const ClaudePreview: React.FC<Props> = ({
   const iconColor = isDark ? 'text-[#b8b5ac]' : 'text-[#87857d]';
   const cardBg = isDark ? 'bg-[#30302e]' : 'bg-white';
   const pillBg = isDark ? 'bg-[#3a3a38] text-[#e8e6df]' : 'bg-[#f0eee6] text-[#40403a]';
+  // Assistant replies are bare text with no bubble behind them, unlike self
+  // messages (always paired with a same-theme bubble). The real app relies on
+  // the page background for contrast; story mode's scrim is always a dark
+  // overlay, so a light-theme project would otherwise render invisible dark
+  // text there.
+  const assistantTextColor = chromeless ? 'text-[#f5f4ef]' : textPrimary;
+  const assistantIconColor = chromeless ? 'text-[#b8b5ac]' : iconColor;
+  const assistantMutedColor = chromeless ? 'text-[#9a978f]' : textMuted;
 
   const hasMessages = displayMessages.length > 0;
   const lastMsg = displayMessages[displayMessages.length - 1];
@@ -93,7 +103,8 @@ export const ClaudePreview: React.FC<Props> = ({
   );
 
   return (
-    <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden ${pageBg}`}>
+    <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden ${chromeless ? '' : pageBg}`}>
+      {!chromeless && (
       <DeviceStatusBar
         os={project.deviceOS}
         theme={project.theme}
@@ -102,8 +113,10 @@ export const ClaudePreview: React.FC<Props> = ({
         editable={isEditor}
         onEditTime={onUpdateStatusTime}
       />
+      )}
 
       {/* Header */}
+      {!chromeless && (
       <div className="flex flex-shrink-0 items-center justify-between px-4 pb-1.5 pt-2">
         <button className={textPrimary}>
           <Menu size={20} strokeWidth={2} />
@@ -115,6 +128,7 @@ export const ClaudePreview: React.FC<Props> = ({
           <MoreVertical size={18} strokeWidth={2.1} className={textPrimary} />
         </div>
       </div>
+      )}
 
       {/* Feed */}
       <div
@@ -122,7 +136,7 @@ export const ClaudePreview: React.FC<Props> = ({
         className="phone-chat-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-4 pb-3 pt-2"
         style={{ scrollBehavior: 'smooth' }}
       >
-        {!hasMessages && (
+        {!hasMessages && !chromeless && (
           <div className="flex h-[60%] flex-col items-center justify-center gap-3">
             <Starburst size={34} />
             <span className={`${textPrimary} text-center text-[25px]`} style={{ fontFamily: SERIF }}>
@@ -157,9 +171,9 @@ export const ClaudePreview: React.FC<Props> = ({
               {msg.kind === 'image' && msg.objectUrl ? (
                 <img src={msg.objectUrl} alt="" className="max-h-[260px] max-w-[210px] rounded-[16px] object-cover" />
               ) : (
-                editableText(msg, `${textPrimary} text-[15.5px] leading-[23px]`, { fontFamily: SERIF })
+                editableText(msg, `${assistantTextColor} text-[15.5px] leading-[23px]`, { fontFamily: SERIF })
               )}
-              <div className={`${iconColor} mt-3 flex items-center gap-[18px]`}>
+              <div className={`${assistantIconColor} mt-3 flex items-center gap-[18px]`}>
                 <Copy size={15} strokeWidth={1.8} />
                 <Share2 size={15} strokeWidth={1.8} />
                 <Play size={15} strokeWidth={1.8} />
@@ -185,7 +199,7 @@ export const ClaudePreview: React.FC<Props> = ({
         {hasMessages && lastIsAssistant && !showThinking && (
           <div className="flex items-start justify-between gap-4 pb-1 pt-3">
             <Starburst size={20} className="mt-0.5 flex-shrink-0" />
-            <div className={`${textMuted} text-right text-[10.5px] leading-[15px]`}>
+            <div className={`${assistantMutedColor} text-right text-[10.5px] leading-[15px]`}>
               Claude is AI and can make mistakes.<br />Please double-check responses.
             </div>
           </div>
@@ -193,6 +207,7 @@ export const ClaudePreview: React.FC<Props> = ({
       </div>
 
       {/* Input card */}
+      {!chromeless && (
       <div data-chat-input className="flex-shrink-0 px-3 pb-2 pt-1">
         <div className={`${cardBg} rounded-[24px] px-4 pb-3 pt-3.5 shadow-sm ${isDark ? '' : 'ring-1 ring-black/5'}`}>
           <div className={`${textMuted} text-[15px] leading-none`}>
@@ -219,6 +234,7 @@ export const ClaudePreview: React.FC<Props> = ({
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 };

@@ -3,60 +3,66 @@ import type { ChatProject } from '../parser/types';
 import { buildFramePlan, FPS } from '../video/chatTimeline';
 import { tryEncodeMessageSoundTrack } from './exportAudio';
 import { drainEncoderQueue, getExportScale, negotiateVideoConfig, type ExportOptions, type ProgressCallback } from './exportMp4';
-import {
-  captureChatSprites, createFeedComposer, openRenderIframe, sleep, triggerDownload,
-} from './compositeCore';
-
-export { CompositeUnsupportedError } from './compositeCore';
+import { captureChatSprites, createFeedComposer, openRenderIframe, sleep, triggerDownload } from './compositeCore';
+import { createStoryBackgroundSource } from './storyBackground';
+import { storyStage } from '../story/storyLayout';
 
 /**
- * Sprite-compositing video exporter (phone frame).
- *
- * Captures each part of the chat ONCE with the browser's real renderer
- * (html-to-image): the phone chrome, the full message list as one tall
- * transparent image (with and without reactions), and the typing bubble in
- * three animation phases (see compositeCore.captureChatSprites). Every video
- * frame is then composed on a canvas at the timeline's native 30fps — smooth
- * scrolling, animated typing dots — and encoded with WebCodecs
- * (compositeCore.createFeedComposer). Preview fidelity without a recording
- * server. The story exporter (exportStory.ts) reuses the same core over a
- * chrome-less, story-sized render instead.
+ * Story-mode video exporter: chat bubbles over a background, at 9:16 or
+ * 16:9, no phone chrome. Shares its capture/composite core with the phone
+ * exporter (compositeCore.ts) — the only real difference is what's captured
+ * (a chrome-less, story-sized stage instead of a phone) and that a moving
+ * background is painted under the (transparent) capture every frame instead
+ * of a solid page color.
  */
 
-const PHONE_W = 390;
-const PHONE_H = 844;
+// Canvas-area safety net, mirroring exportPng's fitPixelRatio: a very long
+// chat at 2x on a 1080x1920 stage could otherwise produce a browser-crashing
+// tall capture.
+const MAX_TALL_CAPTURE_AREA = 60_000_000;
 
-export async function exportCompositeMp4(
+export async function exportStoryMp4(
   project: ChatProject,
   onProgress: ProgressCallback,
   options: ExportOptions = {},
 ): Promise<void> {
-  const filename = `${project.platform}-chat.mp4`;
+  const story = project.story;
+  if (!story?.enabled) throw new Error('Story mode is not enabled for this chat.');
+
+  const stage = storyStage(story.aspect);
+  const filename = `${project.platform}-story-${story.aspect === '9:16' ? '9x16' : '16x9'}.mp4`;
   const messages = project.messages;
   const plans = buildFramePlan(messages, project.participants, project.playbackSpeed);
   const audioTrack = await tryEncodeMessageSoundTrack(project, plans.length / FPS, options.includeSounds !== false);
-  // 2x for crisp text on desktop, 1x on phones/low-memory devices (see
-  // getExportScale) — the 2x buffers can OOM-crash a mobile tab.
-  const SCALE = getExportScale();
-  const VIDEO_W = PHONE_W * SCALE;
-  const VIDEO_H = PHONE_H * SCALE;
+
+  let SCALE = getExportScale();
+  if (stage.w * stage.h * SCALE * SCALE > MAX_TALL_CAPTURE_AREA) SCALE = 1;
+  const VIDEO_W = Math.round(stage.w * SCALE);
+  const VIDEO_H = Math.round(stage.h * SCALE);
   const { config, muxerCodec } = await negotiateVideoConfig(VIDEO_W, VIDEO_H, FPS);
+
+  const background = createStoryBackgroundSource(story.background, VIDEO_W, VIDEO_H);
 
   localStorage.setItem('ecm:v1:export-payload', JSON.stringify(project));
   onProgress('preparing', 2);
 
-  const render = await openRenderIframe(`${window.location.origin}/render/chat/?mode=video`, PHONE_W, PHONE_H);
+  const render = await openRenderIframe(
+    `${window.location.origin}/render/chat/?mode=video&story=1&w=${stage.w}&h=${stage.h}`,
+    stage.w,
+    stage.h,
+  );
 
   try {
     const { win, doc, root } = render;
-    const baseBg = project.theme === 'dark' ? '#0b141a' : '#ffffff';
+    // No page background — the story stage is captured transparent (scrim +
+    // name pill baked in, no phone chrome) so the canvas background painted
+    // below shows through everywhere the chat column doesn't cover.
     const sprites = await captureChatSprites({
-      win, doc, root, messages, plans, scale: SCALE, baseBg,
+      win, doc, root, messages, plans, scale: SCALE,
       onProgress: (pct) => onProgress('preparing', pct),
     });
     const composer = createFeedComposer(sprites, SCALE);
 
-    // ---- Encode ----
     onProgress('encoding', 18);
     const outCanvas = document.createElement('canvas');
     outCanvas.width = VIDEO_W;
@@ -81,6 +87,7 @@ export async function exportCompositeMp4(
 
     for (let f = 0; f < plans.length; f++) {
       if (encoderError) throw encoderError;
+      background.drawAt(ctx, f / FPS);
       composer.drawFrame(ctx, plans[f], f);
 
       const videoFrame = new VideoFrame(outCanvas, {
@@ -89,11 +96,8 @@ export async function exportCompositeMp4(
       });
       encoder.encode(videoFrame, { keyFrame: f % (FPS * 2) === 0 });
       videoFrame.close();
-      // Bound the encoder queue — on phones the encoder can't keep up with
-      // frame production, and an unbounded queue OOM-kills the tab.
       await drainEncoderQueue(encoder);
       if (f % 3 === 0) onProgress('encoding', 18 + (f / plans.length) * 72);
-      // Yield periodically so the UI stays responsive
       if (f % 30 === 0) await sleep(0);
     }
 
@@ -109,5 +113,6 @@ export async function exportCompositeMp4(
     onProgress('idle', 100);
   } finally {
     render.close();
+    background.close();
   }
 }

@@ -40,6 +40,8 @@ interface Props {
   onUpdateStatusTime?: (t: string) => void;
   onAvatarClick?: (participantId: string) => void;
   feedRef?: React.RefObject<HTMLDivElement | null>;
+  /** Story mode: no status bar, header or input bar — bubbles only. */
+  chromeless?: boolean;
 }
 
 function isDiscordMessage(msg: Message | undefined): msg is TextMessage | ImageMessage {
@@ -189,11 +191,16 @@ const DiscordMessageRow: React.FC<{
   onAddImage?: (afterId: string, file: File) => void;
   onAddDate?: (afterId: string, label?: string) => void;
   onAvatarClick?: (participantId: string) => void;
+  /** Story mode: Discord has no bubble background behind messages, only the
+   * page color — which chromeless mode removes — so text must stay legible
+   * against the story stage's dark scrim regardless of the chat's theme. */
+  chromeless?: boolean;
 }> = ({
   msg, participant, project, isEditor, isFirstInGroup,
   onEdit, onEditTime, onReaction, onClearReaction, onDelete, onAddText, onAddImage, onAddDate, onAvatarClick,
+  chromeless = false,
 }) => {
-  const isDark = project.theme === 'dark';
+  const isDark = chromeless || project.theme === 'dark';
   const [showMenu, setShowMenu] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [showActionStrip, setShowActionStrip] = useState(false);
@@ -447,6 +454,7 @@ export const DiscordPreview: React.FC<Props> = ({
   project, mode, visibleCount, typingParticipantId, activeReactionIds = [],
   onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage, onAddText, onAddImage, onAddDate,
   onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, feedRef,
+  chromeless = false,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -481,7 +489,8 @@ export const DiscordPreview: React.FC<Props> = ({
       : {};
 
   return (
-    <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden ${bg}`}>
+    <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden ${chromeless ? '' : bg}`}>
+      {!chromeless && (
       <DeviceStatusBar
         os={project.deviceOS}
         theme={project.theme}
@@ -490,7 +499,9 @@ export const DiscordPreview: React.FC<Props> = ({
         editable={isEditor}
         onEditTime={onUpdateStatusTime}
       />
+      )}
 
+      {!chromeless && (
       <div className={`${headerBg} flex flex-shrink-0 items-center gap-2 border-b px-3 py-1.5`}>
         <button className={`${textPrimary} flex h-8 w-7 flex-shrink-0 items-center justify-center`}>
           <ChevronLeft size={26} strokeWidth={2.7} />
@@ -525,6 +536,7 @@ export const DiscordPreview: React.FC<Props> = ({
           <Search size={18} strokeWidth={2.5} />
         </button>
       </div>
+      )}
 
       <div
         ref={feedRef}
@@ -537,7 +549,7 @@ export const DiscordPreview: React.FC<Props> = ({
               <DiscordDateDivider
                 key={msg.id}
                 label={msg.label}
-                isDark={isDark}
+                isDark={chromeless || isDark}
                 isEditor={isEditor}
                 onSave={(label) => onUpdateMessage?.(msg.id, { label } as Partial<Message>)}
               />
@@ -586,6 +598,7 @@ export const DiscordPreview: React.FC<Props> = ({
               onAddImage={onAddImage}
               onAddDate={onAddDate}
               onAvatarClick={onAvatarClick}
+              chromeless={chromeless}
             />
           );
         })}
@@ -604,6 +617,7 @@ export const DiscordPreview: React.FC<Props> = ({
         {typingParticipant && <div className="h-16" data-typing-tail aria-hidden="true" />}
       </div>
 
+      {!chromeless && (
       <div data-chat-input className={`${isDark ? 'bg-[#1e1f22]' : 'bg-white'} flex flex-shrink-0 items-center gap-2 border-t px-3 py-2 ${isDark ? 'border-[#2b2d31]' : 'border-[#e3e5e8]'}`}>
         <button className={`${iconButton} flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full`}>
           <Plus size={23} strokeWidth={2.1} />
@@ -622,6 +636,7 @@ export const DiscordPreview: React.FC<Props> = ({
           <Mic size={21} strokeWidth={2.2} />
         </button>
       </div>
+      )}
     </div>
   );
 };

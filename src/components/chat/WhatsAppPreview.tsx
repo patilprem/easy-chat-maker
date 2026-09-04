@@ -221,6 +221,8 @@ interface Props {
   onAvatarClick?: (participantId: string) => void;
   onGroupAvatarClick?: () => void;
   feedRef?: React.RefObject<HTMLDivElement | null>;
+  /** Story mode: no status bar, header, input bar or wallpaper — bubbles only. */
+  chromeless?: boolean;
 }
 
 
@@ -264,6 +266,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
   onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage,
   onAddText, onAddImage, onAddDate, onAddSystem, onAddCall, onAddVoiceNote,
   onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, onGroupAvatarClick, feedRef,
+  chromeless = false,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -324,6 +327,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
 
   return (
     <div className={`flex flex-col h-full min-h-0 w-full overflow-hidden ${isDark ? 'dark' : ''}`}>
+      {!chromeless && (
       <DeviceStatusBar
         os={project.deviceOS}
         theme={project.theme}
@@ -332,8 +336,10 @@ export const WhatsAppPreview: React.FC<Props> = ({
         editable={isEditor}
         onEditTime={onUpdateStatusTime}
       />
+      )}
 
       {/* Header */}
+      {!chromeless && (
       <div className={`${headerBg} flex items-center gap-2 px-2 py-2 flex-shrink-0 shadow-sm`}>
         <ChevronLeft size={22} className={`${headerTextColor} flex-shrink-0 cursor-pointer`} />
         <button
@@ -362,16 +368,19 @@ export const WhatsAppPreview: React.FC<Props> = ({
           <EllipsisVertical size={20} className={headerTextColor} />
         </div>
       </div>
+      )}
 
       {/* Chat feed — the wallpaper sits in this wrapper, BEHIND the scroller,
           so it stays put while messages scroll over it, exactly like the real
-          app (and so neither exporter has to compensate for it). */}
+          app (and so neither exporter has to compensate for it). In story
+          mode the wrapper is transparent — the story stage paints its own
+          background behind the whole column. */}
       <div className="relative flex flex-1 min-h-0 flex-col">
-      <ChatBackgroundLayer project={project} />
+      {!chromeless && <ChatBackgroundLayer project={project} />}
       <div
         ref={feedRef}
-        data-has-background={hasBackground ? '' : undefined}
-        className={`phone-chat-scroll relative z-[1] flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${hasBackground ? '' : bg}`}
+        data-has-background={hasBackground && !chromeless ? '' : undefined}
+        className={`phone-chat-scroll relative z-[1] flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${chromeless || hasBackground ? '' : bg}`}
         style={{ scrollBehavior: 'smooth' }}
       >
         {/* Inner wrapper grows to the full scroll height so the doodle covers
@@ -381,7 +390,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
         <div className="relative min-h-full pt-4 pb-2">
         {/* WhatsApp doodle overlay (whatsapp-bg.png — white doodles; inverted
             on the light theme so they read dark on the beige bg) */}
-        {doodleOn && (
+        {doodleOn && !chromeless && (
         <div
           data-chat-wallpaper
           className="absolute inset-0 pointer-events-none"
@@ -519,6 +528,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
       </div>
 
       {/* Input bar matching the Android UI layout */}
+      {!chromeless && (
       <div data-chat-input className={`${inputBg} flex items-center gap-1.5 px-2 pt-2 pb-3.5 flex-shrink-0`}>
         <div className={`flex-1 flex items-center gap-2 ${inputFieldBg} rounded-full px-3.5 py-2 shadow-sm`}>
           <Smile size={21} className="text-gray-400 dark:text-[#8696a0] flex-shrink-0 cursor-pointer" />
@@ -530,6 +540,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
           <Mic size={19} className="text-white" />
         </div>
       </div>
+      )}
     </div>
   );
 };

@@ -43,8 +43,10 @@ const baseVideoConfig = (codec: string, width: number, height: number, framerate
   width,
   height,
   // Scale the bitrate budget with resolution (~0.12 bits/pixel/frame) so
-  // text stays sharp at 2x without bloating 1x files.
-  bitrate: Math.min(10_000_000, Math.max(2_500_000, Math.round(width * height * framerate * 0.12))),
+  // text stays sharp at 2x without bloating 1x files. The 14 Mbps cap covers
+  // story mode's 1080x1920/1920x1080 frames with a moving background; the
+  // 780x1688 phone export's own budget (~4.7 Mbps) stays well under it.
+  bitrate: Math.min(14_000_000, Math.max(2_500_000, Math.round(width * height * framerate * 0.12))),
   framerate,
 });
 

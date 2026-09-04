@@ -6,7 +6,8 @@ import { PRESETS } from '../templates/presets';
 import { SCENARIOS } from '../templates/scenarios';
 import { isAiPlatform } from '../parser/types';
 import { trackChatGenerated, trackTemplateLoaded } from '../track';
-import type { ChatProject, Message, Participant, Reaction } from '../parser/types';
+import { defaultStorySettings } from '../story/storyLayout';
+import type { ChatProject, Message, Participant, Reaction, StoryAspect, StorySettings } from '../parser/types';
 
 const STORAGE_KEY = 'ecm:v1:project';
 
@@ -54,6 +55,12 @@ interface EditorState {
   setBackgroundDoodle: (on: boolean) => void;
   setBackgroundDim: (dim: number) => void;
   clearBackground: () => void;
+  setStoryEnabled: (on: boolean) => void;
+  setStoryAspect: (aspect: StoryAspect) => void;
+  setStoryBackgroundPreset: (presetId: string) => void;
+  setStoryScrim: (scrim: number) => void;
+  setStoryNamePill: (on: boolean) => void;
+  updateStory: (patch: Partial<StorySettings>) => void;
   resolveImageUrls: () => Promise<void>;
   reset: () => void;
   hydrateFromStorage: () => void;
@@ -126,6 +133,13 @@ export const useEditorStore = create<EditorState>((set, get) => {
         background: project.background
           ? { ...project.background, imageUrl: undefined }
           : undefined,
+        story: project.story
+          ? {
+              ...project.story,
+              background: { ...project.story.background, mediaUrl: undefined },
+              music: project.story.music ? { ...project.story.music, mediaUrl: undefined } : undefined,
+            }
+          : undefined,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
     } catch { /* ignore quota errors */ }
@@ -173,7 +187,8 @@ export const useEditorStore = create<EditorState>((set, get) => {
     loadPreset: (id) => {
       const preset = PRESETS[id];
       if (!preset) return;
-      update(() => ({ ...preset, id: nanoid(), exportConsentAccepted: false }));
+      const story = get().project.story;
+      update(() => ({ ...preset, id: nanoid(), exportConsentAccepted: false, story }));
       set({ scriptInput: '', warnings: [] });
       trackTemplateLoaded('preset', id, get().project.platform);
     },
@@ -181,7 +196,8 @@ export const useEditorStore = create<EditorState>((set, get) => {
     loadScenario: (id) => {
       const scenario = SCENARIOS[id];
       if (!scenario) return;
-      update(() => ({ ...scenario, id: nanoid(), exportConsentAccepted: false }));
+      const story = get().project.story;
+      update(() => ({ ...scenario, id: nanoid(), exportConsentAccepted: false, story }));
       set({ scriptInput: '', warnings: [] });
       trackTemplateLoaded('scenario', id, get().project.platform);
     },
@@ -451,6 +467,44 @@ export const useEditorStore = create<EditorState>((set, get) => {
     })),
 
     clearBackground: () => update((p) => ({ ...p, background: undefined })),
+
+    setStoryEnabled: (on) => update((p) => ({
+      ...p,
+      story: on
+        ? p.story
+          ? { ...p.story, enabled: true }
+          : defaultStorySettings()
+        : p.story
+          ? { ...p.story, enabled: false }
+          : p.story,
+    })),
+
+    setStoryAspect: (aspect) => update((p) => ({
+      ...p,
+      story: p.story ? { ...p.story, aspect } : { ...defaultStorySettings(aspect), enabled: false },
+    })),
+
+    setStoryBackgroundPreset: (presetId) => update((p) => ({
+      ...p,
+      story: p.story
+        ? { ...p.story, background: { kind: 'color', presetId, blur: p.story.background.blur, dim: p.story.background.dim } }
+        : p.story,
+    })),
+
+    setStoryScrim: (scrim) => update((p) => ({
+      ...p,
+      story: p.story ? { ...p.story, scrim: Math.min(1, Math.max(0, scrim)) } : p.story,
+    })),
+
+    setStoryNamePill: (on) => update((p) => ({
+      ...p,
+      story: p.story ? { ...p.story, showNamePill: on } : p.story,
+    })),
+
+    updateStory: (patch) => update((p) => ({
+      ...p,
+      story: p.story ? { ...p.story, ...patch } : p.story,
+    })),
 
     resolveImageUrls: async () => {
       const { project } = get();

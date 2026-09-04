@@ -117,6 +117,74 @@ export interface ChatProject {
   statusBarTime?: string;
   /** Chat wallpaper / theme. Undefined = the platform's stock background. */
   background?: ChatBackground;
+  /** Story mode: chrome-less bubbles over a background, 9:16/16:9 export. */
+  story?: StorySettings;
+}
+
+/** Output frame shape for Story mode. */
+export type StoryAspect = '9:16' | '16:9';
+
+/**
+ * Story-mode background behind the chat column. Only one of
+ * presetId/libraryId/mediaId applies, matching `kind`.
+ */
+export interface StoryBackground {
+  kind: 'color' | 'library' | 'upload';
+  /** kind: 'color' — id from lib/story/storyColors.ts */
+  presetId?: string;
+  /** kind: 'library' — id from lib/story/storyLibrary.ts */
+  libraryId?: string;
+  /** kind: 'upload' — IndexedDB key for the uploaded image/video */
+  mediaId?: string;
+  /** Transient blob: URL for the upload — never persisted, re-resolved on load. */
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video';
+  /** Gaussian blur in stage px. 0 = sharp. */
+  blur?: number;
+  /** 0–1 dark scrim over the whole background. */
+  dim?: number;
+  /** Loop the background video. Default true. */
+  loop?: boolean;
+  /** Seconds into the video to start playback/export from. */
+  startOffsetSec?: number;
+}
+
+/** Story-mode background music bed, mixed under message sounds and voice. */
+export interface StoryMusic {
+  kind: 'library' | 'upload';
+  /** kind: 'library' — id from lib/story/storyMusic.ts */
+  libraryId?: string;
+  /** kind: 'upload' — IndexedDB key for the uploaded audio file */
+  mediaId?: string;
+  /** Transient blob: URL for the upload — never persisted, re-resolved on load. */
+  mediaUrl?: string;
+  /** 0–1 music volume before ducking. */
+  volume: number;
+  /** Lower the music under a voiceover clip. Default true. */
+  duckUnderVoice?: boolean;
+}
+
+/** Story-mode AI voiceover (Kokoro, generated locally in the browser). */
+export interface StoryVoice {
+  enabled: boolean;
+  /** 0.8–1.3 playback speed multiplier for generated speech. */
+  speed: number;
+  /** participantId -> Kokoro voice id (see lib/tts/voices.ts) */
+  voices: Record<string, string>;
+  /** Use WebGPU (fp32, heavier download) instead of the wasm/q8 default. */
+  preferWebGpu?: boolean;
+}
+
+export interface StorySettings {
+  enabled: boolean;
+  aspect: StoryAspect;
+  background: StoryBackground;
+  music?: StoryMusic;
+  voice?: StoryVoice;
+  /** 0–1 opacity of the dark rounded scrim behind the chat column. */
+  scrim: number;
+  showNamePill: boolean;
+  anchor?: 'top' | 'bottom';
 }
 
 export interface ParsedChatResult {

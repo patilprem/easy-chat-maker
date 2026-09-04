@@ -22,6 +22,8 @@ interface Props {
   onAvatarClick?: (participantId: string) => void;
   onGroupAvatarClick?: () => void;
   feedRef?: React.RefObject<HTMLDivElement | null>;
+  /** Story mode: no status bar, header or input bar — bubbles only. */
+  chromeless?: boolean;
 }
 
 function isChatMessage(msg: Message | undefined): msg is TextMessage | ImageMessage {
@@ -62,7 +64,7 @@ export const AiMessageActions: React.FC<{
 export const ChatGPTPreview: React.FC<Props> = ({
   project, mode, visibleCount, typingParticipantId,
   onUpdateMessage, onDeleteMessage, onAddText, onUpdateStatusTime,
-  feedRef,
+  feedRef, chromeless = false,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -85,11 +87,19 @@ export const ChatGPTPreview: React.FC<Props> = ({
   const bubbleBg = isDark ? 'bg-[#303030]' : 'bg-[#f4f4f4]';
   const iconColor = isDark ? 'text-[#b4b4b4]' : 'text-[#5d5d5d]';
   const inputBg = isDark ? 'bg-[#2f2f2f]' : 'bg-[#f4f4f4]';
+  // Assistant replies are bare text with no bubble behind them, unlike self
+  // messages (always paired with a same-theme bubble). The real app relies on
+  // the page background for contrast; story mode's scrim is always a dark
+  // overlay, so a light-theme project would otherwise render invisible dark
+  // text there.
+  const assistantTextColor = chromeless ? 'text-[#ececec]' : textPrimary;
+  const assistantIconColor = chromeless ? 'text-[#b4b4b4]' : iconColor;
 
   const hasMessages = displayMessages.length > 0;
 
   return (
-    <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden ${pageBg}`}>
+    <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden ${chromeless ? '' : pageBg}`}>
+      {!chromeless && (
       <DeviceStatusBar
         os={project.deviceOS}
         theme={project.theme}
@@ -98,8 +108,10 @@ export const ChatGPTPreview: React.FC<Props> = ({
         editable={isEditor}
         onEditTime={onUpdateStatusTime}
       />
+      )}
 
       {/* Header */}
+      {!chromeless && (
       <div className="flex flex-shrink-0 items-center justify-between px-3 pb-1.5 pt-1.5">
         <div className="flex items-center gap-2">
           <button className={`${chipBg} ${textPrimary} flex h-9 w-9 items-center justify-center rounded-full`}>
@@ -114,6 +126,7 @@ export const ChatGPTPreview: React.FC<Props> = ({
           <MoreVertical size={16} strokeWidth={2.1} />
         </div>
       </div>
+      )}
 
       {/* Feed */}
       <div
@@ -121,7 +134,7 @@ export const ChatGPTPreview: React.FC<Props> = ({
         className="phone-chat-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-4 pb-3 pt-2"
         style={{ scrollBehavior: 'smooth' }}
       >
-        {!hasMessages && (
+        {!hasMessages && !chromeless && (
           <div className="flex h-full items-center justify-center">
             <span className={`${textPrimary} text-[21px] font-semibold`}>What can I help with?</span>
           </div>
@@ -174,13 +187,13 @@ export const ChatGPTPreview: React.FC<Props> = ({
                     e.preventDefault();
                     document.execCommand('insertText', false, e.clipboardData.getData('text/plain'));
                   }}
-                  className={`${textPrimary} text-[14.5px] leading-[22px] outline-none ${isEditor ? 'cursor-text' : 'select-none'}`}
+                  className={`${assistantTextColor} text-[14.5px] leading-[22px] outline-none ${isEditor ? 'cursor-text' : 'select-none'}`}
                   style={{ overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}
                 >
                   {msg.kind === 'text' ? msg.text : ''}
                 </div>
               )}
-              <div className={`${iconColor} mt-2.5 flex items-center gap-[18px]`}>
+              <div className={`${assistantIconColor} mt-2.5 flex items-center gap-[18px]`}>
                 <Copy size={15} strokeWidth={2} />
                 <ThumbsUp size={15} strokeWidth={2} />
                 <ThumbsDown size={15} strokeWidth={2} />
@@ -198,12 +211,13 @@ export const ChatGPTPreview: React.FC<Props> = ({
         {/* Streaming indicator: pulsing dot */}
         {showStreamDot && (
           <div className="py-2" data-typing-indicator>
-            <span className={`block h-3.5 w-3.5 animate-pulse rounded-full ${isDark ? 'bg-white' : 'bg-black'}`} />
+            <span className={`block h-3.5 w-3.5 animate-pulse rounded-full ${chromeless || isDark ? 'bg-white' : 'bg-black'}`} />
           </div>
         )}
       </div>
 
       {/* Input bar */}
+      {!chromeless && (
       <div data-chat-input className="flex-shrink-0 px-3 pb-2 pt-1">
         <div className={`${inputBg} flex items-center gap-2.5 rounded-full py-2.5 pl-4 pr-2`}>
           <Plus size={20} strokeWidth={2.1} className={`${textPrimary} flex-shrink-0`} />
@@ -216,6 +230,7 @@ export const ChatGPTPreview: React.FC<Props> = ({
           </span>
         </div>
       </div>
+      )}
     </div>
   );
 };

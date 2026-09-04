@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ScriptPanel } from './ScriptPanel';
 import { PlatformSettings } from './PlatformSettings';
+import { StorySettings } from './StorySettings';
 import { ExportPanel } from './ExportPanel';
 import { PhonePreview } from './PhonePreview';
 import { useEditorStore } from '../../lib/state/editorStore';
@@ -71,6 +72,8 @@ export const ChatEditorApp: React.FC = () => {
         {/* Right — Settings + Export */}
         <div className="border-l border-white/5 p-5 flex flex-col gap-6 overflow-y-auto">
           <PlatformSettings />
+          <div className="h-px bg-white/10" />
+          <StorySettings />
           <ExportPanel />
         </div>
       </div>
@@ -105,6 +108,8 @@ export const ChatEditorApp: React.FC = () => {
             <div className="space-y-6">
               <ScriptPanel />
               <PlatformSettings />
+              <div className="h-px bg-white/10" />
+              <StorySettings />
             </div>
           ) : (
             <div className="flex justify-center pt-2">

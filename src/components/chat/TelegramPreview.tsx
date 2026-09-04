@@ -28,6 +28,8 @@ interface Props {
   onAvatarClick?: (participantId: string) => void;
   onGroupAvatarClick?: () => void;
   feedRef?: React.RefObject<HTMLDivElement | null>;
+  /** Story mode: no status bar, header, input bar or wallpaper — bubbles only. */
+  chromeless?: boolean;
 }
 
 function isTelegramMessage(msg: Message | undefined): msg is TextMessage | ImageMessage {
@@ -461,13 +463,14 @@ export const TelegramPreview: React.FC<Props> = ({
   project, mode, visibleCount, typingParticipantId, activeReactionIds = [],
   onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage, onAddText, onAddImage, onAddDate,
   onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, onGroupAvatarClick, feedRef,
+  chromeless = false,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
   const allVisible = visibleCount === undefined;
   const displayMessages = allVisible ? project.messages : project.messages.slice(0, visibleCount);
   const hasBackground = hasCustomBackground(project);
-  const doodleOn = showDoodle(project);
+  const doodleOn = showDoodle(project) && !chromeless;
 
   const getParticipant = useCallback(
     (id: string): Participant | undefined => project.participants.find((p) => p.id === id),
@@ -504,7 +507,7 @@ export const TelegramPreview: React.FC<Props> = ({
     <div
       className="relative flex h-full min-h-0 w-full flex-col overflow-hidden"
       style={
-        hasBackground
+        chromeless || hasBackground
           ? undefined
           : isDark
             ? { backgroundColor: WALLPAPER_DARK }
@@ -513,9 +516,11 @@ export const TelegramPreview: React.FC<Props> = ({
     >
       {/* Telegram paints the wallpaper edge to edge, with the header pill and
           composer floating over it — so the layer covers the whole screen and
-          the chrome is lifted above it. */}
-      <ChatBackgroundLayer project={project} />
+          the chrome is lifted above it. In story mode there is no wallpaper
+          and no chrome to lift, so the wrapper stays transparent. */}
+      {!chromeless && <ChatBackgroundLayer project={project} />}
       <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+      {!chromeless && (
       <DeviceStatusBar
         os={project.deviceOS}
         theme={project.theme}
@@ -524,7 +529,9 @@ export const TelegramPreview: React.FC<Props> = ({
         editable={isEditor}
         onEditTime={onUpdateStatusTime}
       />
+      )}
 
+      {!chromeless && (
       <div className="relative z-20 flex flex-shrink-0 items-center gap-2 px-3 pb-0.5 pt-0.5">
         <button className={`${circleBg} ${textPrimary} flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full shadow-sm ring-1 ring-white/20`}>
           <ChevronLeft size={25} strokeWidth={2.4} />
@@ -555,10 +562,11 @@ export const TelegramPreview: React.FC<Props> = ({
           <EllipsisVertical size={22} strokeWidth={2.5} />
         </button>
       </div>
+      )}
 
       <div
         ref={feedRef}
-        data-has-background={hasBackground ? '' : undefined}
+        data-has-background={hasBackground && !chromeless ? '' : undefined}
         className="phone-chat-scroll relative z-[1] min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
         style={{ scrollBehavior: 'smooth' }}
       >
@@ -662,6 +670,7 @@ export const TelegramPreview: React.FC<Props> = ({
         </div>
       </div>
 
+      {!chromeless && (
       <div data-chat-input className="relative z-20 flex-shrink-0 px-3 pb-2 pt-0.5">
         <div className={`${inputBg} flex items-center gap-2 rounded-full px-3 py-1.5 shadow-sm ring-1 ring-white/20`}>
           <Smile size={20} strokeWidth={2.1} className={`${inputIcon} flex-shrink-0`} />
@@ -672,6 +681,7 @@ export const TelegramPreview: React.FC<Props> = ({
           </div>
         </div>
       </div>
+      )}
       </div>
     </div>
   );

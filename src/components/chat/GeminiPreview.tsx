@@ -23,6 +23,8 @@ interface Props {
   onAvatarClick?: (participantId: string) => void;
   onGroupAvatarClick?: () => void;
   feedRef?: React.RefObject<HTMLDivElement | null>;
+  /** Story mode: no status bar, header or input bar — bubbles only. */
+  chromeless?: boolean;
 }
 
 function isChatMessage(msg: Message | undefined): msg is TextMessage | ImageMessage {
@@ -49,7 +51,7 @@ const GeminiStar: React.FC<{ size?: number }> = ({ size = 26 }) => (
 export const GeminiPreview: React.FC<Props> = ({
   project, mode, visibleCount, typingParticipantId,
   onUpdateMessage, onDeleteMessage, onAddText, onUpdateStatusTime, onUpdateSubtitle,
-  feedRef,
+  feedRef, chromeless = false,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -72,6 +74,14 @@ export const GeminiPreview: React.FC<Props> = ({
   const iconColor = isDark ? 'text-[#c4c7c5]' : 'text-[#575b5f]';
   const inputBg = isDark ? 'bg-[#1e1f20]' : 'bg-[#f0f4f9]';
   const sendBg = isDark ? 'bg-[#4c8df6]' : 'bg-[#0b57d0]';
+  // Assistant replies are bare text with no bubble behind them, unlike self
+  // messages (always paired with a same-theme bubble). The real app relies on
+  // the page background for contrast; story mode's scrim is always a dark
+  // overlay, so a light-theme project would otherwise render invisible dark
+  // text there.
+  const assistantTextColor = chromeless ? 'text-[#e3e3e3]' : textPrimary;
+  const assistantIconColor = chromeless ? 'text-[#c4c7c5]' : iconColor;
+  const assistantMutedColor = chromeless ? 'text-[#9aa0a6]' : textMuted;
 
   const hasMessages = displayMessages.length > 0;
   const modelLabel = project.subtitle || 'Flash';
@@ -93,7 +103,7 @@ export const GeminiPreview: React.FC<Props> = ({
   );
 
   return (
-    <div className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden ${pageBg}`}>
+    <div className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden ${chromeless ? '' : pageBg}`}>
       <style>{`
         @keyframes gemini-aurora {
           0% { opacity: 0.55; transform: translateY(0) scale(1); }
@@ -106,6 +116,7 @@ export const GeminiPreview: React.FC<Props> = ({
         }
       `}</style>
 
+      {!chromeless && (
       <DeviceStatusBar
         os={project.deviceOS}
         theme={project.theme}
@@ -114,8 +125,10 @@ export const GeminiPreview: React.FC<Props> = ({
         editable={isEditor}
         onEditTime={onUpdateStatusTime}
       />
+      )}
 
       {/* Header */}
+      {!chromeless && (
       <div className="flex flex-shrink-0 items-center justify-between px-3.5 pb-1.5 pt-2">
         <div className="flex items-center gap-3.5">
           <Menu size={19} strokeWidth={2} className={textPrimary} />
@@ -138,6 +151,7 @@ export const GeminiPreview: React.FC<Props> = ({
           <MoreVertical size={17} strokeWidth={2.1} />
         </div>
       </div>
+      )}
 
       {/* Feed */}
       <div
@@ -145,7 +159,7 @@ export const GeminiPreview: React.FC<Props> = ({
         className="phone-chat-scroll relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-4 pb-3 pt-2"
         style={{ scrollBehavior: 'smooth' }}
       >
-        {!hasMessages && (
+        {!hasMessages && !chromeless && (
           <div className="flex h-[65%] flex-col items-center justify-center gap-3">
             <GeminiStar size={30} />
             <span
@@ -188,9 +202,9 @@ export const GeminiPreview: React.FC<Props> = ({
               {msg.kind === 'image' && msg.objectUrl ? (
                 <img src={msg.objectUrl} alt="" className="max-h-[260px] max-w-[210px] rounded-[18px] object-cover" />
               ) : (
-                editableText(msg, `${textPrimary} text-[14.5px] leading-[22px]`)
+                editableText(msg, `${assistantTextColor} text-[14.5px] leading-[22px]`)
               )}
-              <div className={`${iconColor} mt-3 flex items-center gap-[18px]`}>
+              <div className={`${assistantIconColor} mt-3 flex items-center gap-[18px]`}>
                 <ThumbsUp size={15} strokeWidth={2} />
                 <ThumbsDown size={15} strokeWidth={2} />
                 <RotateCw size={15} strokeWidth={2} />
@@ -200,7 +214,7 @@ export const GeminiPreview: React.FC<Props> = ({
                 <Volume2 size={16} strokeWidth={2} />
               </div>
               {isLastMessage && (
-                <div className={`${textMuted} mt-2.5 text-[11px] leading-none`}>
+                <div className={`${assistantMutedColor} mt-2.5 text-[11px] leading-none`}>
                   Gemini is AI and can make mistakes.
                 </div>
               )}
@@ -213,7 +227,7 @@ export const GeminiPreview: React.FC<Props> = ({
 
         {/* Thinking: three fading dots */}
         {showThinking && (
-          <div className={`${textMuted} flex gap-1 py-3 text-[22px] leading-none`} data-typing-indicator>
+          <div className={`${assistantMutedColor} flex gap-1 py-3 text-[22px] leading-none`} data-typing-indicator>
             {[0, 1, 2].map((i) => (
               <span key={i} style={{ animation: `gemini-dot 1.2s ${i * 0.2}s infinite` }}>•</span>
             ))}
@@ -236,6 +250,7 @@ export const GeminiPreview: React.FC<Props> = ({
       )}
 
       {/* Input bar */}
+      {!chromeless && (
       <div data-chat-input className="relative z-20 flex-shrink-0 px-3 pb-2 pt-1">
         <div className={`${inputBg} flex items-center gap-3 rounded-full py-2.5 pl-4 pr-2`}>
           <Plus size={20} strokeWidth={2} className={textMuted} />
@@ -246,6 +261,7 @@ export const GeminiPreview: React.FC<Props> = ({
           </span>
         </div>
       </div>
+      )}
     </div>
   );
 };

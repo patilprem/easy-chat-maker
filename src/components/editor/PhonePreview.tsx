@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { Play, Pause, Plus, Volume2, VolumeX } from 'lucide-react';
 import { ChatPreview } from '../chat/ChatPreview';
+import { StoryStage } from '../chat/StoryStage';
 import { OnboardingHint } from './OnboardingHint';
 import { buildFramePlan, FPS } from '../../lib/video/chatTimeline';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { playMessageSound } from '../../lib/media/messageSounds';
+import { storyStage } from '../../lib/story/storyLayout';
 import type { Message } from '../../lib/parser/types';
 
 const SPEED_OPTIONS = [1, 1.5, 2, 0.75];
@@ -130,6 +132,37 @@ export const PhonePreview: React.FC = () => {
   const PHONE_W = 360;
   const PHONE_H = 780;
 
+  const story = project.story;
+  const isStory = story?.enabled ?? false;
+  const stage = isStory ? storyStage(story!.aspect) : null;
+  // Fit the story stage into the same footprint the phone frame occupies, so
+  // switching modes doesn't reflow the rest of the editor layout.
+  const storyFit = stage ? Math.min(PHONE_W / stage.w, PHONE_H / stage.h) : 1;
+
+  const chatPreviewProps = {
+    project,
+    visibleCount: isPlaying ? currentPlan?.visibleCount : undefined,
+    typingParticipantId: isPlaying ? currentPlan?.typingParticipantId : null,
+    activeReactionIds: isPlaying ? currentPlan?.activeReactionIds : undefined,
+    onUpdateMessage: (id: string, patch: Partial<Message>) => updateMessage(id, patch),
+    onSetReaction: setReaction,
+    onClearReaction: clearReaction,
+    onDeleteMessage: deleteMessage,
+    onAddText: (afterId: string, replyToId?: string) => addTextMessage(afterId, undefined, replyToId),
+    onAddImage: (afterId: string, file: File) => addImageMessage(afterId, file),
+    onAddDate: (afterId: string, label?: string) => addDateMessage(afterId, label),
+    onAddSystem: (afterId: string) => addSystemMessage(afterId),
+    onAddCall: (afterId: string, isVoiceCall?: boolean, duration?: string, status?: 'missed' | 'completed' | 'declined') =>
+      addCallMessage(afterId, undefined, isVoiceCall, duration, status),
+    onAddVoiceNote: (afterId: string, duration?: string) => addVoiceNoteMessage(afterId, undefined, duration),
+    onUpdateTitle: setTitle,
+    onUpdateSubtitle: setSubtitle,
+    onUpdateStatusTime: setStatusBarTime,
+    onAvatarClick: handleAvatarClick,
+    onGroupAvatarClick: handleGroupAvatarClick,
+    feedRef,
+  };
+
   return (
     <div className="flex flex-col items-center gap-4 h-full">
       {/* Play / Pause */}
@@ -165,65 +198,56 @@ export const PhonePreview: React.FC = () => {
         </span>
       </div>
 
-      {/* Phone frame */}
-      <div
-        className="relative flex-shrink-0 mx-auto"
-        style={{
-          width: PHONE_W,
-          height: PHONE_H,
-          maxWidth: '100%',
-        }}
-      >
-        {/* Phone shell */}
+      {/* Preview: story stage or phone frame */}
+      {isStory && stage ? (
         <div
-          className={`absolute inset-0 rounded-[44px] border-[10px] overflow-hidden shadow-2xl ${
-            isDark ? 'border-[#1a1a1a] bg-[#1a1a1a]' : 'border-[#222] bg-[#222]'
-          }`}
-          style={{ boxShadow: '0 0 0 1px rgba(0,0,0,0.4), 0 30px 80px rgba(0,0,0,0.5)' }}
+          className="relative flex-shrink-0 mx-auto overflow-hidden rounded-2xl shadow-2xl"
+          style={{ width: stage.w * storyFit, height: stage.h * storyFit, maxWidth: '100%' }}
         >
-          {/* Notch (iOS) / Punch hole (Android) */}
-          {iOS ? (
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 rounded-b-2xl z-50"
-              style={{ background: '#1a1a1a' }} />
-          ) : (
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full z-50"
-              style={{ background: '#1a1a1a' }} />
-          )}
-
-          {/* Chat preview */}
-          <ChatPreview
-            project={project}
-            mode="editor"
-            visibleCount={isPlaying ? currentPlan?.visibleCount : undefined}
-            typingParticipantId={isPlaying ? currentPlan?.typingParticipantId : null}
-            activeReactionIds={isPlaying ? currentPlan?.activeReactionIds : undefined}
-            onUpdateMessage={(id, patch) => updateMessage(id, patch as Partial<Message>)}
-            onSetReaction={setReaction}
-            onClearReaction={clearReaction}
-            onDeleteMessage={deleteMessage}
-            onAddText={(afterId, replyToId) => addTextMessage(afterId, undefined, replyToId)}
-            onAddImage={(afterId, file) => addImageMessage(afterId, file)}
-            onAddDate={(afterId, label) => addDateMessage(afterId, label)}
-            onAddSystem={(afterId) => addSystemMessage(afterId)}
-            onAddCall={(afterId, isVoice, duration, status) => addCallMessage(afterId, undefined, isVoice, duration, status)}
-            onAddVoiceNote={(afterId, duration) => addVoiceNoteMessage(afterId, undefined, duration)}
-            onUpdateTitle={setTitle}
-            onUpdateSubtitle={setSubtitle}
-            onUpdateStatusTime={setStatusBarTime}
-            onAvatarClick={handleAvatarClick}
-            onGroupAvatarClick={handleGroupAvatarClick}
-            feedRef={feedRef}
-          />
+          <div style={{ width: stage.w, height: stage.h, transform: `scale(${storyFit})`, transformOrigin: 'top left' }}>
+            <StoryStage project={project} aspect={story!.aspect} renderBackground id="phone-screen">
+              <ChatPreview {...chatPreviewProps} mode="editor" chromeless id="story-chat" />
+            </StoryStage>
+          </div>
         </div>
+      ) : (
+        <div
+          className="relative flex-shrink-0 mx-auto"
+          style={{
+            width: PHONE_W,
+            height: PHONE_H,
+            maxWidth: '100%',
+          }}
+        >
+          {/* Phone shell */}
+          <div
+            className={`absolute inset-0 rounded-[44px] border-[10px] overflow-hidden shadow-2xl ${
+              isDark ? 'border-[#1a1a1a] bg-[#1a1a1a]' : 'border-[#222] bg-[#222]'
+            }`}
+            style={{ boxShadow: '0 0 0 1px rgba(0,0,0,0.4), 0 30px 80px rgba(0,0,0,0.5)' }}
+          >
+            {/* Notch (iOS) / Punch hole (Android) */}
+            {iOS ? (
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 rounded-b-2xl z-50"
+                style={{ background: '#1a1a1a' }} />
+            ) : (
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full z-50"
+                style={{ background: '#1a1a1a' }} />
+            )}
 
-        <OnboardingHint visible={project.messages.length > 0 && !isPlaying} />
+            {/* Chat preview */}
+            <ChatPreview {...chatPreviewProps} mode="editor" />
+          </div>
 
-        {/* Side buttons (decorative) */}
-        <div className="absolute left-[-12px] top-24 w-1.5 h-8 rounded-l-full bg-gray-600" />
-        <div className="absolute left-[-12px] top-36 w-1.5 h-12 rounded-l-full bg-gray-600" />
-        <div className="absolute left-[-12px] top-52 w-1.5 h-12 rounded-l-full bg-gray-600" />
-        <div className="absolute right-[-12px] top-32 w-1.5 h-16 rounded-r-full bg-gray-600" />
-      </div>
+          <OnboardingHint visible={project.messages.length > 0 && !isPlaying} />
+
+          {/* Side buttons (decorative) */}
+          <div className="absolute left-[-12px] top-24 w-1.5 h-8 rounded-l-full bg-gray-600" />
+          <div className="absolute left-[-12px] top-36 w-1.5 h-12 rounded-l-full bg-gray-600" />
+          <div className="absolute left-[-12px] top-52 w-1.5 h-12 rounded-l-full bg-gray-600" />
+          <div className="absolute right-[-12px] top-32 w-1.5 h-16 rounded-r-full bg-gray-600" />
+        </div>
+      )}
 
       {/* Empty chat add button */}
       {project.messages.length === 0 && (

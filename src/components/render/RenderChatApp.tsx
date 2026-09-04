@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ChatPreview } from '../chat/ChatPreview';
+import { StoryStage } from '../chat/StoryStage';
 import { buildFramePlan, FPS } from '../../lib/video/chatTimeline';
 import type { ChatProject, FramePlan } from '../../lib/parser/types';
 
@@ -15,11 +16,13 @@ function getRuntimeConfig(fallbackMode: Props['mode']): {
   autoplay: boolean;
   /** Full-chat PNG export: one screen's height, so photo wallpapers repeat. */
   tile: number;
+  /** Story mode: render a chrome-less, story-sized stage instead of a phone. */
+  story: boolean;
 } {
   if (typeof window === 'undefined') {
     return fallbackMode === 'video'
-      ? { mode: 'video', width: 390, height: 844, scale: 1, autoplay: false, tile: 0 }
-      : { mode: 'export', width: 370, height: 824, scale: 1, autoplay: false, tile: 0 };
+      ? { mode: 'video', width: 390, height: 844, scale: 1, autoplay: false, tile: 0, story: false }
+      : { mode: 'export', width: 370, height: 824, scale: 1, autoplay: false, tile: 0, story: false };
   }
 
   const params = new URLSearchParams(window.location.search);
@@ -39,6 +42,7 @@ function getRuntimeConfig(fallbackMode: Props['mode']): {
     scale: Number.isFinite(requestedScale) && requestedScale > 0 ? requestedScale : 1,
     autoplay: params.get('autoplay') === '1',
     tile: Number.isFinite(requestedTile) && requestedTile > 0 ? requestedTile : 0,
+    story: params.get('story') === '1',
   };
 }
 
@@ -203,6 +207,23 @@ export const RenderChatApp: React.FC<Props> = ({ mode }) => {
       <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
         Loading...
       </div>
+    );
+  }
+
+  if (runtimeConfig.story && project.story) {
+    return (
+      <StoryStage project={project} aspect={project.story.aspect} renderBackground={false} id="phone-screen-export">
+        <ChatPreview
+          project={project}
+          mode={runtimeConfig.mode === 'export' ? 'export' : 'video'}
+          chromeless
+          id="story-chat"
+          visibleCount={currentFrame?.visibleCount}
+          typingParticipantId={currentFrame?.typingParticipantId}
+          activeReactionIds={currentFrame?.activeReactionIds}
+          feedRef={feedRef}
+        />
+      </StoryStage>
     );
   }
 

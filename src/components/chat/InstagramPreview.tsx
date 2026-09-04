@@ -25,6 +25,8 @@ interface Props {
   onUpdateStatusTime?: (t: string) => void;
   onAvatarClick?: (participantId: string) => void;
   feedRef?: React.RefObject<HTMLDivElement | null>;
+  /** Story mode: no status bar, header, input bar or wallpaper — bubbles only. */
+  chromeless?: boolean;
 }
 
 export const InstagramPreview: React.FC<Props> = ({
@@ -33,6 +35,7 @@ export const InstagramPreview: React.FC<Props> = ({
   onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage,
   onAddText, onAddImage, onAddDate,
   onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, feedRef,
+  chromeless = false,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -80,6 +83,7 @@ export const InstagramPreview: React.FC<Props> = ({
 
   return (
     <div className={`flex flex-col h-full min-h-0 w-full overflow-hidden ${isDark ? 'dark' : ''}`}>
+      {!chromeless && (
       <DeviceStatusBar
         os={project.deviceOS}
         theme={project.theme}
@@ -88,7 +92,9 @@ export const InstagramPreview: React.FC<Props> = ({
         editable={isEditor}
         onEditTime={onUpdateStatusTime}
       />
+      )}
 
+      {!chromeless && (
       <div className={`${headerBg} flex items-center gap-3 px-3 pt-2 pb-2.5 flex-shrink-0`}>
         <ChevronLeft size={26} strokeWidth={2.2} className={`${textPrimary} flex-shrink-0`} />
         {project.isGroup ? (
@@ -147,15 +153,17 @@ export const InstagramPreview: React.FC<Props> = ({
           <Video size={25} strokeWidth={2.1} className={textPrimary} />
         </div>
       </div>
+      )}
 
       {/* Chat feed — a chat theme paints behind the scroller (and tints the
-          outgoing bubbles), leaving the header and composer chrome alone. */}
+          outgoing bubbles), leaving the header and composer chrome alone. In
+          story mode the wrapper is transparent instead. */}
       <div className="relative flex flex-1 min-h-0 flex-col">
-      <ChatBackgroundLayer project={project} />
+      {!chromeless && <ChatBackgroundLayer project={project} />}
       <div
         ref={feedRef}
-        data-has-background={hasBackground ? '' : undefined}
-        className={`phone-chat-scroll relative z-[1] flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${hasBackground ? '' : bg} py-2`}
+        data-has-background={hasBackground && !chromeless ? '' : undefined}
+        className={`phone-chat-scroll relative z-[1] flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${chromeless || hasBackground ? '' : bg} py-2`}
         style={{ scrollBehavior: 'smooth' }}
       >
         {displayMessages.map((msg, idx) => {
@@ -241,6 +249,7 @@ export const InstagramPreview: React.FC<Props> = ({
       </div>
       </div>
 
+      {!chromeless && (
       <div data-chat-input className={`${bg} px-2.5 pt-1.5 pb-2 flex-shrink-0`}>
         <div className={`${inputShellBg} flex items-center gap-3 rounded-full px-2 py-2`}>
           <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#00FF87] to-[#60EFFF] flex items-center justify-center flex-shrink-0">
@@ -253,6 +262,7 @@ export const InstagramPreview: React.FC<Props> = ({
           <CirclePlus size={24} strokeWidth={2.2} className={`${inputIconColor} flex-shrink-0`} />
         </div>
       </div>
+      )}
     </div>
   );
 };

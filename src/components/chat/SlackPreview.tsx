@@ -24,6 +24,8 @@ interface Props {
   onUpdateStatusTime?: (t: string) => void;
   onAvatarClick?: (participantId: string) => void;
   feedRef?: React.RefObject<HTMLDivElement | null>;
+  /** Story mode: no status bar, header or input bar — bubbles only. */
+  chromeless?: boolean;
 }
 
 function isSlackMessage(msg: Message | undefined): msg is TextMessage | ImageMessage {
@@ -259,11 +261,16 @@ const SlackMessageRow: React.FC<{
   onAddText?: (afterId: string) => void;
   onAddImage?: (afterId: string, file: File) => void;
   onAddDate?: (afterId: string, label?: string) => void;
+  /** Story mode: Slack has no bubble background behind messages, only the
+   * page color — which chromeless mode removes — so text must stay legible
+   * against the story stage's dark scrim regardless of the chat's theme. */
+  chromeless?: boolean;
 }> = ({
   msg, participant, project, isEditor, isFirstInGroup,
   onEdit, onEditTime, onReaction, onClearReaction, onDelete, onAddText, onAddImage, onAddDate,
+  chromeless = false,
 }) => {
-  const isDark = project.theme === 'dark';
+  const isDark = chromeless || project.theme === 'dark';
   const [showMenu, setShowMenu] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null);
@@ -480,6 +487,7 @@ export const SlackPreview: React.FC<Props> = ({
   project, mode, visibleCount, typingParticipantId,
   onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage, onAddText, onAddImage, onAddDate,
   onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, feedRef,
+  chromeless = false,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -500,6 +508,11 @@ export const SlackPreview: React.FC<Props> = ({
   const textMuted = isDark ? 'text-[#c7c7cc]' : 'text-[#616061]';
   const inputBg = isDark ? 'bg-[#1d1c21] border-[#3a3a3f]' : 'bg-white border-[#dddddd]';
   const inputIconBg = isDark ? 'bg-[#2a2b2f]' : 'bg-[#f2f2f2]';
+  // The channel-created/member-joined system lines are bare text with no
+  // badge behind them (unlike the date divider chip below, which pairs its
+  // own background with its text and stays legible either way) — force
+  // readable text against story mode's always-dark scrim.
+  const systemEventIsDark = chromeless || isDark;
 
   const editableProps = (onSave: (v: string) => void) =>
     isEditor
@@ -515,7 +528,8 @@ export const SlackPreview: React.FC<Props> = ({
       : {};
 
   return (
-    <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden ${bg}`}>
+    <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden ${chromeless ? '' : bg}`}>
+      {!chromeless && (
       <DeviceStatusBar
         os={project.deviceOS}
         theme={project.theme}
@@ -524,7 +538,9 @@ export const SlackPreview: React.FC<Props> = ({
         editable={isEditor}
         onEditTime={onUpdateStatusTime}
       />
+      )}
 
+      {!chromeless && (
       <div className={`${headerBg} flex flex-shrink-0 items-center gap-3 border-b px-3 py-2`}>
         <ChevronLeft size={29} strokeWidth={2.4} className={`${textPrimary} flex-shrink-0`} />
         <div className={`${headerPill} flex min-w-0 flex-1 items-center gap-2 rounded-2xl px-2.5 py-1.5`}>
@@ -558,10 +574,11 @@ export const SlackPreview: React.FC<Props> = ({
         <SlackLogoIcon size={30} className="flex-shrink-0" />
         <Headphones size={23} strokeWidth={2.3} className={`${textPrimary} flex-shrink-0`} />
       </div>
+      )}
 
       <div
         ref={feedRef}
-        className={`phone-chat-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden ${bg} pb-3`}
+        className={`phone-chat-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden ${chromeless ? '' : bg} pb-3`}
         style={{ scrollBehavior: 'smooth' }}
       >
         {displayMessages.map((msg, idx) => {
@@ -591,7 +608,7 @@ export const SlackPreview: React.FC<Props> = ({
                   key={msg.id}
                   project={project}
                   creator={createdEvent.creator}
-                  isDark={isDark}
+                  isDark={systemEventIsDark}
                 />
               );
             }
@@ -608,13 +625,13 @@ export const SlackPreview: React.FC<Props> = ({
                   inviter={addedEvent.inviter}
                   addedNames={addedEvent.addedNames}
                   participant={participant}
-                  isDark={isDark}
+                  isDark={systemEventIsDark}
                 />
               );
             }
 
             return (
-              <div key={msg.id} className={`px-[86px] py-3 text-[14.5px] leading-[24px] ${textPrimary}`}>
+              <div key={msg.id} className={`px-[86px] py-3 text-[14.5px] leading-[24px] ${chromeless ? 'text-[#f8f8f8]' : textPrimary}`}>
                 <span
                   contentEditable={isEditor}
                   suppressContentEditableWarning
@@ -650,6 +667,7 @@ export const SlackPreview: React.FC<Props> = ({
               onAddText={onAddText}
               onAddImage={onAddImage}
               onAddDate={onAddDate}
+              chromeless={chromeless}
             />
           );
         })}
@@ -668,6 +686,7 @@ export const SlackPreview: React.FC<Props> = ({
         {typingParticipant && <div className="h-16" data-typing-tail aria-hidden="true" />}
       </div>
 
+      {!chromeless && (
       <div data-chat-input className={`${bg} flex-shrink-0 px-0 pt-1`}>
         <div className={`${inputBg} flex items-center gap-2.5 rounded-t-[18px] border px-5 py-2`}>
           <div className={`${inputIconBg} flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${textPrimary}`}>
@@ -679,6 +698,7 @@ export const SlackPreview: React.FC<Props> = ({
           <Mic size={22} strokeWidth={2.2} className={`${textMuted} flex-shrink-0`} />
         </div>
       </div>
+      )}
     </div>
   );
 };

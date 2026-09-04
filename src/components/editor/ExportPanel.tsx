@@ -5,6 +5,7 @@ import { useEditorStore } from '../../lib/state/editorStore';
 import { exportPng, type PngScope } from '../../lib/export/exportPng';
 import { exportMp4, type ProgressState } from '../../lib/export/exportMp4';
 import { exportCompositeMp4 } from '../../lib/export/exportComposite';
+import { exportStoryMp4 } from '../../lib/export/exportStory';
 import { exportPlaywrightVideo, RecorderUnavailableError } from '../../lib/export/exportPlaywrightVideo';
 import {
   trackConsentAccepted,
@@ -132,24 +133,34 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
 
     // Which renderer produced the file, reported alongside the completed event
     // so a silent slide down the fallback chain is visible in the data.
-    let renderer: 'recorder' | 'composite' | 'frames' = 'recorder';
+    let renderer: 'recorder' | 'composite' | 'frames' | 'story' = 'recorder';
 
     try {
-      // Prefer the local Playwright recorder (used by the desktop Run App.bat
-      // workflow). On the live site, render in-browser instead: the sprite
-      // compositor first (30fps, smooth scroll and typing animation), and the
-      // legacy per-frame capturer only if a platform layout defeats it.
-      try {
-        await exportPlaywrightVideo(project, onProgress, { includeSounds });
-      } catch (e) {
-        if (!(e instanceof RecorderUnavailableError)) throw e;
+      if (project.story?.enabled) {
+        // Story mode has no phone chrome and a moving background to paint,
+        // so it always uses the sprite compositor — the local recorder
+        // records the phone frame, and the legacy per-frame capturer has no
+        // moving-background support. A failure here is reported, not
+        // silently downgraded to a plain phone export.
+        renderer = 'story';
+        await exportStoryMp4(project, onProgress, { includeSounds });
+      } else {
+        // Prefer the local Playwright recorder (used by the desktop Run App.bat
+        // workflow). On the live site, render in-browser instead: the sprite
+        // compositor first (30fps, smooth scroll and typing animation), and the
+        // legacy per-frame capturer only if a platform layout defeats it.
         try {
-          renderer = 'composite';
-          await exportCompositeMp4(project, onProgress, { includeSounds });
-        } catch (compositeError) {
-          console.warn('Composite export failed, using frame capture:', compositeError);
-          renderer = 'frames';
-          await exportMp4(project, onProgress, { includeSounds });
+          await exportPlaywrightVideo(project, onProgress, { includeSounds });
+        } catch (e) {
+          if (!(e instanceof RecorderUnavailableError)) throw e;
+          try {
+            renderer = 'composite';
+            await exportCompositeMp4(project, onProgress, { includeSounds });
+          } catch (compositeError) {
+            console.warn('Composite export failed, using frame capture:', compositeError);
+            renderer = 'frames';
+            await exportMp4(project, onProgress, { includeSounds });
+          }
         }
       }
       trackExportCompleted('mp4', project.platform, renderer);
@@ -298,7 +309,7 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
               </span>
             ) : (
               <>
-                <Clapperboard size={14} /> Export Video
+                <Clapperboard size={14} /> {project.story?.enabled ? 'Export Story Video' : 'Export Video'}
               </>
             )}
           </button>

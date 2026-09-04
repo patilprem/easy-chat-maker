@@ -25,6 +25,8 @@ interface Props {
   onUpdateStatusTime?: (t: string) => void;
   onAvatarClick?: (participantId: string) => void;
   feedRef?: React.RefObject<HTMLDivElement | null>;
+  /** Story mode: no status bar, header, input bar or wallpaper — bubbles only. */
+  chromeless?: boolean;
 }
 
 function isBubbleMessage(msg: Message | undefined): msg is TextMessage | ImageMessage {
@@ -449,6 +451,7 @@ export const MessengerPreview: React.FC<Props> = ({
   project, mode, visibleCount, typingParticipantId, activeReactionIds = [],
   onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage, onAddText, onAddImage, onAddDate,
   onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, feedRef,
+  chromeless = false,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -486,7 +489,8 @@ export const MessengerPreview: React.FC<Props> = ({
       : {};
 
   return (
-    <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden ${bg}`}>
+    <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden ${chromeless ? '' : bg}`}>
+      {!chromeless && (
       <DeviceStatusBar
         os={project.deviceOS}
         theme={project.theme}
@@ -495,7 +499,9 @@ export const MessengerPreview: React.FC<Props> = ({
         editable={isEditor}
         onEditTime={onUpdateStatusTime}
       />
+      )}
 
+      {!chromeless && (
       <div className={`${headerBg} flex flex-shrink-0 items-center gap-3 px-3 py-2 shadow-sm`}>
         <ChevronLeft size={28} strokeWidth={2.4} className={`${accent} flex-shrink-0`} />
         <button
@@ -524,15 +530,17 @@ export const MessengerPreview: React.FC<Props> = ({
           <MessengerInfoIcon size={26} />
         </div>
       </div>
+      )}
 
       {/* Chat feed — a chat theme paints behind the scroller (and tints the
-          outgoing bubbles), leaving the header and composer chrome alone. */}
+          outgoing bubbles), leaving the header and composer chrome alone. In
+          story mode the wrapper is transparent instead. */}
       <div className="relative flex min-h-0 flex-1 flex-col">
-      <ChatBackgroundLayer project={project} />
+      {!chromeless && <ChatBackgroundLayer project={project} />}
       <div
         ref={feedRef}
-        data-has-background={hasBackground ? '' : undefined}
-        className={`phone-chat-scroll relative z-[1] min-h-0 flex-1 overflow-y-auto overflow-x-hidden ${hasBackground ? '' : bg} py-2`}
+        data-has-background={hasBackground && !chromeless ? '' : undefined}
+        className={`phone-chat-scroll relative z-[1] min-h-0 flex-1 overflow-y-auto overflow-x-hidden ${chromeless || hasBackground ? '' : bg} py-2`}
         style={{ scrollBehavior: 'smooth' }}
       >
         {displayMessages.map((msg, idx) => {
@@ -611,6 +619,7 @@ export const MessengerPreview: React.FC<Props> = ({
       </div>
       </div>
 
+      {!chromeless && (
       <div data-chat-input className={`${bg} flex flex-shrink-0 items-center gap-3 px-3 pb-3 pt-2 ${accent}`}>
         <MessengerPlusIcon size={25} className="flex-shrink-0" />
         <MessengerCameraIcon size={26} className="flex-shrink-0" />
@@ -622,6 +631,7 @@ export const MessengerPreview: React.FC<Props> = ({
         </div>
         <MessengerLikeIcon size={29} className="flex-shrink-0" />
       </div>
+      )}
     </div>
   );
 };
