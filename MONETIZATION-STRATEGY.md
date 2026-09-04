@@ -121,7 +121,7 @@ Why this line:
 
 The first draft here said "one $29 lifetime SKU". That fit a one-off unlock
 (1080p + commercial license). **Story mode** (video background, voiceover,
-music — see §9) changes the calculus: creators use it every week, the voice
+music — see §8) changes the calculus: creators use it every week, the voice
 runs in the browser so our marginal cost is zero, and a flat unlimited
 subscription is both fair and worth far more than $29 once.
 
@@ -325,7 +325,7 @@ Reading of that table:
 is a small slice of it, concentrated in video creators and businesses. Build
 the rails only after the fake-door test says our users are in that slice.
 
-## 9. Story mode (video background + voiceover + music) — feasibility note
+## 8. Story mode (video background + voiceover + music) — feasibility note
 
 Asked Sept 2026: "can we make a texting story maker with a video background,
 chat on top, voiceover and music like textingstory.app?" Yes; about two-thirds
@@ -343,7 +343,7 @@ Build order: music → iMessage skin → video background → voiceover. Each st
 ships something usable; the paid features land last, once the free parts
 prove usage.
 
-## 10. KPIs
+## 9. KPIs
 
 | Metric | Where | Target |
 |---|---|---|
