@@ -233,7 +233,7 @@ of traffic**. Keep GROWTH-PLAN.md as the main lever; monetization rides on it.
 - Cloud render for phones that can't encode locally.
 - 4K export.
 
-## 8. Is there real demand? (added Sept 2026)
+## 7. Is there real demand? (added Sept 2026)
 
 Two different questions hide in "is there demand": demand for the *category*
 (people wanting fake chats and chat-story videos) and demand to *pay* for it.
@@ -307,7 +307,7 @@ Reading of that table:
 is a small slice of it, concentrated in video creators and businesses. Build
 the rails only after the fake-door test says our users are in that slice.
 
-## 9. KPIs
+## 8. KPIs
 
 | Metric | Where | Target |
 |---|---|---|
