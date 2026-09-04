@@ -117,17 +117,35 @@ Why this line:
   the Worker, unlocks Pro. Same "no signup" feel; a key can be re-entered on
   another device. Accounts only come in Phase 3 if saved projects earn them.
 
-### Pricing (recommendation)
+### Pricing (recommendation — revised Sept 2026 after the story-mode decision)
+
+The first draft here said "one $29 lifetime SKU". That fit a one-off unlock
+(1080p + commercial license). **Story mode** (video background, voiceover,
+music — see §9) changes the calculus: creators use it every week, the voice
+runs in the browser so our marginal cost is zero, and a flat unlimited
+subscription is both fair and worth far more than $29 once.
 
 | SKU | Price | Notes |
 |---|---|---|
-| **Pro — lifetime** | **$29 one-time** | Matches TextingStory's Pro at $29.99; includes commercial license. Lifetime suits a no-account tool and a young audience who hate subscriptions. |
-| Pro — yearly | $19/yr | Optional second SKU for the yearly-preferrers; test after lifetime is live. |
-| Commercial license only | $15 one-time | For businesses that don't care about 1080p. Cheaper than TextingStory's $59.99 on purpose — we're the "free/fair" brand. |
+| **Pro — monthly** | **$4.99 / month** | Undercuts Chatimator ($5.99), TextingStory ($9.99) and Convoclip ($15). Unlimited exports, no credits. |
+| **Pro — yearly** | **$29 / year** | ~50% off; the default we push on the pricing page. |
+| Pro — lifetime | ~$49, later | Add after a few months of data; priced at ~10 months. This audience is subscription-averse and will ask. |
+| Commercial license only | $15 one-time | For businesses that only need the rights. |
 
-Start with a single **$29 lifetime** SKU. One price is easier to explain on a
-pricing page and in the export panel, and it converts better than a menu for a
-low-consideration purchase. Add the others only with real data.
+**Regional pricing is not optional.** A large share of the text-story
+audience is in India, Indonesia, the Philippines and Brazil. Enable Lemon
+Squeezy purchasing-power pricing: roughly ₹199 / month and ₹999 / year for
+India, and equivalents elsewhere. Without it conversion in those countries
+rounds to zero.
+
+**Free vs Pro line for story mode**
+
+| Free (still no watermark) | Pro |
+|---|---|
+| Story mode with one default voice | Every voice |
+| Bundled royalty-free backgrounds + music | Upload your own footage and music |
+| 780p export (today's quality) | 1080p |
+| — | Batch export, commercial license |
 
 ### Payment rails (no backend to build)
 
@@ -307,7 +325,25 @@ Reading of that table:
 is a small slice of it, concentrated in video creators and businesses. Build
 the rails only after the fake-door test says our users are in that slice.
 
-## 8. KPIs
+## 9. Story mode (video background + voiceover + music) — feasibility note
+
+Asked Sept 2026: "can we make a texting story maker with a video background,
+chat on top, voiceover and music like textingstory.app?" Yes; about two-thirds
+of the pipeline exists (canvas compositor in `exportComposite.ts`, timeline
+in `chatTimeline.ts`, audio mixing + AAC in `exportAudio.ts`).
+
+| Piece | Effort | Notes |
+|---|---|---|
+| Background music | ~½ day | One more buffer in the existing OfflineAudioContext mix, ducked under voice. Bundle CC0 tracks + MP3 upload. |
+| iMessage / SMS skin | ~1 day | Nearly every text-story video uses it; we have 9 platforms but not this one. |
+| Video background, bubbles on top | 3–4 days | 1080×1920, no phone chrome. Draw a footage frame per video frame (HTMLVideoElement seek first, WebCodecs VideoDecoder later). Desktop-first; duration cap. Users upload footage or pick bundled CC0 clips — never ship game footage ourselves. |
+| Voiceover | 3–5 days | Browser `speechSynthesis` can't be captured, so use **Kokoro-82M in the browser** (kokoro-js, Apache-2.0, ~86 MB cached download, WebGPU on desktop, ~340 MB RAM — desktop-first). Zero server cost, no keys, no abuse surface. Timeline must hold each bubble ≥ its spoken length. Fallbacks: Piper (WASM, lighter, more robotic) for phones; Google Cloud TTS free tier (4M Standard / 1M Neural2 chars per month, then ~1¢ per video) behind the Worker for Pro voices later. |
+
+Build order: music → iMessage skin → video background → voiceover. Each step
+ships something usable; the paid features land last, once the free parts
+prove usage.
+
+## 10. KPIs
 
 | Metric | Where | Target |
 |---|---|---|
