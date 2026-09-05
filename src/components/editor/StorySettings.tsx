@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { Clapperboard, Smartphone, Upload, X } from 'lucide-react';
+import { Clapperboard, Music, Smartphone, Upload, X } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { STORY_COLOR_PRESETS, presetCss } from '../../lib/story/storyColors';
+import { VoicePanel } from './VoicePanel';
 import type { StoryAspect } from '../../lib/parser/types';
 
 const segBtn = (active: boolean) =>
@@ -21,15 +22,19 @@ export const StorySettings: React.FC = () => {
   const {
     project, setStoryEnabled, setStoryAspect, setStoryBackgroundPreset, setStoryScrim, setStoryNamePill, updateStory,
     setStoryBackgroundUpload, setStoryBackgroundOption,
+    setStoryMusicUpload, setStoryMusicVolume, clearStoryMusic,
   } = useEditorStore();
   const bgFileRef = useRef<HTMLInputElement>(null);
+  const musicFileRef = useRef<HTMLInputElement>(null);
   const [bgError, setBgError] = useState<string | null>(null);
+  const [musicError, setMusicError] = useState<string | null>(null);
 
   const story = project.story;
   const enabled = story?.enabled ?? false;
   const aspect: StoryAspect = story?.aspect ?? '9:16';
   const activePresetId = story?.background.kind === 'color' ? story.background.presetId : undefined;
   const isUpload = story?.background.kind === 'upload' && !!story.background.mediaUrl;
+  const hasMusic = !!story?.music?.mediaUrl;
 
   return (
     <div className="flex flex-col gap-5">
@@ -176,6 +181,68 @@ export const StorySettings: React.FC = () => {
               </>
             )}
           </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-1.5 text-white/50 text-xs font-medium">
+                <Music size={13} className="text-[#60EFFF]" />
+                Background music
+              </label>
+              {hasMusic && (
+                <button
+                  onClick={() => { clearStoryMusic(); setMusicError(null); }}
+                  className="text-white/40 hover:text-white/80 text-[11px] font-medium transition-colors"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+
+            <button
+              onClick={() => musicFileRef.current?.click()}
+              className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] py-1.5 text-[11.5px] font-medium text-white/70 transition-colors hover:border-white/25 hover:text-white"
+            >
+              <Upload size={13} />
+              {hasMusic ? 'Change track' : 'Upload a music track'}
+            </button>
+            <p className="text-white/30 text-[10.5px]">MP3, M4A, WAV or OGG up to 20 MB. Loops to fill the video, ducks under any voiceover.</p>
+            {musicError && <p className="text-[11px] text-red-400">{musicError}</p>}
+
+            <input
+              ref={musicFileRef}
+              type="file"
+              accept="audio/mpeg,audio/mp3,audio/mp4,audio/x-m4a,audio/wav,audio/ogg"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                e.target.value = '';
+                if (!file) return;
+                setMusicError(null);
+                try {
+                  await setStoryMusicUpload(file);
+                } catch (err) {
+                  setMusicError(err instanceof Error ? err.message : 'Could not use that file');
+                }
+              }}
+            />
+
+            {hasMusic && (
+              <label className="flex items-center gap-2">
+                <span className="text-white/45 text-[11px] whitespace-nowrap">Volume</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={Math.round((story.music?.volume ?? 0.35) * 100)}
+                  onChange={(e) => setStoryMusicVolume(Number(e.target.value) / 100)}
+                  className="h-1 flex-1 accent-[#60EFFF]"
+                />
+              </label>
+            )}
+          </div>
+
+          <VoicePanel project={project} />
 
           <label className="flex items-center gap-2">
             <span className="text-white/45 text-[11px] whitespace-nowrap">Scrim</span>

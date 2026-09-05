@@ -32,6 +32,22 @@ export const PhonePreview: React.FC = () => {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const groupAvatarInputRef = useRef<HTMLInputElement>(null);
   const pendingAvatarParticipantId = useRef<string | null>(null);
+  const musicRef = useRef<HTMLAudioElement>(null);
+
+  // Story mode's background music preview — plays only while the timeline is
+  // actually playing, so scrubbing/editing the script doesn't leave it running.
+  const musicUrl = project.story?.music?.mediaUrl;
+  const musicVolume = project.story?.music?.volume ?? 0.35;
+  useEffect(() => {
+    const audio = musicRef.current;
+    if (!audio || !musicUrl) return;
+    audio.volume = musicVolume;
+    if (isPlaying && !muted) {
+      audio.play().catch(() => { /* autoplay can be blocked before a user gesture — harmless */ });
+    } else {
+      audio.pause();
+    }
+  }, [isPlaying, muted, musicUrl, musicVolume]);
 
   // Rebuild frame plan when project messages or playback speed change
   useEffect(() => {
@@ -283,6 +299,7 @@ export const PhonePreview: React.FC = () => {
           e.target.value = '';
         }}
       />
+      {musicUrl && <audio ref={musicRef} src={musicUrl} loop />}
     </div>
   );
 };

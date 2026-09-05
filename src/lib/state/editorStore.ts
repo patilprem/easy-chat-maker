@@ -62,6 +62,12 @@ interface EditorState {
   setStoryNamePill: (on: boolean) => void;
   setStoryBackgroundUpload: (file: File) => Promise<void>;
   setStoryBackgroundOption: (patch: Partial<StoryBackground>) => void;
+  setStoryMusicUpload: (file: File) => Promise<void>;
+  setStoryMusicVolume: (volume: number) => void;
+  clearStoryMusic: () => void;
+  setStoryVoiceEnabled: (on: boolean) => void;
+  setParticipantVoice: (participantId: string, voiceId: string) => void;
+  setStoryVoiceSpeed: (speed: number) => void;
   updateStory: (patch: Partial<StorySettings>) => void;
   resolveImageUrls: () => Promise<void>;
   reset: () => void;
@@ -531,6 +537,53 @@ export const useEditorStore = create<EditorState>((set, get) => {
       story: p.story ? { ...p.story, background: { ...p.story.background, ...patch } } : p.story,
     })),
 
+    setStoryMusicUpload: async (file) => {
+      const item = await saveMedia(file, 'audio');
+      const objectUrl = URL.createObjectURL(item.blob);
+      update((p) => ({
+        ...p,
+        story: p.story
+          ? { ...p.story, music: { kind: 'upload', mediaId: item.id, mediaUrl: objectUrl, volume: p.story.music?.volume ?? 0.35, duckUnderVoice: true } }
+          : p.story,
+      }));
+    },
+
+    setStoryMusicVolume: (volume) => update((p) => ({
+      ...p,
+      story: p.story?.music ? { ...p.story, music: { ...p.story.music, volume: Math.min(1, Math.max(0, volume)) } } : p.story,
+    })),
+
+    clearStoryMusic: () => update((p) => ({
+      ...p,
+      story: p.story ? { ...p.story, music: undefined } : p.story,
+    })),
+
+    setStoryVoiceEnabled: (on) => update((p) => ({
+      ...p,
+      story: p.story
+        ? { ...p.story, voice: { enabled: on, speed: p.story.voice?.speed ?? 1, voices: p.story.voice?.voices ?? {} } }
+        : p.story,
+    })),
+
+    setParticipantVoice: (participantId, voiceId) => update((p) => ({
+      ...p,
+      story: p.story
+        ? {
+            ...p.story,
+            voice: {
+              enabled: p.story.voice?.enabled ?? false,
+              speed: p.story.voice?.speed ?? 1,
+              voices: { ...p.story.voice?.voices, [participantId]: voiceId },
+            },
+          }
+        : p.story,
+    })),
+
+    setStoryVoiceSpeed: (speed) => update((p) => ({
+      ...p,
+      story: p.story?.voice ? { ...p.story, voice: { ...p.story.voice, speed: Math.min(1.3, Math.max(0.8, speed)) } } : p.story,
+    })),
+
     updateStory: (patch) => update((p) => ({
       ...p,
       story: p.story ? { ...p.story, ...patch } : p.story,
@@ -566,13 +619,24 @@ export const useEditorStore = create<EditorState>((set, get) => {
         ? { ...storyBg, mediaUrl: await resolveObjectUrl(storyBg.mediaId) }
         : storyBg;
 
+      const storyMusic = project.story?.music;
+      const resolvedStoryMusic = storyMusic?.kind === 'upload' && storyMusic.mediaId && !storyMusic.mediaUrl?.startsWith('blob:')
+        ? { ...storyMusic, mediaUrl: await resolveObjectUrl(storyMusic.mediaId) }
+        : storyMusic;
+
       set((s) => ({
         project: {
           ...s.project,
           messages: resolved as Message[],
           participants: resolvedParticipants,
           background: resolvedBackground,
-          story: s.project.story && resolvedStoryBg ? { ...s.project.story, background: resolvedStoryBg } : s.project.story,
+          story: s.project.story
+            ? {
+                ...s.project.story,
+                background: resolvedStoryBg ?? s.project.story.background,
+                music: resolvedStoryMusic ?? s.project.story.music,
+              }
+            : s.project.story,
         },
       }));
     },

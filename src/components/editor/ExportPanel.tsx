@@ -116,19 +116,25 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
     setMp4Progress({ state: 'preparing', pct: 0, msg: getLoadingMsg(0) });
     trackExportStarted('mp4', project.platform);
     let simulatedPct = 0;
+    // A story export's voiceover/model-loading step reports its own message
+    // (e.g. "Generating voice 3/12") — once one arrives, prefer it over the
+    // generic rotation until the exporter moves past that step (pct advances
+    // without a message, e.g. once encoding starts).
+    let customMsg: string | undefined;
     const progressTimer = window.setInterval(() => {
       const step = simulatedPct < 84 ? 2 : 0.75;
       simulatedPct = Math.min(simulatedPct + step, 96);
       setMp4Progress((prev) => {
         if (!prev) return prev;
         const pct = Math.max(prev.pct, simulatedPct);
-        return { ...prev, pct, msg: getLoadingMsg(pct) };
+        return { ...prev, pct, msg: customMsg ?? getLoadingMsg(pct) };
       });
     }, 900);
 
-    const onProgress = (state: ProgressState, pct: number) => {
+    const onProgress = (state: ProgressState, pct: number, msg?: string) => {
       simulatedPct = Math.max(simulatedPct, pct);
-      setMp4Progress({ state, pct, msg: getLoadingMsg(pct) });
+      customMsg = msg;
+      setMp4Progress({ state, pct, msg: msg ?? getLoadingMsg(pct) });
     };
 
     // Which renderer produced the file, reported alongside the completed event

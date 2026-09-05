@@ -35,5 +35,16 @@ export default defineConfig({
         allow: [projectRoot],
       },
     },
+    // kokoro-js (in-browser voiceover) pulls in @huggingface/transformers and
+    // its onnxruntime-web wasm runtime, which Vite's dependency pre-bundler
+    // mishandles (worker/wasm asset URLs get rewritten incorrectly). It's only
+    // ever reached via a dynamic import() from lib/tts, so excluding it from
+    // pre-bundling costs nothing for the pages that never touch story mode.
+    optimizeDeps: {
+      exclude: ['kokoro-js', '@huggingface/transformers', 'onnxruntime-web'],
+    },
+    build: {
+      target: 'esnext',
+    },
   },
 });

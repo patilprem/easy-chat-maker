@@ -1,11 +1,13 @@
 import { Muxer, ArrayBufferTarget } from 'mp4-muxer';
 import type { ChatProject } from '../parser/types';
-import { buildFramePlan, FPS } from '../video/chatTimeline';
-import { tryEncodeMessageSoundTrack } from './exportAudio';
+import { buildRevealSchedule, framePlansFromSchedule, FPS } from '../video/chatTimeline';
+import { tryEncodeStoryAudioTrack } from './exportAudio';
 import { drainEncoderQueue, getExportScale, negotiateVideoConfig, type ExportOptions, type ProgressCallback } from './exportMp4';
 import { captureChatSprites, createFeedComposer, openRenderIframe, sleep, triggerDownload } from './compositeCore';
 import { createStoryBackgroundSource } from './storyBackground';
 import { storyStage } from '../story/storyLayout';
+import { ensureVoiceClips } from '../tts/voiceClips';
+import type { VoiceClip } from '../tts/kokoro';
 
 /**
  * Story-mode video exporter: chat bubbles over a background, at 9:16 or
@@ -13,8 +15,14 @@ import { storyStage } from '../story/storyLayout';
  * exporter (compositeCore.ts) — the only real difference is what's captured
  * (a chrome-less, story-sized stage instead of a phone) and that a moving
  * background is painted under the (transparent) capture every frame instead
- * of a solid page color.
+ * of a solid page color. When voiceover is on, each bubble's hold time
+ * stretches to match its spoken line (see buildRevealSchedule) and the
+ * clips are mixed into the same audio track as message sounds and music.
  */
+
+// Extra hold after a spoken line finishes, so the bubble doesn't vanish the
+// instant the voice stops — matches the silent path's natural pause feel.
+const VOICE_HOLD_PADDING_SEC = 0.3;
 
 // Canvas-area safety net, mirroring exportPng's fitPixelRatio: a very long
 // chat at 2x on a 1080x1920 stage could otherwise produce a browser-crashing
@@ -32,8 +40,29 @@ export async function exportStoryMp4(
   const stage = storyStage(story.aspect);
   const filename = `${project.platform}-story-${story.aspect === '9:16' ? '9x16' : '16x9'}.mp4`;
   const messages = project.messages;
-  const plans = buildFramePlan(messages, project.participants, project.playbackSpeed);
-  const audioTrack = await tryEncodeMessageSoundTrack(project, plans.length / FPS, options.includeSounds !== false);
+
+  let voiceClips: Map<string, VoiceClip> = new Map();
+  if (story.voice?.enabled) {
+    onProgress('preparing', 1, 'Preparing voiceover…');
+    voiceClips = await ensureVoiceClips(project, (msg, pct) => onProgress('preparing', Math.min(pct, 15), msg));
+  }
+
+  const holdSecById: Record<string, number> = {};
+  for (const [msgId, clip] of voiceClips) holdSecById[msgId] = clip.durationSec + VOICE_HOLD_PADDING_SEC;
+
+  const schedule = buildRevealSchedule(messages, project.participants, {
+    speed: project.playbackSpeed,
+    holdSecById: voiceClips.size > 0 ? holdSecById : undefined,
+  });
+  const plans = framePlansFromSchedule(schedule);
+
+  const audioTrack = await tryEncodeStoryAudioTrack(
+    project,
+    schedule,
+    voiceClips.size > 0 ? voiceClips : null,
+    plans.length / FPS,
+    options.includeSounds !== false,
+  );
 
   let SCALE = getExportScale();
   if (stage.w * stage.h * SCALE * SCALE > MAX_TALL_CAPTURE_AREA) SCALE = 1;
@@ -44,7 +73,7 @@ export async function exportStoryMp4(
   const background = await createStoryBackgroundSource(story.background, VIDEO_W, VIDEO_H);
 
   localStorage.setItem('ecm:v1:export-payload', JSON.stringify(project));
-  onProgress('preparing', 2);
+  onProgress('preparing', 16);
 
   const render = await openRenderIframe(
     `${window.location.origin}/render/chat/?mode=video&story=1&w=${stage.w}&h=${stage.h}`,

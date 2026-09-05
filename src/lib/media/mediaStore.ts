@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 
 const mediaStore = createStore('ecm-media', 'media');
 
-export type MediaKind = 'image' | 'video';
+export type MediaKind = 'image' | 'video' | 'audio';
 
 export interface LocalMediaItem {
   id: string;
@@ -12,14 +12,16 @@ export interface LocalMediaItem {
   kind: MediaKind;
   width?: number;
   height?: number;
-  /** kind: 'video' only */
+  /** kind: 'video' | 'audio' only */
   durationSec?: number;
 }
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 MB
 const MAX_VIDEO_BYTES = 60 * 1024 * 1024; // 60 MB — story backgrounds only, re-encode short clips for best results
+const MAX_AUDIO_BYTES = 20 * 1024 * 1024; // 20 MB — story background music
 const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
 const VIDEO_TYPES = ['video/mp4', 'video/webm'];
+const AUDIO_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/mp4', 'audio/x-m4a', 'audio/wav', 'audio/ogg'];
 
 function getImageDimensions(blob: Blob): Promise<{ width: number; height: number }> {
   return new Promise((resolve) => {
@@ -49,7 +51,40 @@ function getVideoMetadata(blob: Blob): Promise<{ width: number; height: number; 
   });
 }
 
+function getAudioDuration(blob: Blob): Promise<number> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio();
+    audio.preload = 'metadata';
+    audio.onloadedmetadata = () => {
+      resolve(audio.duration || 0);
+      URL.revokeObjectURL(url);
+    };
+    audio.onerror = () => resolve(0);
+    audio.src = url;
+  });
+}
+
 export async function saveMedia(file: File, kind: MediaKind = 'image'): Promise<LocalMediaItem> {
+  if (kind === 'audio') {
+    if (!AUDIO_TYPES.includes(file.type)) {
+      throw new Error('Unsupported audio type. Use MP3, M4A, WAV, or OGG.');
+    }
+    if (file.size > MAX_AUDIO_BYTES) {
+      throw new Error('Audio too large. Maximum size is 20 MB.');
+    }
+    const durationSec = await getAudioDuration(file);
+    const item: LocalMediaItem = {
+      id: nanoid(),
+      blob: file,
+      mimeType: file.type,
+      kind: 'audio',
+      durationSec,
+    };
+    await set(item.id, item, mediaStore);
+    return item;
+  }
+
   if (kind === 'video') {
     if (!VIDEO_TYPES.includes(file.type)) {
       throw new Error('Unsupported video type. Use MP4 or WebM.');
