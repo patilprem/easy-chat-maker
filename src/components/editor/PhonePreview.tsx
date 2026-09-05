@@ -160,11 +160,18 @@ export const PhonePreview: React.FC = () => {
   const prevSoundStateRef = useRef({ visible: 0, reactions: 0 });
   useEffect(() => {
     if (!currentPlan) return;
+    // Story mode's first bubble is already "visible" in frame 0 of the
+    // timeline (no typing delay to hide it behind) even before Play is
+    // pressed. Tracking state must stay untouched while paused, or it
+    // silently records that bubble as already-seen and the real playback
+    // start never detects it as new — message 1's sound/voiceover would
+    // never fire.
+    if (!isPlaying) return;
     const prev = prevSoundStateRef.current;
     const visible = currentPlan.visibleCount;
     const reactions = currentPlan.activeReactionIds.length;
 
-    if (isPlaying && !muted) {
+    if (!muted) {
       if (visible > prev.visible) {
         // previewMessages already excludes calls in phone mode's own way —
         // filter it out here too so the index maps 1:1 onto `visible`,
