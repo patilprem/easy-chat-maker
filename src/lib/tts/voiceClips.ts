@@ -2,7 +2,7 @@ import type { ChatProject } from '../parser/types';
 import { ttsCapability } from './capability';
 import { speak, type VoiceClip } from './kokoro';
 import { cacheKeyFor, getCachedClip, putCachedClip } from './voiceCache';
-import { defaultVoiceFor } from './voices';
+import { assignVoicesForParticipants } from './voices';
 
 export type VoiceClipProgress = (msg: string, pct: number) => void;
 
@@ -48,6 +48,9 @@ export async function ensureVoiceClips(
 
   const speed = voiceSettings.speed || 1;
   const clips = new Map<string, VoiceClip>();
+  // Assigned once across every participant so nobody silently shares a
+  // voice with someone else in the same chat (see assignVoicesForParticipants).
+  const defaultVoices = assignVoicesForParticipants(project.participants);
 
   onProgress?.('Loading voice model…', 2);
   let modelReady = false;
@@ -55,9 +58,7 @@ export async function ensureVoiceClips(
   for (let i = 0; i < textMessages.length; i++) {
     const msg = textMessages[i];
     if (msg.kind !== 'text') continue;
-    const participantIndex = project.participants.findIndex((p) => p.id === msg.participantId);
-    const participantName = project.participants[participantIndex]?.name;
-    const voiceId = voiceSettings.voices[msg.participantId] ?? defaultVoiceFor(Math.max(0, participantIndex), participantName);
+    const voiceId = voiceSettings.voices[msg.participantId] ?? defaultVoices[msg.participantId];
     const spokenText = normalizeForSpeech(msg.text);
     if (!spokenText) continue;
 

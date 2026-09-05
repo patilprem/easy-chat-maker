@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Clapperboard, Music, Smartphone, Upload, X } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { STORY_COLOR_PRESETS, presetCss } from '../../lib/story/storyColors';
+import { normalizeCycleCount } from '../../lib/story/storyCycle';
 import { VoicePanel } from './VoicePanel';
 import type { StoryAspect } from '../../lib/parser/types';
 
@@ -254,12 +255,12 @@ export const StorySettings: React.FC = () => {
               min={3}
               max={8}
               step={1}
-              value={story.cycleCount ?? 5}
+              value={normalizeCycleCount(story.cycleCount, aspect)}
               onChange={(e) => updateStory({ cycleCount: Number(e.target.value) })}
               className="h-1 flex-1 accent-[#60EFFF]"
             />
             <span className="w-4 flex-shrink-0 text-right text-[10.5px] tabular-nums text-white/40">
-              {story.cycleCount ?? 5}
+              {normalizeCycleCount(story.cycleCount, aspect)}
             </span>
           </label>
 

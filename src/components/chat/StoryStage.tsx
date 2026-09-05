@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ChatProject, StoryAspect, StoryBackground } from '../../lib/parser/types';
-import { storyStage, STORY_SCRIM_PAD } from '../../lib/story/storyLayout';
+import { storyStage, maxStoryContentH, STORY_SCRIM_PAD } from '../../lib/story/storyLayout';
 import { StoryBackgroundLayer } from './StoryBackgroundLayer';
 
 const FALLBACK_BACKGROUND: StoryBackground = { kind: 'color', presetId: 'midnight' };
@@ -56,7 +56,7 @@ export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackgro
     ? project.participants[0]?.avatarUrl
     : otherParticipant?.avatarUrl;
 
-  const maxBoxH = stage.column.h + STORY_SCRIM_PAD * 2;
+  const maxBoxH = maxStoryContentH(stage, anchor) + STORY_SCRIM_PAD * 2;
   const boxPositionStyle: React.CSSProperties = anchor === 'bottom'
     ? { bottom: stage.h - (stage.column.y + stage.column.h) - STORY_SCRIM_PAD }
     : { top: stage.column.y - STORY_SCRIM_PAD };

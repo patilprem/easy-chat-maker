@@ -38,8 +38,23 @@ const MALE_HINTS = /male|man|daniel|alex|fred|david|mark|george|thomas|guy|ryan|
 // candidate voice is available.
 const QUALITY_HINTS = /natural|neural|online|premium|enhanced|google/i;
 
-/** A stable-ish, varied, natural-leaning voice per participant from whatever this OS/browser has installed. */
+// Sticky per-participant assignment so the same person keeps the same
+// preview voice across bubbles, and — since it also tracks which voices
+// are already taken — two different participants don't silently share one
+// just because they landed on the same index modulo a short pool.
+// Cleared via resetPreviewVoiceAssignments() whenever the chat's
+// participant list changes.
+const assignedByIndex = new Map<number, SpeechSynthesisVoice>();
+
+export function resetPreviewVoiceAssignments(): void {
+  assignedByIndex.clear();
+}
+
+/** A stable, varied, natural-leaning voice per participant from whatever this OS/browser has installed — distinct from every other participant's when enough candidates exist. */
 function pickVoice(participantIndex: number, participantName?: string): SpeechSynthesisVoice | undefined {
+  const cached = assignedByIndex.get(participantIndex);
+  if (cached) return cached;
+
   const voices = loadVoices().filter((v) => v.lang.toLowerCase().startsWith('en'));
   if (voices.length === 0) return undefined;
   const female = voices.filter((v) => FEMALE_HINTS.test(v.name));
@@ -57,7 +72,11 @@ function pickVoice(participantIndex: number, participantName?: string): SpeechSy
   const pool = targetPool.length ? targetPool : (safeFallback.length ? safeFallback : voices);
   const natural = pool.filter((v) => QUALITY_HINTS.test(v.name));
   const ranked = natural.length ? natural : pool;
-  return ranked[Math.max(0, participantIndex) % ranked.length];
+
+  const alreadyUsed = new Set(assignedByIndex.values());
+  const chosen = ranked.find((v) => !alreadyUsed.has(v)) ?? ranked[Math.max(0, participantIndex) % ranked.length];
+  assignedByIndex.set(participantIndex, chosen);
+  return chosen;
 }
 
 export function isPreviewVoiceSupported(): boolean {

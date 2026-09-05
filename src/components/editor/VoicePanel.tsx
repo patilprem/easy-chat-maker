@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Mic } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { ttsCapability } from '../../lib/tts/capability';
-import { TTS_VOICES, defaultVoiceFor } from '../../lib/tts/voices';
+import { TTS_VOICES, assignVoicesForParticipants } from '../../lib/tts/voices';
 import type { ChatProject } from '../../lib/parser/types';
 
 interface Props {
@@ -26,6 +26,9 @@ export const VoicePanel: React.FC<Props> = ({ project }) => {
     () => project.participants.filter((p) => project.messages.some((m) => m.kind === 'text' && m.participantId === p.id)),
     [project.participants, project.messages],
   );
+  // Assigned once across every speaker so nobody silently shares a voice
+  // with someone else in the same chat (see assignVoicesForParticipants).
+  const defaultVoices = useMemo(() => assignVoicesForParticipants(speakers), [speakers]);
 
   return (
     <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
@@ -57,8 +60,8 @@ export const VoicePanel: React.FC<Props> = ({ project }) => {
             <p className="text-[10.5px] text-white/35">Add some text messages to choose voices.</p>
           )}
 
-          {speakers.map((p, i) => {
-            const value = voice?.voices[p.id] ?? defaultVoiceFor(i, p.name);
+          {speakers.map((p) => {
+            const value = voice?.voices[p.id] ?? defaultVoices[p.id];
             return (
               <label key={p.id} className="flex items-center gap-2">
                 <span className="w-16 flex-shrink-0 truncate text-[11px] text-white/50">{p.name}</span>

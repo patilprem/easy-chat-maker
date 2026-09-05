@@ -122,10 +122,53 @@ export function resolveGender(participantIndex: number, participantName?: string
   return detectGenderFromName(participantName ?? '') ?? (participantIndex % 2 === 0 ? 'female' : 'male');
 }
 
-/** A stable, varied default voice per participant so a group chat doesn't sound like one person. */
-export function defaultVoiceFor(participantIndex: number, participantName?: string): string {
-  const rotation = resolveGender(participantIndex, participantName) === 'male' ? DEFAULT_MALE_ROTATION : DEFAULT_FEMALE_ROTATION;
-  return rotation[participantIndex % rotation.length];
+/**
+ * Assigns every participant a distinct default voice matching their
+ * detected gender — a same-gender rotation indexed only by that
+ * participant's raw position in the chat (as the old defaultVoiceFor did)
+ * can collide once a group has more than a handful of people, since two
+ * participants `rotation.length` seats apart land on the identical voice.
+ * This tracks which voices are already taken across the WHOLE chat and
+ * only repeats one if a single chat genuinely has more same-gender
+ * participants than Kokoro has voices for that gender.
+ */
+export function assignVoicesForParticipants(
+  participants: { id: string; name: string }[],
+): Record<string, string> {
+  const femaleCandidates = [
+    ...DEFAULT_FEMALE_ROTATION,
+    ...TTS_VOICES.filter((v) => v.gender === 'female' && !DEFAULT_FEMALE_ROTATION.includes(v.id)).map((v) => v.id),
+  ];
+  const maleCandidates = [
+    ...DEFAULT_MALE_ROTATION,
+    ...TTS_VOICES.filter((v) => v.gender === 'male' && !DEFAULT_MALE_ROTATION.includes(v.id)).map((v) => v.id),
+  ];
+
+  const assigned: Record<string, string> = {};
+  const used = new Set<string>();
+  let femaleCursor = 0;
+  let maleCursor = 0;
+
+  participants.forEach((p, i) => {
+    const gender = resolveGender(i, p.name);
+    const candidates = gender === 'male' ? maleCandidates : femaleCandidates;
+    const cursor = gender === 'male' ? maleCursor : femaleCursor;
+
+    let chosen = candidates[cursor % candidates.length];
+    for (let offset = 0; offset < candidates.length; offset++) {
+      const candidate = candidates[(cursor + offset) % candidates.length];
+      if (!used.has(candidate)) {
+        chosen = candidate;
+        break;
+      }
+    }
+
+    assigned[p.id] = chosen;
+    used.add(chosen);
+    if (gender === 'male') maleCursor++; else femaleCursor++;
+  });
+
+  return assigned;
 }
 
 export function findVoice(id: string | undefined): TtsVoice {

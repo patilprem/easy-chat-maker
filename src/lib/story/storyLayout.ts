@@ -38,6 +38,22 @@ export function storyStage(aspect: StoryAspect): StoryStageGeometry {
   return STAGES[aspect];
 }
 
+/**
+ * How tall the auto-height chat box (see StoryStage.tsx) is allowed to grow
+ * before it clips, in CSS px, EXCLUDING its own padding. `column.h` was
+ * originally the box's fixed, always-on height; now that the box only
+ * grows to fit whatever's actually visible, there's no cosmetic downside to
+ * letting it use the rest of the room the stage design left around it —
+ * `column.h` stays as a floor so this can only grow the ceiling, never
+ * shrink it below what the layout already accounted for.
+ */
+export function maxStoryContentH(stage: StoryStageGeometry, anchor: 'top' | 'bottom' = 'top'): number {
+  const boxTopY = stage.column.y - STORY_SCRIM_PAD;
+  const boxBottomY = stage.column.y + stage.column.h + STORY_SCRIM_PAD;
+  const available = anchor === 'bottom' ? boxBottomY : stage.h - boxTopY;
+  return Math.max(stage.column.h, available - STORY_SCRIM_PAD * 2);
+}
+
 export function defaultStorySettings(aspect: StoryAspect = '9:16'): StorySettings {
   return {
     enabled: true,

@@ -8,7 +8,7 @@ import { useEditorStore } from '../../lib/state/editorStore';
 import { playMessageSound } from '../../lib/media/messageSounds';
 import { storyStage } from '../../lib/story/storyLayout';
 import { normalizeCycleCount, windowForPreview } from '../../lib/story/storyCycle';
-import { speakPreview, stopPreviewVoice } from '../../lib/tts/previewVoice';
+import { speakPreview, stopPreviewVoice, resetPreviewVoiceAssignments } from '../../lib/tts/previewVoice';
 import { normalizeForSpeech } from '../../lib/tts/voiceClips';
 import type { Message, Participant } from '../../lib/parser/types';
 
@@ -211,6 +211,14 @@ export const PhonePreview: React.FC = () => {
   }, [isPlaying, muted]);
   useEffect(() => () => stopPreviewVoice(), []);
 
+  // Re-assign preview voices from scratch whenever the cast changes (a
+  // different chat loaded, someone added/removed/renamed) — otherwise a
+  // stale per-index assignment from a previous chat could linger and
+  // collide with this one's.
+  useEffect(() => {
+    resetPreviewVoiceAssignments();
+  }, [project.participants]);
+
   const handleAvatarClick = useCallback((participantId: string) => {
     pendingAvatarParticipantId.current = participantId;
     avatarInputRef.current?.click();
@@ -246,7 +254,7 @@ export const PhonePreview: React.FC = () => {
   // (see exportStory.ts) rather than scrolling forever — there's no manual
   // choice for this any more. Only windows while actually playing — editing
   // always shows every message so nothing becomes unreachable to click on.
-  const cycleCount = isStory ? normalizeCycleCount(story!.cycleCount) : 0;
+  const cycleCount = isStory ? normalizeCycleCount(story!.cycleCount, story!.aspect) : 0;
   const storyWindow = cycleCount && isPlaying && currentPlan
     ? windowForPreview(previewMessages, currentPlan.visibleCount, cycleCount)
     : null;

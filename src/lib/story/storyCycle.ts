@@ -1,4 +1,4 @@
-import type { Message } from '../parser/types';
+import type { Message, StoryAspect } from '../parser/types';
 
 export interface StoryPage {
   /** Messages for this page — a slice from where the page starts to the end of the chat; the page's own visibleCount caps how many of those actually show. */
@@ -7,10 +7,15 @@ export interface StoryPage {
   startRevealIdx: number;
 }
 
-const DEFAULT_CYCLE_COUNT = 5;
+const DEFAULT_CYCLE_COUNT_PORTRAIT = 5;
+// 16:9's stage is much shorter than 9:16's, so the same 5-bubble default
+// leaves each bubble less room before the auto-height box hits its cap and
+// clips — a lower default gives landscape bubbles more breathing room.
+const DEFAULT_CYCLE_COUNT_LANDSCAPE = 3;
 
-export function normalizeCycleCount(cycleCount: number | undefined): number {
-  return Math.max(1, Math.round(cycleCount ?? DEFAULT_CYCLE_COUNT));
+export function normalizeCycleCount(cycleCount: number | undefined, aspect?: StoryAspect): number {
+  const fallback = aspect === '16:9' ? DEFAULT_CYCLE_COUNT_LANDSCAPE : DEFAULT_CYCLE_COUNT_PORTRAIT;
+  return Math.max(1, Math.round(cycleCount ?? fallback));
 }
 
 /** Same subset chatTimeline's reveal schedule counts — every message except calls. */
