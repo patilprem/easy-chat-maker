@@ -476,11 +476,32 @@ export interface FeedComposer {
 }
 
 /**
+ * A rounded backdrop drawn behind the feed, sized to that frame's actual
+ * visible content instead of the feed's full (fixed) rect — story mode's
+ * "the box grows with the bubbles" look. Nothing here is story-specific:
+ * the composer just draws a rect around whatever content height it already
+ * computed for scrolling, so this stays meaningless — and unused — for the
+ * phone exporter.
+ */
+export interface FeedComposerScrim {
+  /** e.g. 'rgba(0,0,0,0.45)'. */
+  color: string;
+  /** CSS px inset between the shape's edge and the bubble content. */
+  padPx: number;
+  /** CSS px corner radius. */
+  radiusPx: number;
+  /** CSS px cap on content height (excluding padding) — degrades to a fixed-size box for an unusually long page instead of growing unbounded. */
+  maxContentHPx: number;
+  /** 'top' grows the box downward from a fixed top edge; 'bottom' grows it upward from a fixed bottom edge. */
+  anchor: 'top' | 'bottom';
+}
+
+/**
  * Builds a stateful per-frame compositor (tracks smoothed scroll position
  * and the current typing-dot animation phase across calls, so frames must be
  * drawn in increasing `frameIndex` order for one export).
  */
-export function createFeedComposer(sprites: ChatSprites, scale: number): FeedComposer {
+export function createFeedComposer(sprites: ChatSprites, scale: number, opts?: { scrim?: FeedComposerScrim }): FeedComposer {
   const {
     rootW, rootH, feedX, feedY, feedW, feedH, layerOffX, layerOffY, layerW,
     padTop, padBottom, feedPadBottom, rowCountAt, rowMsgId, geomPlain, geomReact,
@@ -537,6 +558,31 @@ export function createFeedComposer(sprites: ChatSprites, scale: number): FeedCom
       const contentBottom = typing ? typingTop + typing.height + typingTailH : rowsBottom;
       const targetScroll = Math.max(0, layerOffY + contentBottom + padBottom + feedPadBottom - feedH);
       scroll = scroll < 0 ? targetScroll : scroll + (targetScroll - scroll) * (1 - Math.exp(-(1 / FPS) / SCROLL_SMOOTHING_S));
+      // Row/typing/badge positions are layer-relative, so the layer's own
+      // offset inside the feed rides along with the scroll offset here.
+      // Hoisted above the scrim draw below, which needs it too.
+      const feedTopS = Math.round((feedY + layerOffY - scroll) * scale); // snapped once per frame
+
+      if (opts?.scrim) {
+        const { color, padPx, radiusPx, maxContentHPx, anchor } = opts.scrim;
+        const contentHPx = Math.min(Math.max(contentBottom, 0), maxContentHPx);
+        const padS = Math.round(padPx * scale);
+        const radiusS = Math.round(radiusPx * scale);
+        const boxXS = Math.round(feedX * scale) - padS;
+        const boxWS = Math.round(feedW * scale) + padS * 2;
+        const boxHS = Math.round(contentHPx * scale) + padS * 2;
+        const boxYS = anchor === 'bottom'
+          ? Math.round((feedY + feedH) * scale) - boxHS + padS
+          : feedTopS - padS;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+          ctx.roundRect(boxXS, boxYS, boxWS, boxHS, radiusS);
+        } else {
+          ctx.rect(boxXS, boxYS, boxWS, boxHS);
+        }
+        ctx.fill();
+      }
 
       ctx.drawImage(k > 0 ? baseConv : baseEmpty, 0, 0, rootWS, rootHS);
       ctx.save();
@@ -546,9 +592,6 @@ export function createFeedComposer(sprites: ChatSprites, scale: number): FeedCom
 
       const destX = Math.round((feedX + layerOffX) * scale);
       const layerWS = Math.round(layerW * scale);
-      // Row/typing/badge positions are layer-relative, so the layer's own
-      // offset inside the feed rides along with the scroll offset here.
-      const feedTopS = Math.round((feedY + layerOffY - scroll) * scale); // snapped once per frame
 
       for (const pl of placed) {
         const dTop = feedTopS + pl.yS;

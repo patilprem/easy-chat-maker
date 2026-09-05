@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useCallback, useState } from 'react';
 import { Play, Pause, Plus, Volume2, VolumeX } from 'lucide-react';
 import { ChatPreview } from '../chat/ChatPreview';
 import { StoryStage } from '../chat/StoryStage';
@@ -23,14 +23,29 @@ export const PhonePreview: React.FC = () => {
   } = useEditorStore();
 
   const speed = project.playbackSpeed ?? 1;
+  const story = project.story;
+  const isStory = story?.enabled ?? false;
+  // System/date messages ("X created group", "Monday") are chrome that
+  // doesn't belong in the chrome-less story look — drop them entirely
+  // rather than giving them a reveal slot, in both the preview and (see
+  // exportStory.ts) the exported video. Memoized: a fresh array on every
+  // render would retrigger the frame-plan-rebuild effect below on every
+  // playback tick (a new array reference never equals the last one) and
+  // reset the animation to frame 0 continuously.
+  const previewMessages = useMemo(
+    () => (isStory ? project.messages.filter((m) => m.kind !== 'system' && m.kind !== 'date') : project.messages),
+    [isStory, project.messages],
+  );
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
   const [frame, setFrame] = useState(0);
-  const [framePlan, setFramePlan] = useState(() => buildFramePlan(project.messages, project.participants, speed));
+  const [framePlan, setFramePlan] = useState(() => buildFramePlan(previewMessages, project.participants, speed));
 
   const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
   const frameRef = useRef(0);
+  const speechActiveRef = useRef(false);
   const feedRef = useRef<HTMLDivElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const groupAvatarInputRef = useRef<HTMLInputElement>(null);
@@ -71,12 +86,12 @@ export const PhonePreview: React.FC = () => {
 
   // Rebuild frame plan when project messages or playback speed change
   useEffect(() => {
-    const plan = buildFramePlan(project.messages, project.participants, speed);
+    const plan = buildFramePlan(previewMessages, project.participants, speed);
     setFramePlan(plan);
     setFrame(0);
     frameRef.current = 0;
     lastTimeRef.current = 0;
-  }, [project.messages, project.participants, speed]);
+  }, [previewMessages, project.participants, speed]);
 
   // Animation loop
   useEffect(() => {
@@ -86,6 +101,15 @@ export const PhonePreview: React.FC = () => {
     }
 
     const tick = (timestamp: number) => {
+      // Hold the current frame while narration for the just-revealed bubble
+      // is still playing, so the next bubble never appears mid-sentence —
+      // see the sound/voice effect below, which sets this while speaking.
+      if (speechActiveRef.current) {
+        lastTimeRef.current = 0;
+        rafRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
       if (lastTimeRef.current === 0) lastTimeRef.current = timestamp;
       const elapsed = timestamp - lastTimeRef.current;
 
@@ -135,9 +159,10 @@ export const PhonePreview: React.FC = () => {
 
     if (isPlaying && !muted) {
       if (visible > prev.visible) {
-        const timelineMessages = project.messages.filter(
-          (m) => m.kind !== 'call',
-        );
+        // previewMessages already excludes calls in phone mode's own way —
+        // filter it out here too so the index maps 1:1 onto `visible`,
+        // exactly like the timeline that produced it.
+        const timelineMessages = previewMessages.filter((m) => m.kind !== 'call');
         const revealed = timelineMessages[visible - 1];
         if (revealed && (revealed.kind === 'text' || revealed.kind === 'image' || revealed.kind === 'voice')) {
           const isSelf = project.participants.find((p) => p.id === revealed.participantId)?.isSelf;
@@ -146,11 +171,16 @@ export const PhonePreview: React.FC = () => {
         // Free, instant preview narration (Web Speech API — see
         // lib/tts/previewVoice.ts) so voice can be heard while editing,
         // without downloading anything. The exported video bakes in real
-        // Kokoro-generated audio instead.
-        if (revealed && revealed.kind === 'text' && project.story?.enabled && project.story.voice?.enabled) {
+        // Kokoro-generated audio instead. Gates the animation loop (via
+        // speechActiveRef) until this line finishes speaking, so the next
+        // bubble never appears while this one is still being read out.
+        if (revealed && revealed.kind === 'text' && story?.enabled && story.voice?.enabled) {
           const idx = project.participants.findIndex((p) => p.id === revealed.participantId);
           const isSelf = project.participants[idx]?.isSelf ?? false;
-          speakPreview(normalizeForSpeech(revealed.text), Math.max(0, idx), isSelf, project.story.voice.speed);
+          speechActiveRef.current = true;
+          speakPreview(normalizeForSpeech(revealed.text), Math.max(0, idx), isSelf, story.voice.speed, () => {
+            speechActiveRef.current = false;
+          });
         }
       }
       if (reactions > prev.reactions) {
@@ -159,7 +189,7 @@ export const PhonePreview: React.FC = () => {
     }
 
     prevSoundStateRef.current = { visible, reactions };
-  }, [currentPlan, isPlaying, muted, project.messages, project.participants, project.platform, project.story?.enabled, project.story?.voice]);
+  }, [currentPlan, isPlaying, muted, previewMessages, project.participants, project.platform, story?.enabled, story?.voice]);
 
   // Stop any in-flight narration the moment playback pauses/mutes, and on unmount.
   useEffect(() => {
@@ -183,8 +213,6 @@ export const PhonePreview: React.FC = () => {
   const PHONE_W = 360;
   const PHONE_H = 780;
 
-  const story = project.story;
-  const isStory = story?.enabled ?? false;
   const stage = isStory ? storyStage(story!.aspect) : null;
   // Fit the story stage to whatever space the editor column actually has
   // (measured via ResizeObserver above), but never larger than the classic
@@ -200,11 +228,13 @@ export const PhonePreview: React.FC = () => {
     ? Math.max(0.35, Math.min(fitW / stage.w, fitH / stage.h, PHONE_W / stage.w, PHONE_H / stage.h))
     : 1;
 
-  const cycleCount = isStory && story!.feedStyle === 'cycle' ? normalizeCycleCount(story!.cycleCount) : 0;
-  // Only windows while actually playing — editing always shows every
-  // message so nothing becomes unreachable to click on.
+  // Story mode always restarts from the top every `cycleCount` bubbles
+  // (see exportStory.ts) rather than scrolling forever — there's no manual
+  // choice for this any more. Only windows while actually playing — editing
+  // always shows every message so nothing becomes unreachable to click on.
+  const cycleCount = isStory ? normalizeCycleCount(story!.cycleCount) : 0;
   const storyWindow = cycleCount && isPlaying && currentPlan
-    ? windowForPreview(project.messages, currentPlan.visibleCount, cycleCount)
+    ? windowForPreview(previewMessages, currentPlan.visibleCount, cycleCount)
     : null;
 
   const chatPreviewProps = {
@@ -231,9 +261,12 @@ export const PhonePreview: React.FC = () => {
     feedRef,
   };
 
+  // Story mode's preview always renders previewMessages (system/date
+  // already stripped), further windowed down to the current page while
+  // playing.
   const storyChatPreviewProps = storyWindow
     ? { ...chatPreviewProps, project: { ...project, messages: storyWindow.messages }, visibleCount: storyWindow.visibleCount }
-    : chatPreviewProps;
+    : { ...chatPreviewProps, project: { ...project, messages: previewMessages } };
 
   return (
     <div className="flex flex-col items-center gap-4 h-full w-full min-h-0">
@@ -270,7 +303,7 @@ export const PhonePreview: React.FC = () => {
           </button>
         )}
         <span className="text-white/40 text-xs">
-          {currentPlan ? `${currentPlan.visibleCount} / ${project.messages.length} messages` : ''}
+          {currentPlan ? `${currentPlan.visibleCount} / ${previewMessages.length} messages` : ''}
         </span>
       </div>
 

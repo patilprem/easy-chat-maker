@@ -8,6 +8,9 @@ import type { StoryAspect, StorySettings } from '../parser/types';
  */
 export const STORY_COLUMN_W = 390;
 
+/** CSS px inset between the dark backdrop's edge and the bubbles inside it. */
+export const STORY_SCRIM_PAD = 12;
+
 export interface StoryStageGeometry {
   w: number;
   h: number;

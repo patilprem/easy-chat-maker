@@ -244,40 +244,24 @@ export const StorySettings: React.FC = () => {
 
           <VoicePanel project={project} />
 
-          <div className="space-y-1.5">
-            <label className="text-white/50 text-xs font-medium">Chat feed style</label>
-            <div className="flex bg-white/5 border border-white/10 rounded-xl p-1 gap-1">
-              <button
-                onClick={() => updateStory({ feedStyle: 'scroll' })}
-                className={segBtn((story.feedStyle ?? 'scroll') === 'scroll')}
-              >
-                Scroll
-              </button>
-              <button
-                onClick={() => updateStory({ feedStyle: 'cycle' })}
-                className={segBtn(story.feedStyle === 'cycle')}
-              >
-                Restart every few
-              </button>
-            </div>
-            {story.feedStyle === 'cycle' && (
-              <label className="flex items-center gap-2 pt-0.5">
-                <span className="text-white/45 text-[11px] whitespace-nowrap">Bubbles before restart</span>
-                <input
-                  type="range"
-                  min={3}
-                  max={8}
-                  step={1}
-                  value={story.cycleCount ?? 5}
-                  onChange={(e) => updateStory({ cycleCount: Number(e.target.value) })}
-                  className="h-1 flex-1 accent-[#60EFFF]"
-                />
-                <span className="w-4 flex-shrink-0 text-right text-[10.5px] tabular-nums text-white/40">
-                  {story.cycleCount ?? 5}
-                </span>
-              </label>
-            )}
-          </div>
+          {/* The chat always restarts from the top every few bubbles
+              (like textingstory.app) instead of scrolling forever — that's
+              no longer a choice, just how many bubbles a page holds. */}
+          <label className="flex items-center gap-2">
+            <span className="text-white/45 text-[11px] whitespace-nowrap">Bubbles before restart</span>
+            <input
+              type="range"
+              min={3}
+              max={8}
+              step={1}
+              value={story.cycleCount ?? 5}
+              onChange={(e) => updateStory({ cycleCount: Number(e.target.value) })}
+              className="h-1 flex-1 accent-[#60EFFF]"
+            />
+            <span className="w-4 flex-shrink-0 text-right text-[10.5px] tabular-nums text-white/40">
+              {story.cycleCount ?? 5}
+            </span>
+          </label>
 
           <label className="flex items-center gap-2">
             <span className="text-white/45 text-[11px] whitespace-nowrap">Darken behind chat</span>

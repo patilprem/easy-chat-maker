@@ -198,13 +198,11 @@ export interface StorySettings {
   showHeader?: boolean;
   anchor?: 'top' | 'bottom';
   /**
-   * 'scroll' (default/undefined) keeps scrolling forever, like the phone
-   * exporter. 'cycle' clears the chat column and restarts from the top every
-   * `cycleCount` bubbles — the "restart from top" rhythm used by
-   * textingstory.app and similar chat-story videos.
+   * @deprecated Story mode always restarts from the top now (see
+   * `cycleCount`) — kept only so old saved projects still type-check.
    */
   feedStyle?: 'scroll' | 'cycle';
-  /** Bubbles shown per page before restarting, when feedStyle is 'cycle'. Default 5. */
+  /** Bubbles shown per page before the chat clears and restarts from the top, like textingstory.app. Default 5. */
   cycleCount?: number;
 }
 

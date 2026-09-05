@@ -41,14 +41,41 @@ export function isPreviewVoiceSupported(): boolean {
   return typeof speechSynthesis !== 'undefined';
 }
 
-/** Speaks one line immediately. Cancels whatever was speaking before it (bubbles reveal faster than long lines finish). */
-export function speakPreview(text: string, participantIndex: number, isSelf: boolean, speed = 1): void {
-  if (!isPreviewVoiceSupported() || !text.trim()) return;
+// Generous ceiling in case a browser/voice combo never fires 'end' (seen
+// occasionally on some platforms) — without this, playback could freeze
+// forever waiting for a callback that's never coming.
+const MAX_UTTERANCE_WAIT_MS = 15000;
+
+/**
+ * Speaks one line immediately and reports back when it's actually done, so
+ * the caller can hold the next bubble until narration for this one
+ * finishes — voice and bubbles stay in sync instead of the bubble racing
+ * ahead on a fixed timer. Cancels whatever was speaking before it (bubbles
+ * can reveal faster than a long line takes to read if something goes wrong
+ * upstream).
+ */
+export function speakPreview(text: string, participantIndex: number, isSelf: boolean, speed = 1, onEnd?: () => void): void {
+  if (!isPreviewVoiceSupported() || !text.trim()) {
+    onEnd?.();
+    return;
+  }
   speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
   const voice = pickVoice(participantIndex, isSelf);
   if (voice) utter.voice = voice;
   utter.rate = Math.min(1.6, Math.max(0.7, speed));
+
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    window.clearTimeout(timer);
+    onEnd?.();
+  };
+  const timer = window.setTimeout(finish, MAX_UTTERANCE_WAIT_MS);
+  utter.onend = finish;
+  utter.onerror = finish;
+
   speechSynthesis.speak(utter);
 }
 

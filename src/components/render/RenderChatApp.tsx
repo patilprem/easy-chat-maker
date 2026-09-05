@@ -212,7 +212,7 @@ export const RenderChatApp: React.FC<Props> = ({ mode }) => {
 
   if (runtimeConfig.story && project.story) {
     return (
-      <StoryStage project={project} aspect={project.story.aspect} renderBackground={false} id="phone-screen-export">
+      <StoryStage project={project} aspect={project.story.aspect} renderBackground={false} bakeScrim={false} id="phone-screen-export">
         <ChatPreview
           project={project}
           mode={runtimeConfig.mode === 'export' ? 'export' : 'video'}

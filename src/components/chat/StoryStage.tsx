@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ChatProject, StoryAspect, StoryBackground } from '../../lib/parser/types';
-import { storyStage } from '../../lib/story/storyLayout';
+import { storyStage, STORY_SCRIM_PAD } from '../../lib/story/storyLayout';
 import { StoryBackgroundLayer } from './StoryBackgroundLayer';
 
 const FALLBACK_BACKGROUND: StoryBackground = { kind: 'color', presetId: 'midnight' };
@@ -16,6 +16,14 @@ interface Props {
    * canvas, frame by frame (see lib/export/storyBackground.ts).
    */
   renderBackground: boolean;
+  /**
+   * Draw the rounded dark backdrop behind the chat column as CSS (default,
+   * used by the editor preview). The video exporter turns this off and
+   * instead draws the same backdrop on the canvas each frame, sized to that
+   * frame's actual bubble content — see compositeCore.ts's `scrim` option —
+   * so the DOM captured for export only ever contains the pill and bubbles.
+   */
+  bakeScrim?: boolean;
   children: React.ReactNode;
   style?: React.CSSProperties;
 }
@@ -26,11 +34,19 @@ interface Props {
  * the same 390px width as the phone feed so every bubble component and the
  * video compositor's row-geometry logic keep working completely unchanged —
  * only what surrounds the column changes between phone mode and story mode.
+ *
+ * The dark backdrop behind the column hugs however many bubbles are
+ * currently on screen instead of reserving a fixed-height slab — plain
+ * `height: auto` (capped by `maxHeight` as a safety net for an unusually
+ * long page) does that. It's anchored at the top (grows downward) or bottom
+ * (grows upward) of the stage's original column slot depending on
+ * `story.anchor`.
  */
-export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackground, children, style }) => {
+export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackground, bakeScrim = true, children, style }) => {
   const stage = storyStage(aspect);
   const story = project.story;
   const scrim = story?.scrim ?? 0.45;
+  const anchor = story?.anchor ?? 'top';
   // The platform's own header (when kept — see showHeader below) already
   // shows the name and avatar, so the floating pill would just duplicate it.
   const showNamePill = (story?.showNamePill ?? true) && !story?.showHeader;
@@ -39,6 +55,11 @@ export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackgro
   const pillAvatar = project.isGroup
     ? project.participants[0]?.avatarUrl
     : otherParticipant?.avatarUrl;
+
+  const maxBoxH = stage.column.h + STORY_SCRIM_PAD * 2;
+  const boxPositionStyle: React.CSSProperties = anchor === 'bottom'
+    ? { bottom: stage.h - (stage.column.y + stage.column.h) - STORY_SCRIM_PAD }
+    : { top: stage.column.y - STORY_SCRIM_PAD };
 
   return (
     <div
@@ -67,23 +88,22 @@ export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackgro
         </div>
       )}
 
-      {/* Rounded dark scrim so bubbles stay readable over any background. */}
+      {/* Rounded dark backdrop + chat column, merged into one auto-height
+          box so it hugs whatever's currently visible instead of a fixed
+          slab. `bakeScrim=false` (export capture) skips painting it here —
+          the exporter draws the equivalent shape on the canvas instead. */}
       <div
-        className="absolute z-[1] rounded-[22px]"
+        className="absolute z-[3] overflow-hidden rounded-[22px]"
         style={{
-          left: stage.column.x - 12,
-          top: stage.column.y - 12,
-          width: stage.column.w + 24,
-          height: stage.column.h + 24,
-          background: `rgba(0, 0, 0, ${scrim})`,
+          left: stage.column.x - STORY_SCRIM_PAD,
+          width: stage.column.w + STORY_SCRIM_PAD * 2,
+          maxHeight: maxBoxH,
+          padding: STORY_SCRIM_PAD,
+          background: bakeScrim ? `rgba(0, 0, 0, ${scrim})` : 'transparent',
+          ...boxPositionStyle,
         }}
-      />
-
-      <div
-        className="absolute z-[3] overflow-hidden"
-        style={{ left: stage.column.x, top: stage.column.y, width: stage.column.w, height: stage.column.h }}
       >
-        {children}
+        <div style={{ width: stage.column.w }}>{children}</div>
       </div>
     </div>
   );

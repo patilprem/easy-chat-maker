@@ -5,7 +5,7 @@ import { tryEncodeStoryAudioTrack } from './exportAudio';
 import { drainEncoderQueue, getExportScale, negotiateVideoConfig, type ExportOptions, type ProgressCallback } from './exportMp4';
 import { captureChatSprites, createFeedComposer, openRenderIframe, sleep, triggerDownload, type FeedComposer } from './compositeCore';
 import { createStoryBackgroundSource } from './storyBackground';
-import { storyStage } from '../story/storyLayout';
+import { storyStage, STORY_SCRIM_PAD } from '../story/storyLayout';
 import { buildStoryPages, normalizeCycleCount, pageIndexForRevealIdx } from '../story/storyCycle';
 import { ensureVoiceClips } from '../tts/voiceClips';
 import type { VoiceClip } from '../tts/kokoro';
@@ -40,7 +40,10 @@ export async function exportStoryMp4(
 
   const stage = storyStage(story.aspect);
   const filename = `${project.platform}-story-${story.aspect === '9:16' ? '9x16' : '16x9'}.mp4`;
-  const messages = project.messages;
+  // System/date messages ("X created group", "Monday") are chrome that
+  // doesn't belong in the chrome-less story look — drop them entirely
+  // rather than giving them a reveal slot.
+  const messages = project.messages.filter((m) => m.kind !== 'system' && m.kind !== 'date');
 
   let voiceClips: Map<string, VoiceClip> = new Map();
   if (story.voice?.enabled) {
@@ -73,17 +76,16 @@ export async function exportStoryMp4(
 
   const background = await createStoryBackgroundSource(story.background, VIDEO_W, VIDEO_H);
 
-  // "Restart every few" feed style (see StorySettings): the chat column
-  // clears and starts fresh from the top every `cycleCount` bubbles instead
-  // of scrolling forever, like textingstory.app. Each page is an
+  // The chat column always restarts from the top every `cycleCount` bubbles
+  // instead of scrolling forever, like textingstory.app. Each page is an
   // independent mini-chat, so it gets its own render pass and its own
   // FeedComposer — the shared `schedule`/`plans` above (and therefore the
   // background, music, voiceover and per-message timing) are completely
   // unaffected and keep running across page boundaries; only which
   // composer draws a given frame, and its bubbles resetting to empty at the
   // top, changes.
-  const cycleCount = story.feedStyle === 'cycle' ? normalizeCycleCount(story.cycleCount) : 0;
-  const pages = cycleCount ? buildStoryPages(messages, cycleCount) : [{ messages, startRevealIdx: 0 }];
+  const cycleCount = normalizeCycleCount(story.cycleCount);
+  const pages = buildStoryPages(messages, cycleCount);
 
   try {
     const composers: FeedComposer[] = [];
@@ -100,14 +102,25 @@ export async function exportStoryMp4(
         const pagePlans = framePlansFromSchedule(
           buildRevealSchedule(page.messages, project.participants, { speed: project.playbackSpeed }),
         );
-        // No page background — the story stage is captured transparent (scrim +
-        // name pill baked in, no phone chrome) so the canvas background painted
-        // below shows through everywhere the chat column doesn't cover.
+        // No page background, and no scrim either — the story stage is
+        // captured transparent (name pill baked in, no phone chrome, no
+        // scrim) so the canvas background painted below shows through
+        // everywhere the chat column doesn't cover, and the scrim drawn
+        // below (sized to each frame's actual content) shows through the
+        // gaps around a short page instead of a fixed dark slab.
         const sprites = await captureChatSprites({
           win, doc, root, messages: page.messages, plans: pagePlans, scale: SCALE,
           onProgress: (pct) => onProgress('preparing', 16 + Math.round(((i + pct / 100) / pages.length) * 2)),
         });
-        composers.push(createFeedComposer(sprites, SCALE));
+        composers.push(createFeedComposer(sprites, SCALE, {
+          scrim: {
+            color: `rgba(0, 0, 0, ${story.scrim})`,
+            padPx: STORY_SCRIM_PAD,
+            radiusPx: 22,
+            maxContentHPx: stage.column.h,
+            anchor: story.anchor ?? 'top',
+          },
+        }));
       } finally {
         render.close();
       }
@@ -139,13 +152,9 @@ export async function exportStoryMp4(
       if (encoderError) throw encoderError;
       await background.drawAt(ctx, f / FPS);
       const plan = plans[f];
-      if (cycleCount) {
-        const pIdx = Math.min(pageIndexForRevealIdx(plan.visibleCount, cycleCount), composers.length - 1);
-        const relativePlan = { ...plan, visibleCount: plan.visibleCount - pages[pIdx].startRevealIdx };
-        composers[pIdx].drawFrame(ctx, relativePlan, f);
-      } else {
-        composers[0].drawFrame(ctx, plan, f);
-      }
+      const pIdx = Math.min(pageIndexForRevealIdx(plan.visibleCount, cycleCount), composers.length - 1);
+      const relativePlan = { ...plan, visibleCount: plan.visibleCount - pages[pIdx].startRevealIdx };
+      composers[pIdx].drawFrame(ctx, relativePlan, f);
 
       const videoFrame = new VideoFrame(outCanvas, {
         timestamp: Math.round((f / FPS) * 1_000_000),
