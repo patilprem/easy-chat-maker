@@ -10,6 +10,7 @@ import { storyStage } from '../../lib/story/storyLayout';
 import { normalizeCycleCount, windowForPreview } from '../../lib/story/storyCycle';
 import { speakPreview, stopPreviewVoice, resetPreviewVoiceAssignments } from '../../lib/tts/previewVoice';
 import { normalizeForSpeech } from '../../lib/tts/voiceClips';
+import { assignVoicesForParticipants, findVoice } from '../../lib/tts/voices';
 import type { Message, Participant } from '../../lib/parser/types';
 
 const SPEED_OPTIONS = [1, 1.5, 2, 0.75];
@@ -43,6 +44,11 @@ export const PhonePreview: React.FC = () => {
     () => (isStory ? project.messages.filter((m) => m.kind !== 'system' && m.kind !== 'date') : project.messages),
     [isStory, project.messages],
   );
+  // Same default assignment the real export uses (assignVoicesForParticipants)
+  // so the live preview's gender always matches whichever voice is actually
+  // selected — an explicit per-participant override in story.voice.voices
+  // takes precedence over this default, exactly like the export.
+  const defaultVoices = useMemo(() => assignVoicesForParticipants(project.participants), [project.participants]);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -190,9 +196,10 @@ export const PhonePreview: React.FC = () => {
         // bubble never appears while this one is still being read out.
         if (revealed && revealed.kind === 'text' && story?.enabled && story.voice?.enabled) {
           const idx = project.participants.findIndex((p) => p.id === revealed.participantId);
-          const participantName = project.participants[idx]?.name;
+          const voiceId = story.voice.voices[revealed.participantId] ?? defaultVoices[revealed.participantId];
+          const gender = findVoice(voiceId).gender;
           speechActiveRef.current = true;
-          speakPreview(normalizeForSpeech(revealed.text), Math.max(0, idx), participantName, story.voice.speed, () => {
+          speakPreview(normalizeForSpeech(revealed.text), Math.max(0, idx), gender, story.voice.speed, () => {
             speechActiveRef.current = false;
           });
         }
@@ -203,7 +210,7 @@ export const PhonePreview: React.FC = () => {
     }
 
     prevSoundStateRef.current = { visible, reactions };
-  }, [currentPlan, isPlaying, muted, previewMessages, project.participants, project.platform, story?.enabled, story?.voice]);
+  }, [currentPlan, isPlaying, muted, previewMessages, project.participants, project.platform, story?.enabled, story?.voice, defaultVoices]);
 
   // Stop any in-flight narration the moment playback pauses/mutes, and on unmount.
   useEffect(() => {

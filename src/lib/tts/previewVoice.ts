@@ -8,7 +8,7 @@
  * one-time model download only happens if/when the user exports with
  * voiceover enabled.
  */
-import { resolveGender } from './voices';
+import type { Gender } from './voices';
 
 let cachedVoices: SpeechSynthesisVoice[] = [];
 
@@ -38,28 +38,42 @@ const MALE_HINTS = /male|man|daniel|alex|fred|david|mark|george|thomas|guy|ryan|
 // candidate voice is available.
 const QUALITY_HINTS = /natural|neural|online|premium|enhanced|google/i;
 
-// Sticky per-participant assignment so the same person keeps the same
-// preview voice across bubbles, and — since it also tracks which voices
-// are already taken — two different participants don't silently share one
-// just because they landed on the same index modulo a short pool.
-// Cleared via resetPreviewVoiceAssignments() whenever the chat's
-// participant list changes.
-const assignedByIndex = new Map<number, SpeechSynthesisVoice>();
+// Sticky per-(participant, gender) assignment so the same person keeps the
+// same preview voice across bubbles, and — since it also tracks which
+// voices are already taken — two different participants don't silently
+// share one just because they landed on the same index modulo a short
+// pool. Keyed on gender too, not just participant index: if the user
+// switches that participant's voice to a different gender, this must pick
+// afresh from the new pool rather than replaying a cached voice for the
+// gender they just switched away from — otherwise a change can look like
+// it "didn't apply" when testing it. Cleared via
+// resetPreviewVoiceAssignments() whenever the chat's participant list
+// changes.
+const assignedByKey = new Map<string, SpeechSynthesisVoice>();
 
 export function resetPreviewVoiceAssignments(): void {
-  assignedByIndex.clear();
+  assignedByKey.clear();
 }
 
-/** A stable, varied, natural-leaning voice per participant from whatever this OS/browser has installed — distinct from every other participant's when enough candidates exist. */
-function pickVoice(participantIndex: number, participantName?: string): SpeechSynthesisVoice | undefined {
-  const cached = assignedByIndex.get(participantIndex);
+/**
+ * A stable, varied, natural-leaning voice per participant from whatever
+ * this OS/browser has installed — distinct from every other participant's
+ * when enough candidates exist. `gender` is decided by the CALLER from the
+ * same source of truth as the real export's voice (the participant's
+ * assigned/selected Kokoro voice, via findVoice(id).gender in voices.ts) —
+ * never re-derived from the name here, so an explicit voice pick (e.g.
+ * overriding "Maya" to a male voice) can't be second-guessed by a
+ * name-based gender heuristic that disagrees with it.
+ */
+function pickVoice(participantIndex: number, gender: Gender): SpeechSynthesisVoice | undefined {
+  const key = `${participantIndex}:${gender}`;
+  const cached = assignedByKey.get(key);
   if (cached) return cached;
 
   const voices = loadVoices().filter((v) => v.lang.toLowerCase().startsWith('en'));
   if (voices.length === 0) return undefined;
   const female = voices.filter((v) => FEMALE_HINTS.test(v.name));
   const male = voices.filter((v) => MALE_HINTS.test(v.name));
-  const gender = resolveGender(participantIndex, participantName);
   const targetPool = gender === 'male' ? male : female;
   const oppositePool = gender === 'male' ? female : male;
   // No positively-identified voice for the target gender? Fall back to
@@ -73,9 +87,9 @@ function pickVoice(participantIndex: number, participantName?: string): SpeechSy
   const natural = pool.filter((v) => QUALITY_HINTS.test(v.name));
   const ranked = natural.length ? natural : pool;
 
-  const alreadyUsed = new Set(assignedByIndex.values());
+  const alreadyUsed = new Set(assignedByKey.values());
   const chosen = ranked.find((v) => !alreadyUsed.has(v)) ?? ranked[Math.max(0, participantIndex) % ranked.length];
-  assignedByIndex.set(participantIndex, chosen);
+  assignedByKey.set(key, chosen);
   return chosen;
 }
 
@@ -96,14 +110,14 @@ const MAX_UTTERANCE_WAIT_MS = 15000;
  * can reveal faster than a long line takes to read if something goes wrong
  * upstream).
  */
-export function speakPreview(text: string, participantIndex: number, participantName: string | undefined, speed = 1, onEnd?: () => void): void {
+export function speakPreview(text: string, participantIndex: number, gender: Gender, speed = 1, onEnd?: () => void): void {
   if (!isPreviewVoiceSupported() || !text.trim()) {
     onEnd?.();
     return;
   }
   speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
-  const voice = pickVoice(participantIndex, participantName);
+  const voice = pickVoice(participantIndex, gender);
   if (voice) utter.voice = voice;
   utter.rate = Math.min(1.6, Math.max(0.7, speed));
 

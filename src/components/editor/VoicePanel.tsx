@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
-import { Mic } from 'lucide-react';
+import { Mic, Volume2 } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { ttsCapability } from '../../lib/tts/capability';
-import { TTS_VOICES, assignVoicesForParticipants } from '../../lib/tts/voices';
+import { TTS_VOICES, assignVoicesForParticipants, findVoice } from '../../lib/tts/voices';
+import { speakPreview } from '../../lib/tts/previewVoice';
 import type { ChatProject } from '../../lib/parser/types';
 
 interface Props {
@@ -62,6 +63,7 @@ export const VoicePanel: React.FC<Props> = ({ project }) => {
 
           {speakers.map((p) => {
             const value = voice?.voices[p.id] ?? defaultVoices[p.id];
+            const participantIndex = project.participants.findIndex((pp) => pp.id === p.id);
             return (
               <label key={p.id} className="flex items-center gap-2">
                 <span className="w-16 flex-shrink-0 truncate text-[11px] text-white/50">{p.name}</span>
@@ -81,9 +83,20 @@ export const VoicePanel: React.FC<Props> = ({ project }) => {
                     ))}
                   </optgroup>
                 </select>
+                <button
+                  type="button"
+                  title="Hear this voice now"
+                  onClick={() => speakPreview(`Hi, this is ${p.name}.`, participantIndex, findVoice(value).gender, voice?.speed ?? 1)}
+                  className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-white/50 transition-colors hover:border-white/25 hover:text-white"
+                >
+                  <Volume2 size={13} />
+                </button>
               </label>
             );
           })}
+          <p className="text-white/25 text-[10px] -mt-1">
+            Tap 🔊 to hear a voice instantly with your device's built-in voice — confirms a change took effect without waiting for playback.
+          </p>
 
           <label className="flex items-center gap-2">
             <span className="text-white/45 text-[11px] whitespace-nowrap">Speed</span>
