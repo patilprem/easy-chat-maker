@@ -25,22 +25,34 @@ export interface StoryStageGeometry {
   w: number;
   h: number;
   column: { x: number; y: number; w: number; h: number };
-  pill: { x: number; y: number };
+}
+
+// The chat box TARGETS about 60% of the stage's height, centered with
+// roughly equal margins above and below — but this is a floor, not a hard
+// cap: a page whose bubbles need more room than that grows the box taller
+// (see maxStoryContentH) rather than cropping a bubble's text, so the
+// actual on-screen split isn't pinned to exactly 20/60/20 in every case.
+const BOX_TOP_FRAC = 0.2;
+const BOX_HEIGHT_FRAC = 0.6;
+
+function makeStage(w: number, h: number): StoryStageGeometry {
+  const outerTop = h * BOX_TOP_FRAC;
+  const outerHeight = h * BOX_HEIGHT_FRAC;
+  return {
+    w,
+    h,
+    column: {
+      x: (w - STORY_COLUMN_W) / 2,
+      y: outerTop + STORY_SCRIM_PAD,
+      w: STORY_COLUMN_W,
+      h: outerHeight - STORY_SCRIM_PAD * 2,
+    },
+  };
 }
 
 const STAGES: Record<StoryAspect, StoryStageGeometry> = {
-  '9:16': {
-    w: 540,
-    h: 960,
-    column: { x: 75, y: 150, w: STORY_COLUMN_W, h: 690 },
-    pill: { x: 75, y: 96 },
-  },
-  '16:9': {
-    w: 960,
-    h: 540,
-    column: { x: 285, y: 30, w: STORY_COLUMN_W, h: 480 },
-    pill: { x: 285, y: 8 },
-  },
+  '9:16': makeStage(540, 960),
+  '16:9': makeStage(960, 540),
 };
 
 /** Stage size + chat-column placement (CSS px, pre-SCALE) for an aspect. */
@@ -49,13 +61,13 @@ export function storyStage(aspect: StoryAspect): StoryStageGeometry {
 }
 
 /**
- * How tall the auto-height chat box (see StoryStage.tsx) is allowed to grow
- * before it clips, in CSS px, EXCLUDING its own padding. `column.h` was
- * originally the box's fixed, always-on height; now that the box only
- * grows to fit whatever's actually visible, there's no cosmetic downside to
- * letting it use the rest of the room the stage design left around it —
- * `column.h` stays as a floor so this can only grow the ceiling, never
- * shrink it below what the layout already accounted for.
+ * How tall the chat box (see StoryStage.tsx) is allowed to grow before it
+ * has to clip, in CSS px, EXCLUDING its own padding — a safety net for an
+ * unusually long page, not the box's normal size. `column.h` (~60% of the
+ * stage) is the floor it targets when content is short; this is the
+ * ceiling it can grow into using the rest of the room the stage design
+ * left around it, so a long bubble stretches the box instead of being cut
+ * off.
  */
 export function maxStoryContentH(stage: StoryStageGeometry, anchor: 'top' | 'bottom' = 'top'): number {
   const boxTopY = stage.column.y - STORY_SCRIM_PAD;

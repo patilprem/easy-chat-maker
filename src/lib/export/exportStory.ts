@@ -102,11 +102,10 @@ export async function exportStoryMp4(
           buildRevealSchedule(page.messages, project.participants, { speed: project.playbackSpeed, noTypingNoPause: true }),
         );
         // No page background, and no scrim either — the story stage is
-        // captured transparent (name pill baked in, no phone chrome, no
-        // scrim) so the canvas background painted below shows through
-        // everywhere the chat column doesn't cover, and the scrim drawn
-        // below (sized to each frame's actual content) shows through the
-        // gaps around a short page instead of a fixed dark slab.
+        // captured transparent (header baked in, no phone chrome, no scrim)
+        // so the canvas background painted below shows through everywhere
+        // the chat column doesn't cover, and the fixed-size scrim drawn
+        // below shows through the gaps around it.
         const sprites = await captureChatSprites({
           win, doc, root, messages: page.messages, plans: pagePlans, scale: SCALE,
           onProgress: (pct) => onProgress('preparing', 16 + Math.round(((i + pct / 100) / pages.length) * 2)),
@@ -123,6 +122,7 @@ export async function exportStoryMp4(
             color: `rgba(0, 0, 0, ${STORY_SCRIM})`,
             padPx: STORY_SCRIM_PAD,
             radiusPx: 22,
+            minContentHPx: stage.column.h,
             maxContentHPx: maxStoryContentH(stage, scrimAnchor),
             anchor: scrimAnchor,
             fixedEdgeRootY,

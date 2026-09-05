@@ -477,11 +477,12 @@ export interface FeedComposer {
 
 /**
  * A rounded backdrop drawn behind the feed, sized to that frame's actual
- * visible content instead of the feed's full (fixed) rect — story mode's
- * "the box grows with the bubbles" look. Nothing here is story-specific:
- * the composer just draws a rect around whatever content height it already
- * computed for scrolling, so this stays meaningless — and unused — for the
- * phone exporter.
+ * visible content — clamped between a floor (so a short page still looks
+ * like it fills a reasonable chunk of the stage) and a ceiling (so an
+ * unusually long page grows the box instead of cropping a bubble's text).
+ * Nothing here is story-specific: the composer just draws a rect around
+ * whatever content height it already computed for scrolling, so this stays
+ * meaningless — and unused — for the phone exporter.
  */
 export interface FeedComposerScrim {
   /** e.g. 'rgba(0,0,0,0.45)'. */
@@ -490,9 +491,11 @@ export interface FeedComposerScrim {
   padPx: number;
   /** CSS px corner radius. */
   radiusPx: number;
-  /** CSS px cap on content height (excluding padding) — degrades to a fixed-size box for an unusually long page instead of growing unbounded. */
+  /** CSS px floor on content height (excluding padding) — the box never shrinks below this even for very few bubbles. */
+  minContentHPx: number;
+  /** CSS px ceiling on content height (excluding padding) — the box grows to fit unusually long content instead of cropping it, up to this safety-net cap. */
   maxContentHPx: number;
-  /** 'top' grows the box downward from a fixed top edge; 'bottom' grows it upward from a fixed bottom edge. */
+  /** 'top' anchors the box's top edge; 'bottom' anchors its bottom edge. */
   anchor: 'top' | 'bottom';
   /**
    * Root-relative CSS px of the box's FIXED edge (its top edge for
@@ -575,8 +578,8 @@ export function createFeedComposer(sprites: ChatSprites, scale: number, opts?: {
       const feedTopS = Math.round((feedY + layerOffY - scroll) * scale); // snapped once per frame
 
       if (opts?.scrim) {
-        const { color, padPx, radiusPx, maxContentHPx, anchor, fixedEdgeRootY } = opts.scrim;
-        const contentHPx = Math.min(Math.max(contentBottom, 0), maxContentHPx);
+        const { color, padPx, radiusPx, minContentHPx, maxContentHPx, anchor, fixedEdgeRootY } = opts.scrim;
+        const contentHPx = Math.min(Math.max(contentBottom, minContentHPx), maxContentHPx);
         const padS = Math.round(padPx * scale);
         const radiusS = Math.round(radiusPx * scale);
         const boxXS = Math.round(feedX * scale) - padS;

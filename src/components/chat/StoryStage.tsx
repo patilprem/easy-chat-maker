@@ -5,6 +5,9 @@ import { StoryBackgroundLayer } from './StoryBackgroundLayer';
 
 const FALLBACK_BACKGROUND: StoryBackground = { kind: 'color', presetId: 'midnight' };
 
+/** Slightly larger than 1:1 so bubble text reads a bit bigger in story mode without touching every platform's own font sizes — see the zoom usage below. */
+const STORY_FONT_ZOOM = 1.08;
+
 interface Props {
   project: ChatProject;
   aspect: StoryAspect;
@@ -19,9 +22,9 @@ interface Props {
   /**
    * Draw the rounded dark backdrop behind the chat column as CSS (default,
    * used by the editor preview). The video exporter turns this off and
-   * instead draws the same backdrop on the canvas each frame, sized to that
-   * frame's actual bubble content — see compositeCore.ts's `scrim` option —
-   * so the DOM captured for export only ever contains the header and bubbles.
+   * instead draws the same backdrop on the canvas each frame — see
+   * compositeCore.ts's `scrim` option — so the DOM captured for export only
+   * ever contains the header and bubbles.
    */
   bakeScrim?: boolean;
   children: React.ReactNode;
@@ -38,18 +41,18 @@ interface Props {
  * completely unchanged — only what surrounds the column changes between
  * phone mode and story mode.
  *
- * The dark backdrop behind the column hugs however many bubbles are
- * currently on screen instead of reserving a fixed-height slab — plain
- * `height: auto` (capped by `maxHeight` as a safety net for an unusually
- * long page) does that. It's anchored at the top (grows downward) or bottom
- * (grows upward) of the stage's original column slot depending on
- * `story.anchor`.
+ * The dark backdrop TARGETS about 60% of the stage's height, centered with
+ * roughly even margins above and below, regardless of how many bubbles are
+ * visible — but that's a floor, not a hard cap: a page whose bubbles need
+ * more room grows the box taller (up to a generous safety-net ceiling)
+ * rather than cropping a bubble's text.
  */
 export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackground, bakeScrim = true, children, style }) => {
   const stage = storyStage(aspect);
   const story = project.story;
   const anchor = story?.anchor ?? 'top';
 
+  const minBoxH = stage.column.h + STORY_SCRIM_PAD * 2;
   const maxBoxH = maxStoryContentH(stage, anchor) + STORY_SCRIM_PAD * 2;
   const boxPositionStyle: React.CSSProperties = anchor === 'bottom'
     ? { bottom: stage.h - (stage.column.y + stage.column.h) - STORY_SCRIM_PAD }
@@ -65,22 +68,32 @@ export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackgro
         <StoryBackgroundLayer background={story?.background ?? FALLBACK_BACKGROUND} />
       )}
 
-      {/* Rounded dark backdrop + chat column, merged into one auto-height
-          box so it hugs whatever's currently visible instead of a fixed
-          slab. `bakeScrim=false` (export capture) skips painting it here —
-          the exporter draws the equivalent shape on the canvas instead. */}
+      {/* Rounded dark backdrop + chat column — targets ~60% of the stage's
+          height (min-height) but grows with content up to a generous cap
+          (max-height) instead of cropping. `bakeScrim=false` (export
+          capture) skips painting the backdrop here, since the exporter
+          draws the equivalent shape on the canvas instead. */}
       <div
         className="absolute z-[3] overflow-hidden rounded-[22px]"
         style={{
           left: stage.column.x - STORY_SCRIM_PAD,
           width: stage.column.w + STORY_SCRIM_PAD * 2,
+          minHeight: minBoxH,
           maxHeight: maxBoxH,
           padding: STORY_SCRIM_PAD,
           background: bakeScrim ? `rgba(0, 0, 0, ${STORY_SCRIM})` : 'transparent',
           ...boxPositionStyle,
         }}
       >
-        <div style={{ width: stage.column.w }}>{children}</div>
+        {/* `zoom` (not `transform: scale`) genuinely affects layout, so the
+            video compositor's DOM measurements (getBoundingClientRect) pick
+            up the enlarged bubble text automatically — the pre-zoom size is
+            shrunk by the same factor so the POST-zoom box matches the CSS
+            px values above. No explicit height here — it stays intrinsic so
+            the box can grow with it (see min/max-height above). */}
+        <div style={{ width: stage.column.w / STORY_FONT_ZOOM, zoom: STORY_FONT_ZOOM }}>
+          {children}
+        </div>
       </div>
     </div>
   );
