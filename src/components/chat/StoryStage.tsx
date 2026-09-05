@@ -1,7 +1,9 @@
 import React from 'react';
-import type { ChatProject, StoryAspect } from '../../lib/parser/types';
+import type { ChatProject, StoryAspect, StoryBackground } from '../../lib/parser/types';
 import { storyStage } from '../../lib/story/storyLayout';
-import { findColorPreset, presetCss } from '../../lib/story/storyColors';
+import { StoryBackgroundLayer } from './StoryBackgroundLayer';
+
+const FALLBACK_BACKGROUND: StoryBackground = { kind: 'color', presetId: 'midnight' };
 
 interface Props {
   project: ChatProject;
@@ -29,7 +31,9 @@ export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackgro
   const stage = storyStage(aspect);
   const story = project.story;
   const scrim = story?.scrim ?? 0.45;
-  const showNamePill = story?.showNamePill ?? true;
+  // The platform's own header (when kept — see showHeader below) already
+  // shows the name and avatar, so the floating pill would just duplicate it.
+  const showNamePill = (story?.showNamePill ?? true) && !story?.showHeader;
 
   const otherParticipant = project.participants.find((p) => !p.isSelf) ?? project.participants[0];
   const pillAvatar = project.isGroup
@@ -43,16 +47,7 @@ export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackgro
       style={{ width: stage.w, height: stage.h, ...style }}
     >
       {renderBackground && (
-        <div
-          className="absolute inset-0"
-          style={
-            story?.background.kind === 'color' || !story?.background
-              ? { background: presetCss(findColorPreset(story?.background.presetId)) }
-              : undefined
-          }
-        >
-          {/* Image/video backgrounds render here in Phase 2 (StoryBackgroundLayer). */}
-        </div>
+        <StoryBackgroundLayer background={story?.background ?? FALLBACK_BACKGROUND} />
       )}
 
       {showNamePill && (

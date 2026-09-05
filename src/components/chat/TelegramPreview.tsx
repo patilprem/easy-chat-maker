@@ -30,6 +30,8 @@ interface Props {
   feedRef?: React.RefObject<HTMLDivElement | null>;
   /** Story mode: no status bar, header, input bar or wallpaper — bubbles only. */
   chromeless?: boolean;
+  /** Story mode only: keep the header even though chromeless strips everything else. */
+  showHeader?: boolean;
 }
 
 function isTelegramMessage(msg: Message | undefined): msg is TextMessage | ImageMessage {
@@ -464,6 +466,7 @@ export const TelegramPreview: React.FC<Props> = ({
   onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage, onAddText, onAddImage, onAddDate,
   onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, onGroupAvatarClick, feedRef,
   chromeless = false,
+  showHeader = false,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -531,7 +534,7 @@ export const TelegramPreview: React.FC<Props> = ({
       />
       )}
 
-      {!chromeless && (
+      {(!chromeless || showHeader) && (
       <div className="relative z-20 flex flex-shrink-0 items-center gap-2 px-3 pb-0.5 pt-0.5">
         <button className={`${circleBg} ${textPrimary} flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full shadow-sm ring-1 ring-white/20`}>
           <ChevronLeft size={25} strokeWidth={2.4} />

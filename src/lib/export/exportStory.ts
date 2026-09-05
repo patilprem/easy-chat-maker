@@ -41,7 +41,7 @@ export async function exportStoryMp4(
   const VIDEO_H = Math.round(stage.h * SCALE);
   const { config, muxerCodec } = await negotiateVideoConfig(VIDEO_W, VIDEO_H, FPS);
 
-  const background = createStoryBackgroundSource(story.background, VIDEO_W, VIDEO_H);
+  const background = await createStoryBackgroundSource(story.background, VIDEO_W, VIDEO_H);
 
   localStorage.setItem('ecm:v1:export-payload', JSON.stringify(project));
   onProgress('preparing', 2);
@@ -87,7 +87,7 @@ export async function exportStoryMp4(
 
     for (let f = 0; f < plans.length; f++) {
       if (encoderError) throw encoderError;
-      background.drawAt(ctx, f / FPS);
+      await background.drawAt(ctx, f / FPS);
       composer.drawFrame(ctx, plans[f], f);
 
       const videoFrame = new VideoFrame(outCanvas, {

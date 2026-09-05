@@ -27,6 +27,8 @@ interface Props {
   feedRef?: React.RefObject<HTMLDivElement | null>;
   /** Story mode: no status bar, header, input bar or wallpaper — bubbles only. */
   chromeless?: boolean;
+  /** Story mode only: keep the header even though chromeless strips everything else. */
+  showHeader?: boolean;
 }
 
 export const InstagramPreview: React.FC<Props> = ({
@@ -36,6 +38,7 @@ export const InstagramPreview: React.FC<Props> = ({
   onAddText, onAddImage, onAddDate,
   onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, feedRef,
   chromeless = false,
+  showHeader = false,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -94,7 +97,7 @@ export const InstagramPreview: React.FC<Props> = ({
       />
       )}
 
-      {!chromeless && (
+      {(!chromeless || showHeader) && (
       <div className={`${headerBg} flex items-center gap-3 px-3 pt-2 pb-2.5 flex-shrink-0`}>
         <ChevronLeft size={26} strokeWidth={2.2} className={`${textPrimary} flex-shrink-0`} />
         {project.isGroup ? (

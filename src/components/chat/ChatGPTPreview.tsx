@@ -24,6 +24,8 @@ interface Props {
   feedRef?: React.RefObject<HTMLDivElement | null>;
   /** Story mode: no status bar, header or input bar — bubbles only. */
   chromeless?: boolean;
+  /** Story mode only: keep the header even though chromeless strips everything else. */
+  showHeader?: boolean;
 }
 
 function isChatMessage(msg: Message | undefined): msg is TextMessage | ImageMessage {
@@ -65,6 +67,7 @@ export const ChatGPTPreview: React.FC<Props> = ({
   project, mode, visibleCount, typingParticipantId,
   onUpdateMessage, onDeleteMessage, onAddText, onUpdateStatusTime,
   feedRef, chromeless = false,
+  showHeader = false,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -111,7 +114,7 @@ export const ChatGPTPreview: React.FC<Props> = ({
       )}
 
       {/* Header */}
-      {!chromeless && (
+      {(!chromeless || showHeader) && (
       <div className="flex flex-shrink-0 items-center justify-between px-3 pb-1.5 pt-1.5">
         <div className="flex items-center gap-2">
           <button className={`${chipBg} ${textPrimary} flex h-9 w-9 items-center justify-center rounded-full`}>

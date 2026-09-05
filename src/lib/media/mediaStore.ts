@@ -3,16 +3,23 @@ import { nanoid } from 'nanoid';
 
 const mediaStore = createStore('ecm-media', 'media');
 
+export type MediaKind = 'image' | 'video';
+
 export interface LocalMediaItem {
   id: string;
   blob: Blob;
   mimeType: string;
+  kind: MediaKind;
   width?: number;
   height?: number;
+  /** kind: 'video' only */
+  durationSec?: number;
 }
 
-const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
-const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 MB
+const MAX_VIDEO_BYTES = 60 * 1024 * 1024; // 60 MB — story backgrounds only, re-encode short clips for best results
+const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+const VIDEO_TYPES = ['video/mp4', 'video/webm'];
 
 function getImageDimensions(blob: Blob): Promise<{ width: number; height: number }> {
   return new Promise((resolve) => {
@@ -27,11 +34,47 @@ function getImageDimensions(blob: Blob): Promise<{ width: number; height: number
   });
 }
 
-export async function saveMedia(file: File): Promise<LocalMediaItem> {
-  if (!ACCEPTED_TYPES.includes(file.type)) {
+function getVideoMetadata(blob: Blob): Promise<{ width: number; height: number; durationSec: number }> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(blob);
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.muted = true;
+    video.onloadedmetadata = () => {
+      resolve({ width: video.videoWidth, height: video.videoHeight, durationSec: video.duration || 0 });
+      URL.revokeObjectURL(url);
+    };
+    video.onerror = () => resolve({ width: 0, height: 0, durationSec: 0 });
+    video.src = url;
+  });
+}
+
+export async function saveMedia(file: File, kind: MediaKind = 'image'): Promise<LocalMediaItem> {
+  if (kind === 'video') {
+    if (!VIDEO_TYPES.includes(file.type)) {
+      throw new Error('Unsupported video type. Use MP4 or WebM.');
+    }
+    if (file.size > MAX_VIDEO_BYTES) {
+      throw new Error('Video too large. Maximum size is 60 MB — trim or re-encode a shorter clip.');
+    }
+    const meta = await getVideoMetadata(file);
+    const item: LocalMediaItem = {
+      id: nanoid(),
+      blob: file,
+      mimeType: file.type,
+      kind: 'video',
+      width: meta.width,
+      height: meta.height,
+      durationSec: meta.durationSec,
+    };
+    await set(item.id, item, mediaStore);
+    return item;
+  }
+
+  if (!IMAGE_TYPES.includes(file.type)) {
     throw new Error('Unsupported image type. Use PNG, JPG, WebP, or GIF.');
   }
-  if (file.size > MAX_SIZE_BYTES) {
+  if (file.size > MAX_IMAGE_BYTES) {
     throw new Error('Image too large. Maximum size is 5 MB.');
   }
 
@@ -40,6 +83,7 @@ export async function saveMedia(file: File): Promise<LocalMediaItem> {
     id: nanoid(),
     blob: file,
     mimeType: file.type,
+    kind: 'image',
     width: dims.width,
     height: dims.height,
   };

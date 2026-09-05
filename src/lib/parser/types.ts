@@ -184,6 +184,15 @@ export interface StorySettings {
   /** 0–1 opacity of the dark rounded scrim behind the chat column. */
   scrim: number;
   showNamePill: boolean;
+  /**
+   * Keep the platform's own header (back arrow, avatar, name, call icons)
+   * instead of stripping it along with the status bar and input bar — the
+   * classic "texting story" look screenshots a real chat app UI over a
+   * background video rather than floating bare bubbles. Turns the name pill
+   * off implicitly in the UI (both would show the name twice) but the two
+   * settings are independent, so this doesn't force it in data.
+   */
+  showHeader?: boolean;
   anchor?: 'top' | 'bottom';
 }
 

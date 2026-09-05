@@ -206,7 +206,7 @@ export const PhonePreview: React.FC = () => {
         >
           <div style={{ width: stage.w, height: stage.h, transform: `scale(${storyFit})`, transformOrigin: 'top left' }}>
             <StoryStage project={project} aspect={story!.aspect} renderBackground id="phone-screen">
-              <ChatPreview {...chatPreviewProps} mode="editor" chromeless id="story-chat" />
+              <ChatPreview {...chatPreviewProps} mode="editor" chromeless showHeader={story!.showHeader} id="story-chat" />
             </StoryStage>
           </div>
         </div>

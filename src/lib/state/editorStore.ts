@@ -7,7 +7,7 @@ import { SCENARIOS } from '../templates/scenarios';
 import { isAiPlatform } from '../parser/types';
 import { trackChatGenerated, trackTemplateLoaded } from '../track';
 import { defaultStorySettings } from '../story/storyLayout';
-import type { ChatProject, Message, Participant, Reaction, StoryAspect, StorySettings } from '../parser/types';
+import type { ChatProject, Message, Participant, Reaction, StoryAspect, StoryBackground, StorySettings } from '../parser/types';
 
 const STORAGE_KEY = 'ecm:v1:project';
 
@@ -60,6 +60,8 @@ interface EditorState {
   setStoryBackgroundPreset: (presetId: string) => void;
   setStoryScrim: (scrim: number) => void;
   setStoryNamePill: (on: boolean) => void;
+  setStoryBackgroundUpload: (file: File) => Promise<void>;
+  setStoryBackgroundOption: (patch: Partial<StoryBackground>) => void;
   updateStory: (patch: Partial<StorySettings>) => void;
   resolveImageUrls: () => Promise<void>;
   reset: () => void;
@@ -501,6 +503,34 @@ export const useEditorStore = create<EditorState>((set, get) => {
       story: p.story ? { ...p.story, showNamePill: on } : p.story,
     })),
 
+    setStoryBackgroundUpload: async (file) => {
+      const kind = file.type.startsWith('video/') ? 'video' : 'image';
+      const item = await saveMedia(file, kind);
+      const objectUrl = URL.createObjectURL(item.blob);
+      update((p) => ({
+        ...p,
+        story: p.story
+          ? {
+              ...p.story,
+              background: {
+                kind: 'upload',
+                mediaId: item.id,
+                mediaUrl: objectUrl,
+                mediaType: kind,
+                blur: p.story.background.blur,
+                dim: p.story.background.dim ?? 0.35,
+                loop: p.story.background.loop ?? true,
+              },
+            }
+          : p.story,
+      }));
+    },
+
+    setStoryBackgroundOption: (patch) => update((p) => ({
+      ...p,
+      story: p.story ? { ...p.story, background: { ...p.story.background, ...patch } } : p.story,
+    })),
+
     updateStory: (patch) => update((p) => ({
       ...p,
       story: p.story ? { ...p.story, ...patch } : p.story,
@@ -531,12 +561,18 @@ export const useEditorStore = create<EditorState>((set, get) => {
         ? { ...bg, imageUrl: await resolveObjectUrl(bg.mediaId) }
         : bg;
 
+      const storyBg = project.story?.background;
+      const resolvedStoryBg = storyBg?.kind === 'upload' && storyBg.mediaId && !storyBg.mediaUrl?.startsWith('blob:')
+        ? { ...storyBg, mediaUrl: await resolveObjectUrl(storyBg.mediaId) }
+        : storyBg;
+
       set((s) => ({
         project: {
           ...s.project,
           messages: resolved as Message[],
           participants: resolvedParticipants,
           background: resolvedBackground,
+          story: s.project.story && resolvedStoryBg ? { ...s.project.story, background: resolvedStoryBg } : s.project.story,
         },
       }));
     },

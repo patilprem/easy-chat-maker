@@ -217,6 +217,7 @@ export const RenderChatApp: React.FC<Props> = ({ mode }) => {
           project={project}
           mode={runtimeConfig.mode === 'export' ? 'export' : 'video'}
           chromeless
+          showHeader={project.story.showHeader}
           id="story-chat"
           visibleCount={currentFrame?.visibleCount}
           typingParticipantId={currentFrame?.typingParticipantId}

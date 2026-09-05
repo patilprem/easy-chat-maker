@@ -25,6 +25,8 @@ interface Props {
   feedRef?: React.RefObject<HTMLDivElement | null>;
   /** Story mode: no status bar, header or input bar — bubbles only. */
   chromeless?: boolean;
+  /** Story mode only: keep the header even though chromeless strips everything else. */
+  showHeader?: boolean;
 }
 
 function isChatMessage(msg: Message | undefined): msg is TextMessage | ImageMessage {
@@ -52,6 +54,7 @@ export const GeminiPreview: React.FC<Props> = ({
   project, mode, visibleCount, typingParticipantId,
   onUpdateMessage, onDeleteMessage, onAddText, onUpdateStatusTime, onUpdateSubtitle,
   feedRef, chromeless = false,
+  showHeader = false,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -128,7 +131,7 @@ export const GeminiPreview: React.FC<Props> = ({
       )}
 
       {/* Header */}
-      {!chromeless && (
+      {(!chromeless || showHeader) && (
       <div className="flex flex-shrink-0 items-center justify-between px-3.5 pb-1.5 pt-2">
         <div className="flex items-center gap-3.5">
           <Menu size={19} strokeWidth={2} className={textPrimary} />

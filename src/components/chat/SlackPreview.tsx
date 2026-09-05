@@ -26,6 +26,8 @@ interface Props {
   feedRef?: React.RefObject<HTMLDivElement | null>;
   /** Story mode: no status bar, header or input bar — bubbles only. */
   chromeless?: boolean;
+  /** Story mode only: keep the header even though chromeless strips everything else. */
+  showHeader?: boolean;
 }
 
 function isSlackMessage(msg: Message | undefined): msg is TextMessage | ImageMessage {
@@ -488,6 +490,7 @@ export const SlackPreview: React.FC<Props> = ({
   onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage, onAddText, onAddImage, onAddDate,
   onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, feedRef,
   chromeless = false,
+  showHeader = false,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -540,7 +543,7 @@ export const SlackPreview: React.FC<Props> = ({
       />
       )}
 
-      {!chromeless && (
+      {(!chromeless || showHeader) && (
       <div className={`${headerBg} flex flex-shrink-0 items-center gap-3 border-b px-3 py-2`}>
         <ChevronLeft size={29} strokeWidth={2.4} className={`${textPrimary} flex-shrink-0`} />
         <div className={`${headerPill} flex min-w-0 flex-1 items-center gap-2 rounded-2xl px-2.5 py-1.5`}>

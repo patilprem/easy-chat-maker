@@ -27,6 +27,8 @@ interface Props {
   feedRef?: React.RefObject<HTMLDivElement | null>;
   /** Story mode: no status bar, header, input bar or wallpaper — bubbles only. */
   chromeless?: boolean;
+  /** Story mode only: keep the header even though chromeless strips everything else. */
+  showHeader?: boolean;
 }
 
 function isBubbleMessage(msg: Message | undefined): msg is TextMessage | ImageMessage {
@@ -452,6 +454,7 @@ export const MessengerPreview: React.FC<Props> = ({
   onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage, onAddText, onAddImage, onAddDate,
   onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, feedRef,
   chromeless = false,
+  showHeader = false,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -501,7 +504,7 @@ export const MessengerPreview: React.FC<Props> = ({
       />
       )}
 
-      {!chromeless && (
+      {(!chromeless || showHeader) && (
       <div className={`${headerBg} flex flex-shrink-0 items-center gap-3 px-3 py-2 shadow-sm`}>
         <ChevronLeft size={28} strokeWidth={2.4} className={`${accent} flex-shrink-0`} />
         <button

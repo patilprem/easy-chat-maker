@@ -37,6 +37,8 @@ interface Props {
   style?: React.CSSProperties;
   /** Story mode: no status bar, header, input bar or wallpaper — bubbles only. */
   chromeless?: boolean;
+  /** Story mode only: keep the header even though chromeless strips everything else. */
+  showHeader?: boolean;
   /**
    * Full-chat PNG export only: the height of one phone screen, so a photo
    * wallpaper repeats per screen down the tall render instead of stretching.

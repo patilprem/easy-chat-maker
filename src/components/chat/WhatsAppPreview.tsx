@@ -223,6 +223,8 @@ interface Props {
   feedRef?: React.RefObject<HTMLDivElement | null>;
   /** Story mode: no status bar, header, input bar or wallpaper — bubbles only. */
   chromeless?: boolean;
+  /** Story mode only: keep the header even though chromeless strips everything else. */
+  showHeader?: boolean;
 }
 
 
@@ -267,6 +269,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
   onAddText, onAddImage, onAddDate, onAddSystem, onAddCall, onAddVoiceNote,
   onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, onGroupAvatarClick, feedRef,
   chromeless = false,
+  showHeader = false,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -339,7 +342,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
       )}
 
       {/* Header */}
-      {!chromeless && (
+      {(!chromeless || showHeader) && (
       <div className={`${headerBg} flex items-center gap-2 px-2 py-2 flex-shrink-0 shadow-sm`}>
         <ChevronLeft size={22} className={`${headerTextColor} flex-shrink-0 cursor-pointer`} />
         <button

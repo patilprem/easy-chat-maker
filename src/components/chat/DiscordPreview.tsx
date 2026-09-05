@@ -42,6 +42,8 @@ interface Props {
   feedRef?: React.RefObject<HTMLDivElement | null>;
   /** Story mode: no status bar, header or input bar — bubbles only. */
   chromeless?: boolean;
+  /** Story mode only: keep the header even though chromeless strips everything else. */
+  showHeader?: boolean;
 }
 
 function isDiscordMessage(msg: Message | undefined): msg is TextMessage | ImageMessage {
@@ -455,6 +457,7 @@ export const DiscordPreview: React.FC<Props> = ({
   onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage, onAddText, onAddImage, onAddDate,
   onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, feedRef,
   chromeless = false,
+  showHeader = false,
 }) => {
   const isEditor = mode === 'editor';
   const isDark = project.theme === 'dark';
@@ -501,7 +504,7 @@ export const DiscordPreview: React.FC<Props> = ({
       />
       )}
 
-      {!chromeless && (
+      {(!chromeless || showHeader) && (
       <div className={`${headerBg} flex flex-shrink-0 items-center gap-2 border-b px-3 py-1.5`}>
         <button className={`${textPrimary} flex h-8 w-7 flex-shrink-0 items-center justify-center`}>
           <ChevronLeft size={26} strokeWidth={2.7} />
