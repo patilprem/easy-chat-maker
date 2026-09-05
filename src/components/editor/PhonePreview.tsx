@@ -3,16 +3,23 @@ import { Play, Pause, Plus, Volume2, VolumeX } from 'lucide-react';
 import { ChatPreview } from '../chat/ChatPreview';
 import { StoryStage } from '../chat/StoryStage';
 import { OnboardingHint } from './OnboardingHint';
-import { buildFramePlan, FPS } from '../../lib/video/chatTimeline';
+import { buildFramePlan, buildRevealSchedule, framePlansFromSchedule, FPS } from '../../lib/video/chatTimeline';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { playMessageSound } from '../../lib/media/messageSounds';
 import { storyStage } from '../../lib/story/storyLayout';
 import { normalizeCycleCount, windowForPreview } from '../../lib/story/storyCycle';
 import { speakPreview, stopPreviewVoice } from '../../lib/tts/previewVoice';
 import { normalizeForSpeech } from '../../lib/tts/voiceClips';
-import type { Message } from '../../lib/parser/types';
+import type { Message, Participant } from '../../lib/parser/types';
 
 const SPEED_OPTIONS = [1, 1.5, 2, 0.75];
+
+/** Story mode: no typing indicator, no pause between bubbles — the next one appears the instant the last one's (voiceover-driven, if enabled) hold time is up. Phone mode keeps its normal typing/pause pacing. */
+function buildPreviewFramePlan(messages: Message[], participants: Participant[], speed: number, isStory: boolean) {
+  return isStory
+    ? framePlansFromSchedule(buildRevealSchedule(messages, participants, { speed, noTypingNoPause: true }))
+    : buildFramePlan(messages, participants, speed);
+}
 
 export const PhonePreview: React.FC = () => {
   const {
@@ -40,7 +47,7 @@ export const PhonePreview: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
   const [frame, setFrame] = useState(0);
-  const [framePlan, setFramePlan] = useState(() => buildFramePlan(previewMessages, project.participants, speed));
+  const [framePlan, setFramePlan] = useState(() => buildPreviewFramePlan(previewMessages, project.participants, speed, isStory));
 
   const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
@@ -86,12 +93,12 @@ export const PhonePreview: React.FC = () => {
 
   // Rebuild frame plan when project messages or playback speed change
   useEffect(() => {
-    const plan = buildFramePlan(previewMessages, project.participants, speed);
+    const plan = buildPreviewFramePlan(previewMessages, project.participants, speed, isStory);
     setFramePlan(plan);
     setFrame(0);
     frameRef.current = 0;
     lastTimeRef.current = 0;
-  }, [previewMessages, project.participants, speed]);
+  }, [previewMessages, project.participants, speed, isStory]);
 
   // Animation loop
   useEffect(() => {

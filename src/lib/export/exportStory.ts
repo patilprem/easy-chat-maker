@@ -16,14 +16,12 @@ import type { VoiceClip } from '../tts/kokoro';
  * exporter (compositeCore.ts) — the only real difference is what's captured
  * (a chrome-less, story-sized stage instead of a phone) and that a moving
  * background is painted under the (transparent) capture every frame instead
- * of a solid page color. When voiceover is on, each bubble's hold time
- * stretches to match its spoken line (see buildRevealSchedule) and the
- * clips are mixed into the same audio track as message sounds and music.
+ * of a solid page color. No typing indicator and no pause between bubbles —
+ * the next one appears the instant this one's hold time is up. When
+ * voiceover is on, that hold time IS the spoken line's duration (see
+ * buildRevealSchedule), so bubble and narration stay in lockstep; the clips
+ * are mixed into the same audio track as message sounds and music.
  */
-
-// Extra hold after a spoken line finishes, so the bubble doesn't vanish the
-// instant the voice stops — matches the silent path's natural pause feel.
-const VOICE_HOLD_PADDING_SEC = 0.3;
 
 // Canvas-area safety net, mirroring exportPng's fitPixelRatio: a very long
 // chat at 2x on a 1080x1920 stage could otherwise produce a browser-crashing
@@ -52,11 +50,12 @@ export async function exportStoryMp4(
   }
 
   const holdSecById: Record<string, number> = {};
-  for (const [msgId, clip] of voiceClips) holdSecById[msgId] = clip.durationSec + VOICE_HOLD_PADDING_SEC;
+  for (const [msgId, clip] of voiceClips) holdSecById[msgId] = clip.durationSec;
 
   const schedule = buildRevealSchedule(messages, project.participants, {
     speed: project.playbackSpeed,
     holdSecById: voiceClips.size > 0 ? holdSecById : undefined,
+    noTypingNoPause: true,
   });
   const plans = framePlansFromSchedule(schedule);
 
@@ -100,7 +99,7 @@ export async function exportStoryMp4(
       try {
         const { win, doc, root } = render;
         const pagePlans = framePlansFromSchedule(
-          buildRevealSchedule(page.messages, project.participants, { speed: project.playbackSpeed }),
+          buildRevealSchedule(page.messages, project.participants, { speed: project.playbackSpeed, noTypingNoPause: true }),
         );
         // No page background, and no scrim either — the story stage is
         // captured transparent (name pill baked in, no phone chrome, no

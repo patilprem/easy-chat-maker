@@ -8,6 +8,10 @@ const PAUSE_FRAMES_BASE = FPS * 0.9;    // hold after each bubble appears
 const INSTANT_PAUSE_BASE = FPS * 0.45;  // date/system chips
 const REACTION_DELAY_BASE = FPS * 0.5;  // frames after bubble before reaction shows
 const END_HOLD_BASE = FPS * 2.5;        // final hold
+// Story mode's noTypingNoPause: a bubble still needs a nonzero reveal→next
+// gap for the video to encode it as its own frame(s) — this is a technical
+// floor, not a pacing choice, so it stays tiny and fixed regardless of speed.
+const MIN_HOLD_FRAMES = Math.round(FPS * 0.1);
 
 function normalizeSpeed(speed?: number): number {
   return typeof speed === 'number' && Number.isFinite(speed) && speed > 0 ? speed : 1;
@@ -37,6 +41,12 @@ export interface ScheduleOptions {
   /** msgId -> seconds to hold the bubble visible (e.g. a voiceover clip's duration). Not divided by speed — a spoken line takes as long as it takes. */
   holdSecById?: Record<string, number>;
   endHoldSec?: number;
+  /**
+   * Story mode: skip the typing indicator and the pause after each bubble —
+   * the next one appears the instant this one's (voiceover-driven, if
+   * enabled) hold time is up, with no extra dead air on top.
+   */
+  noTypingNoPause?: boolean;
 }
 
 /**
@@ -52,8 +62,8 @@ export function buildRevealSchedule(
   opts: ScheduleOptions = {},
 ): RevealSchedule {
   const s = normalizeSpeed(opts.speed);
-  const TYPING_FRAMES = Math.round(TYPING_FRAMES_BASE / s);
-  const PAUSE_FRAMES = Math.round(PAUSE_FRAMES_BASE / s);
+  const TYPING_FRAMES = opts.noTypingNoPause ? 0 : Math.round(TYPING_FRAMES_BASE / s);
+  const PAUSE_FRAMES = opts.noTypingNoPause ? MIN_HOLD_FRAMES : Math.round(PAUSE_FRAMES_BASE / s);
   const INSTANT_PAUSE = Math.round(INSTANT_PAUSE_BASE / s);
   const REACTION_DELAY = Math.round(REACTION_DELAY_BASE / s);
   // Matches the original buildFramePlan when no explicit override is given:
