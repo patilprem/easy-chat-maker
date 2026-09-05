@@ -5,7 +5,7 @@ import { tryEncodeStoryAudioTrack } from './exportAudio';
 import { drainEncoderQueue, getExportScale, negotiateVideoConfig, type ExportOptions, type ProgressCallback } from './exportMp4';
 import { captureChatSprites, createFeedComposer, openRenderIframe, sleep, triggerDownload, type FeedComposer } from './compositeCore';
 import { createStoryBackgroundSource } from './storyBackground';
-import { storyStage, maxStoryContentH, STORY_SCRIM_PAD } from '../story/storyLayout';
+import { storyStage, maxStoryContentH, STORY_SCRIM, STORY_SCRIM_PAD } from '../story/storyLayout';
 import { buildStoryPages, normalizeCycleCount, pageIndexForRevealIdx } from '../story/storyCycle';
 import { ensureVoiceClips } from '../tts/voiceClips';
 import type { VoiceClip } from '../tts/kokoro';
@@ -83,7 +83,7 @@ export async function exportStoryMp4(
   // unaffected and keep running across page boundaries; only which
   // composer draws a given frame, and its bubbles resetting to empty at the
   // top, changes.
-  const cycleCount = normalizeCycleCount(story.cycleCount, story.aspect);
+  const cycleCount = normalizeCycleCount(story.aspect);
   const pages = buildStoryPages(messages, cycleCount);
 
   try {
@@ -120,7 +120,7 @@ export async function exportStoryMp4(
           : stage.column.y - STORY_SCRIM_PAD;
         composers.push(createFeedComposer(sprites, SCALE, {
           scrim: {
-            color: `rgba(0, 0, 0, ${story.scrim})`,
+            color: `rgba(0, 0, 0, ${STORY_SCRIM})`,
             padPx: STORY_SCRIM_PAD,
             radiusPx: 22,
             maxContentHPx: maxStoryContentH(stage, scrimAnchor),

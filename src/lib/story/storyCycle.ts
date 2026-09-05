@@ -13,9 +13,9 @@ const DEFAULT_CYCLE_COUNT_PORTRAIT = 5;
 // clips — a lower default gives landscape bubbles more breathing room.
 const DEFAULT_CYCLE_COUNT_LANDSCAPE = 3;
 
-export function normalizeCycleCount(cycleCount: number | undefined, aspect?: StoryAspect): number {
-  const fallback = aspect === '16:9' ? DEFAULT_CYCLE_COUNT_LANDSCAPE : DEFAULT_CYCLE_COUNT_PORTRAIT;
-  return Math.max(1, Math.round(cycleCount ?? fallback));
+/** Fixed per-aspect default — not user-adjustable, kept simple on purpose. */
+export function normalizeCycleCount(aspect?: StoryAspect): number {
+  return aspect === '16:9' ? DEFAULT_CYCLE_COUNT_LANDSCAPE : DEFAULT_CYCLE_COUNT_PORTRAIT;
 }
 
 /** Same subset chatTimeline's reveal schedule counts — every message except calls. */

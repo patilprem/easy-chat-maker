@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ChatPreview } from '../chat/ChatPreview';
 import { StoryStage } from '../chat/StoryStage';
 import { buildFramePlan, FPS } from '../../lib/video/chatTimeline';
+import { STORY_SHOW_HEADER } from '../../lib/story/storyLayout';
 import type { ChatProject, FramePlan } from '../../lib/parser/types';
 
 interface Props {
@@ -217,7 +218,7 @@ export const RenderChatApp: React.FC<Props> = ({ mode }) => {
           project={project}
           mode={runtimeConfig.mode === 'export' ? 'export' : 'video'}
           chromeless
-          showHeader={project.story.showHeader}
+          showHeader={STORY_SHOW_HEADER}
           id="story-chat"
           visibleCount={currentFrame?.visibleCount}
           typingParticipantId={currentFrame?.typingParticipantId}

@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react';
 import { Clapperboard, Music, Smartphone, Upload, X } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { STORY_COLOR_PRESETS, presetCss } from '../../lib/story/storyColors';
-import { normalizeCycleCount } from '../../lib/story/storyCycle';
 import { VoicePanel } from './VoicePanel';
 import type { StoryAspect } from '../../lib/parser/types';
 
@@ -21,7 +20,7 @@ const segBtn = (active: boolean) =>
  */
 export const StorySettings: React.FC = () => {
   const {
-    project, setStoryEnabled, setStoryAspect, setStoryBackgroundPreset, setStoryScrim, setStoryNamePill, updateStory,
+    project, setStoryEnabled, setStoryAspect, setStoryBackgroundPreset,
     setStoryBackgroundUpload, setStoryBackgroundOption,
     setStoryMusicUpload, setStoryMusicVolume, clearStoryMusic,
   } = useEditorStore();
@@ -244,60 +243,6 @@ export const StorySettings: React.FC = () => {
           </div>
 
           <VoicePanel project={project} />
-
-          {/* The chat always restarts from the top every few bubbles
-              (like textingstory.app) instead of scrolling forever — that's
-              no longer a choice, just how many bubbles a page holds. */}
-          <label className="flex items-center gap-2">
-            <span className="text-white/45 text-[11px] whitespace-nowrap">Bubbles before restart</span>
-            <input
-              type="range"
-              min={3}
-              max={8}
-              step={1}
-              value={normalizeCycleCount(story.cycleCount, aspect)}
-              onChange={(e) => updateStory({ cycleCount: Number(e.target.value) })}
-              className="h-1 flex-1 accent-[#60EFFF]"
-            />
-            <span className="w-4 flex-shrink-0 text-right text-[10.5px] tabular-nums text-white/40">
-              {normalizeCycleCount(story.cycleCount, aspect)}
-            </span>
-          </label>
-
-          <label className="flex items-center gap-2">
-            <span className="text-white/45 text-[11px] whitespace-nowrap">Darken behind chat</span>
-            <input
-              type="range"
-              min={0}
-              max={80}
-              step={5}
-              value={Math.round(story.scrim * 100)}
-              onChange={(e) => setStoryScrim(Number(e.target.value) / 100)}
-              className="h-1 flex-1 accent-[#60EFFF]"
-            />
-          </label>
-
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={!!story.showHeader}
-              onChange={(e) => updateStory({ showHeader: e.target.checked })}
-              className="h-3.5 w-3.5 flex-shrink-0 rounded accent-[#00FF87]"
-            />
-            <span className="text-white/45 text-[11px]">Keep the app header (back arrow, avatar, name — the classic "texting story" look)</span>
-          </label>
-
-          {!story.showHeader && (
-            <label className="flex cursor-pointer items-center gap-2">
-              <input
-                type="checkbox"
-                checked={story.showNamePill}
-                onChange={(e) => setStoryNamePill(e.target.checked)}
-                className="h-3.5 w-3.5 flex-shrink-0 rounded accent-[#00FF87]"
-              />
-              <span className="text-white/45 text-[11px]">Show name over the chat</span>
-            </label>
-          )}
         </>
       )}
     </div>

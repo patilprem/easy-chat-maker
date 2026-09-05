@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ChatProject, StoryAspect, StoryBackground } from '../../lib/parser/types';
-import { storyStage, maxStoryContentH, STORY_SCRIM_PAD } from '../../lib/story/storyLayout';
+import { storyStage, maxStoryContentH, STORY_SCRIM, STORY_SCRIM_PAD } from '../../lib/story/storyLayout';
 import { StoryBackgroundLayer } from './StoryBackgroundLayer';
 
 const FALLBACK_BACKGROUND: StoryBackground = { kind: 'color', presetId: 'midnight' };
@@ -21,7 +21,7 @@ interface Props {
    * used by the editor preview). The video exporter turns this off and
    * instead draws the same backdrop on the canvas each frame, sized to that
    * frame's actual bubble content — see compositeCore.ts's `scrim` option —
-   * so the DOM captured for export only ever contains the pill and bubbles.
+   * so the DOM captured for export only ever contains the header and bubbles.
    */
   bakeScrim?: boolean;
   children: React.ReactNode;
@@ -30,10 +30,13 @@ interface Props {
 
 /**
  * The story-mode "stage": a fixed-size box (see lib/story/storyLayout.ts)
- * holding the background, a name pill, and the chat column. The column stays
- * the same 390px width as the phone feed so every bubble component and the
- * video compositor's row-geometry logic keep working completely unchanged —
- * only what surrounds the column changes between phone mode and story mode.
+ * holding the background and the chat column, which keeps the platform's
+ * own header (back arrow, avatar, name — the classic "texting story" look)
+ * since ChatPreview is always rendered with showHeader on in this mode. The
+ * column stays the same 390px width as the phone feed so every bubble
+ * component and the video compositor's row-geometry logic keep working
+ * completely unchanged — only what surrounds the column changes between
+ * phone mode and story mode.
  *
  * The dark backdrop behind the column hugs however many bubbles are
  * currently on screen instead of reserving a fixed-height slab — plain
@@ -45,16 +48,7 @@ interface Props {
 export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackground, bakeScrim = true, children, style }) => {
   const stage = storyStage(aspect);
   const story = project.story;
-  const scrim = story?.scrim ?? 0.45;
   const anchor = story?.anchor ?? 'top';
-  // The platform's own header (when kept — see showHeader below) already
-  // shows the name and avatar, so the floating pill would just duplicate it.
-  const showNamePill = (story?.showNamePill ?? true) && !story?.showHeader;
-
-  const otherParticipant = project.participants.find((p) => !p.isSelf) ?? project.participants[0];
-  const pillAvatar = project.isGroup
-    ? project.participants[0]?.avatarUrl
-    : otherParticipant?.avatarUrl;
 
   const maxBoxH = maxStoryContentH(stage, anchor) + STORY_SCRIM_PAD * 2;
   const boxPositionStyle: React.CSSProperties = anchor === 'bottom'
@@ -71,23 +65,6 @@ export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackgro
         <StoryBackgroundLayer background={story?.background ?? FALLBACK_BACKGROUND} />
       )}
 
-      {showNamePill && (
-        <div
-          className="absolute z-[2] flex items-center gap-2 rounded-full bg-black/55 px-3 py-1.5 backdrop-blur-sm"
-          style={{ left: stage.pill.x, top: stage.pill.y }}
-        >
-          {pillAvatar && (
-            <img src={pillAvatar} alt="" className="h-6 w-6 flex-shrink-0 rounded-full object-cover" />
-          )}
-          <div className="min-w-0 leading-tight">
-            <div className="truncate text-[13px] font-semibold text-white">{project.title}</div>
-            {project.subtitle && (
-              <div className="truncate text-[10.5px] text-white/70">{project.subtitle}</div>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Rounded dark backdrop + chat column, merged into one auto-height
           box so it hugs whatever's currently visible instead of a fixed
           slab. `bakeScrim=false` (export capture) skips painting it here —
@@ -99,7 +76,7 @@ export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackgro
           width: stage.column.w + STORY_SCRIM_PAD * 2,
           maxHeight: maxBoxH,
           padding: STORY_SCRIM_PAD,
-          background: bakeScrim ? `rgba(0, 0, 0, ${scrim})` : 'transparent',
+          background: bakeScrim ? `rgba(0, 0, 0, ${STORY_SCRIM})` : 'transparent',
           ...boxPositionStyle,
         }}
       >

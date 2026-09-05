@@ -6,7 +6,7 @@ import { OnboardingHint } from './OnboardingHint';
 import { buildFramePlan, buildRevealSchedule, framePlansFromSchedule, FPS } from '../../lib/video/chatTimeline';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { playMessageSound } from '../../lib/media/messageSounds';
-import { storyStage } from '../../lib/story/storyLayout';
+import { storyStage, STORY_SHOW_HEADER } from '../../lib/story/storyLayout';
 import { normalizeCycleCount, windowForPreview } from '../../lib/story/storyCycle';
 import { speakPreview, stopPreviewVoice, resetPreviewVoiceAssignments } from '../../lib/tts/previewVoice';
 import { normalizeForSpeech } from '../../lib/tts/voiceClips';
@@ -261,7 +261,7 @@ export const PhonePreview: React.FC = () => {
   // (see exportStory.ts) rather than scrolling forever — there's no manual
   // choice for this any more. Only windows while actually playing — editing
   // always shows every message so nothing becomes unreachable to click on.
-  const cycleCount = isStory ? normalizeCycleCount(story!.cycleCount, story!.aspect) : 0;
+  const cycleCount = isStory ? normalizeCycleCount(story!.aspect) : 0;
   const storyWindow = cycleCount && isPlaying && currentPlan
     ? windowForPreview(previewMessages, currentPlan.visibleCount, cycleCount)
     : null;
@@ -346,7 +346,7 @@ export const PhonePreview: React.FC = () => {
         >
           <div style={{ width: stage.w, height: stage.h, transform: `scale(${storyFit})`, transformOrigin: 'top left' }}>
             <StoryStage project={project} aspect={story!.aspect} renderBackground id="phone-screen">
-              <ChatPreview {...storyChatPreviewProps} mode="editor" chromeless showHeader={story!.showHeader} id="story-chat" />
+              <ChatPreview {...storyChatPreviewProps} mode="editor" chromeless showHeader={STORY_SHOW_HEADER} id="story-chat" />
             </StoryStage>
           </div>
         </div>
