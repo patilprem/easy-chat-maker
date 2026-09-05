@@ -17,6 +17,7 @@ pnpm-debug.log*
 .tmp/
 .tmp-*
 .scratch_playwright/
+.scratch_*
 
 # wrangler local dev state
 .wrangler/

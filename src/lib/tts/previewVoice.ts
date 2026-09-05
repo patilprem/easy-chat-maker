@@ -25,7 +25,11 @@ if (typeof speechSynthesis !== 'undefined') {
   speechSynthesis.onvoiceschanged = loadVoices;
 }
 
-const FEMALE_HINTS = /female|woman|samantha|victoria|karen|zira|susan|fiona|moira|tessa|aria|jenny|zoe/i;
+// "Google US English" (Chrome's common network TTS default on many setups)
+// is a female voice but its name carries no gender word at all — called
+// out explicitly since it's often the ONLY quality/natural-sounding voice
+// available, which otherwise defeats the fallback logic below.
+const FEMALE_HINTS = /female|woman|samantha|victoria|karen|zira|susan|fiona|moira|tessa|aria|jenny|zoe|hazel|^google us english$/i;
 const MALE_HINTS = /male|man|daniel|alex|fred|david|mark|george|thomas|guy|ryan|eric/i;
 // The same "sounds AI-generated" complaint applies to legacy OS voices — a
 // modern "Natural"/"Neural"/"Online" voice (most current Windows/Chrome/Mac
@@ -41,7 +45,16 @@ function pickVoice(participantIndex: number, participantName?: string): SpeechSy
   const female = voices.filter((v) => FEMALE_HINTS.test(v.name));
   const male = voices.filter((v) => MALE_HINTS.test(v.name));
   const gender = resolveGender(participantIndex, participantName);
-  const pool = gender === 'male' ? (male.length ? male : voices) : (female.length ? female : voices);
+  const targetPool = gender === 'male' ? male : female;
+  const oppositePool = gender === 'male' ? female : male;
+  // No positively-identified voice for the target gender? Fall back to
+  // whatever's left EXCLUDING voices we know belong to the other gender —
+  // falling back to the full unfiltered list could land squarely on a
+  // known-opposite-gender voice (like "Google US English" for a male
+  // participant) purely because its name happens to also match the
+  // "sounds natural" filter below.
+  const safeFallback = voices.filter((v) => !oppositePool.includes(v));
+  const pool = targetPool.length ? targetPool : (safeFallback.length ? safeFallback : voices);
   const natural = pool.filter((v) => QUALITY_HINTS.test(v.name));
   const ranked = natural.length ? natural : pool;
   return ranked[Math.max(0, participantIndex) % ranked.length];
