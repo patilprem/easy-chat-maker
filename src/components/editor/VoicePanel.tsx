@@ -58,7 +58,7 @@ export const VoicePanel: React.FC<Props> = ({ project }) => {
           )}
 
           {speakers.map((p, i) => {
-            const value = voice?.voices[p.id] ?? defaultVoiceFor(i, p.isSelf);
+            const value = voice?.voices[p.id] ?? defaultVoiceFor(i, p.name);
             return (
               <label key={p.id} className="flex items-center gap-2">
                 <span className="w-16 flex-shrink-0 truncate text-[11px] text-white/50">{p.name}</span>

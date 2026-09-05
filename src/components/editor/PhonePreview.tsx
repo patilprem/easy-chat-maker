@@ -190,9 +190,9 @@ export const PhonePreview: React.FC = () => {
         // bubble never appears while this one is still being read out.
         if (revealed && revealed.kind === 'text' && story?.enabled && story.voice?.enabled) {
           const idx = project.participants.findIndex((p) => p.id === revealed.participantId);
-          const isSelf = project.participants[idx]?.isSelf ?? false;
+          const participantName = project.participants[idx]?.name;
           speechActiveRef.current = true;
-          speakPreview(normalizeForSpeech(revealed.text), Math.max(0, idx), isSelf, story.voice.speed, () => {
+          speakPreview(normalizeForSpeech(revealed.text), Math.max(0, idx), participantName, story.voice.speed, () => {
             speechActiveRef.current = false;
           });
         }

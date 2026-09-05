@@ -56,8 +56,8 @@ export async function ensureVoiceClips(
     const msg = textMessages[i];
     if (msg.kind !== 'text') continue;
     const participantIndex = project.participants.findIndex((p) => p.id === msg.participantId);
-    const isSelf = project.participants[participantIndex]?.isSelf ?? false;
-    const voiceId = voiceSettings.voices[msg.participantId] ?? defaultVoiceFor(Math.max(0, participantIndex), isSelf);
+    const participantName = project.participants[participantIndex]?.name;
+    const voiceId = voiceSettings.voices[msg.participantId] ?? defaultVoiceFor(Math.max(0, participantIndex), participantName);
     const spokenText = normalizeForSpeech(msg.text);
     if (!spokenText) continue;
 

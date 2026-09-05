@@ -8,6 +8,7 @@
  * one-time model download only happens if/when the user exports with
  * voiceover enabled.
  */
+import { resolveGender } from './voices';
 
 let cachedVoices: SpeechSynthesisVoice[] = [];
 
@@ -24,17 +25,26 @@ if (typeof speechSynthesis !== 'undefined') {
   speechSynthesis.onvoiceschanged = loadVoices;
 }
 
-const FEMALE_HINTS = /female|woman|samantha|victoria|karen|zira|susan|fiona|moira|tessa/i;
-const MALE_HINTS = /male|man|daniel|alex|fred|david|mark|george|thomas/i;
+const FEMALE_HINTS = /female|woman|samantha|victoria|karen|zira|susan|fiona|moira|tessa|aria|jenny|zoe/i;
+const MALE_HINTS = /male|man|daniel|alex|fred|david|mark|george|thomas|guy|ryan|eric/i;
+// The same "sounds AI-generated" complaint applies to legacy OS voices — a
+// modern "Natural"/"Neural"/"Online" voice (most current Windows/Chrome/Mac
+// installs have at least one) sounds dramatically less robotic than the
+// old offline SAPI/eSpeak defaults, so prefer those when more than one
+// candidate voice is available.
+const QUALITY_HINTS = /natural|neural|online|premium|enhanced|google/i;
 
-/** A stable-ish, varied voice per participant from whatever this OS/browser has installed. */
-function pickVoice(participantIndex: number, isSelf: boolean): SpeechSynthesisVoice | undefined {
+/** A stable-ish, varied, natural-leaning voice per participant from whatever this OS/browser has installed. */
+function pickVoice(participantIndex: number, participantName?: string): SpeechSynthesisVoice | undefined {
   const voices = loadVoices().filter((v) => v.lang.toLowerCase().startsWith('en'));
   if (voices.length === 0) return undefined;
   const female = voices.filter((v) => FEMALE_HINTS.test(v.name));
   const male = voices.filter((v) => MALE_HINTS.test(v.name));
-  const pool = isSelf ? (male.length ? male : voices) : (female.length ? female : voices);
-  return pool[Math.max(0, participantIndex) % pool.length];
+  const gender = resolveGender(participantIndex, participantName);
+  const pool = gender === 'male' ? (male.length ? male : voices) : (female.length ? female : voices);
+  const natural = pool.filter((v) => QUALITY_HINTS.test(v.name));
+  const ranked = natural.length ? natural : pool;
+  return ranked[Math.max(0, participantIndex) % ranked.length];
 }
 
 export function isPreviewVoiceSupported(): boolean {
@@ -54,14 +64,14 @@ const MAX_UTTERANCE_WAIT_MS = 15000;
  * can reveal faster than a long line takes to read if something goes wrong
  * upstream).
  */
-export function speakPreview(text: string, participantIndex: number, isSelf: boolean, speed = 1, onEnd?: () => void): void {
+export function speakPreview(text: string, participantIndex: number, participantName: string | undefined, speed = 1, onEnd?: () => void): void {
   if (!isPreviewVoiceSupported() || !text.trim()) {
     onEnd?.();
     return;
   }
   speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
-  const voice = pickVoice(participantIndex, isSelf);
+  const voice = pickVoice(participantIndex, participantName);
   if (voice) utter.voice = voice;
   utter.rate = Math.min(1.6, Math.max(0.7, speed));
 
