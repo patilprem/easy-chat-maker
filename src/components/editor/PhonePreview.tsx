@@ -187,14 +187,18 @@ export const PhonePreview: React.FC = () => {
   const isStory = story?.enabled ?? false;
   const stage = isStory ? storyStage(story!.aspect) : null;
   // Fit the story stage to whatever space the editor column actually has
-  // (measured via ResizeObserver above) rather than the old fixed phone
-  // footprint, which crushed a 16:9 stage — and its text — down to ~37%.
-  // The mobile "Preview" tab's wrapper has no explicit height, so a
-  // flex-grown measurement there can collapse toward 0 — fall back to the
-  // old phone-sized footprint rather than fitting into a bogus tiny box.
+  // (measured via ResizeObserver above), but never larger than the classic
+  // phone frame's footprint — a big desktop column otherwise blows the
+  // preview up way past a natural "phone-sized" preview. This still shrinks
+  // further for small containers (the mobile "Preview" tab in particular).
+  // That tab's wrapper also has no explicit height, so a flex-grown
+  // measurement there can collapse toward 0 — fall back to the phone-sized
+  // footprint rather than fitting into a bogus tiny box.
   const fitW = wrapSize.w > 100 ? wrapSize.w : PHONE_W;
   const fitH = wrapSize.h > 100 ? wrapSize.h : PHONE_H;
-  const storyFit = stage ? Math.max(0.35, Math.min(fitW / stage.w, fitH / stage.h, 1.6)) : 1;
+  const storyFit = stage
+    ? Math.max(0.35, Math.min(fitW / stage.w, fitH / stage.h, PHONE_W / stage.w, PHONE_H / stage.h))
+    : 1;
 
   const cycleCount = isStory && story!.feedStyle === 'cycle' ? normalizeCycleCount(story!.cycleCount) : 0;
   // Only windows while actually playing — editing always shows every
@@ -251,16 +255,20 @@ export const PhonePreview: React.FC = () => {
         >
           {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
         </button>
-        <button
-          onClick={() => {
-            const next = SPEED_OPTIONS[(SPEED_OPTIONS.indexOf(speed) + 1) % SPEED_OPTIONS.length] ?? 1;
-            setPlaybackSpeed(next);
-          }}
-          title="Chat speed — how fast messages appear, in the preview and in exported videos"
-          className="flex items-center justify-center px-2 h-7 rounded-full bg-white/10 hover:bg-[#00FF87]/15 text-white text-xs font-semibold transition-colors tabular-nums"
-        >
-          {speed}x
-        </button>
+        {/* Story mode has no manual speed control — pacing follows the
+            voiceover when it's on, or the normal reveal timing otherwise. */}
+        {!isStory && (
+          <button
+            onClick={() => {
+              const next = SPEED_OPTIONS[(SPEED_OPTIONS.indexOf(speed) + 1) % SPEED_OPTIONS.length] ?? 1;
+              setPlaybackSpeed(next);
+            }}
+            title="Chat speed — how fast messages appear, in the preview and in exported videos"
+            className="flex items-center justify-center px-2 h-7 rounded-full bg-white/10 hover:bg-[#00FF87]/15 text-white text-xs font-semibold transition-colors tabular-nums"
+          >
+            {speed}x
+          </button>
+        )}
         <span className="text-white/40 text-xs">
           {currentPlan ? `${currentPlan.visibleCount} / ${project.messages.length} messages` : ''}
         </span>

@@ -217,27 +217,29 @@ export const PlatformSettings: React.FC = () => {
         </div>
       )}
 
-      <div className="space-y-1.5">
-        <label className="text-white/50 text-xs font-medium">Device</label>
-        <div className="flex bg-white/5 border border-white/10 rounded-xl p-1 gap-1">
-          <button
-            onClick={() => setDeviceOS('ios')}
-            className={segBtn(project.deviceOS === 'ios')}
-          >
-            <AppleLogoIcon />
-            iOS
-          </button>
-          <button
-            onClick={() => setDeviceOS('android')}
-            className={segBtn(project.deviceOS === 'android')}
-          >
-            <Bot size={14} strokeWidth={2.5} />
-            Android
-          </button>
+      {!storyEnabled && (
+        <div className="space-y-1.5">
+          <label className="text-white/50 text-xs font-medium">Device</label>
+          <div className="flex bg-white/5 border border-white/10 rounded-xl p-1 gap-1">
+            <button
+              onClick={() => setDeviceOS('ios')}
+              className={segBtn(project.deviceOS === 'ios')}
+            >
+              <AppleLogoIcon />
+              iOS
+            </button>
+            <button
+              onClick={() => setDeviceOS('android')}
+              className={segBtn(project.deviceOS === 'android')}
+            >
+              <Bot size={14} strokeWidth={2.5} />
+              Android
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {backgroundAvailable && (
+      {backgroundAvailable && !storyEnabled && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <label className="text-white/50 text-xs font-medium">
