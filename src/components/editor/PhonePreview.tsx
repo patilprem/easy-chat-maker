@@ -276,7 +276,7 @@ export const PhonePreview: React.FC = () => {
 
       {/* Preview: story stage or phone frame — measured so the story stage
           can be fit to whatever space is actually available (see wrapSize). */}
-      <div ref={previewWrapRef} className="flex-1 min-h-0 w-full flex items-center justify-center">
+      <div ref={previewWrapRef} className="flex-1 min-h-0 w-full flex items-start justify-center">
       {isStory && stage ? (
         <div
           className="relative flex-shrink-0 overflow-hidden rounded-2xl shadow-2xl"
