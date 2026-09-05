@@ -8,6 +8,7 @@ import {
   supportsDoodle,
   showDoodle,
 } from '../../lib/backgrounds';
+import { STORY_PLATFORMS } from '../../lib/parser/types';
 import type { Platform } from '../../lib/parser/types';
 
 const WaIcon: React.FC = () => (
@@ -101,8 +102,9 @@ export const PlatformSettings: React.FC = () => {
   const activePresetId = project.background?.presetId;
   const bgImageUrl = project.background?.imageUrl;
   const isThemedPlatform = project.platform === 'instagram' || project.platform === 'messenger';
+  const storyEnabled = project.story?.enabled ?? false;
 
-  const platformGroups: Array<{
+  const allPlatformGroups: Array<{
     label: string;
     items: Array<{ id: Platform; name: string; icon: React.ReactNode }>;
   }> = [
@@ -131,6 +133,15 @@ export const PlatformSettings: React.FC = () => {
       ],
     },
   ];
+
+  // Story mode keeps things simple: only the 4 classic "chat story" apps,
+  // and no theme choice (see STORY_PLATFORMS / setStoryEnabled which forces
+  // dark and switches away from an unsupported platform when turning it on).
+  const platformGroups = storyEnabled
+    ? allPlatformGroups
+        .map((g) => ({ ...g, items: g.items.filter((it) => STORY_PLATFORMS.includes(it.id)) }))
+        .filter((g) => g.items.length > 0)
+    : allPlatformGroups;
 
   const segBtn = (active: boolean) =>
     `flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
@@ -184,25 +195,27 @@ export const PlatformSettings: React.FC = () => {
         ))}
       </div>
 
-      <div className="space-y-1.5">
-        <label className="text-white/50 text-xs font-medium">Theme</label>
-        <div className="flex bg-white/5 border border-white/10 rounded-xl p-1 gap-1">
-          <button
-            onClick={() => setTheme('light')}
-            className={segBtn(project.theme === 'light')}
-          >
-            <Sun size={14} strokeWidth={2.5} />
-            Light
-          </button>
-          <button
-            onClick={() => setTheme('dark')}
-            className={segBtn(project.theme === 'dark')}
-          >
-            <Moon size={14} strokeWidth={2.5} />
-            Dark
-          </button>
+      {!storyEnabled && (
+        <div className="space-y-1.5">
+          <label className="text-white/50 text-xs font-medium">Theme</label>
+          <div className="flex bg-white/5 border border-white/10 rounded-xl p-1 gap-1">
+            <button
+              onClick={() => setTheme('light')}
+              className={segBtn(project.theme === 'light')}
+            >
+              <Sun size={14} strokeWidth={2.5} />
+              Light
+            </button>
+            <button
+              onClick={() => setTheme('dark')}
+              className={segBtn(project.theme === 'dark')}
+            >
+              <Moon size={14} strokeWidth={2.5} />
+              Dark
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="space-y-1.5">
         <label className="text-white/50 text-xs font-medium">Device</label>

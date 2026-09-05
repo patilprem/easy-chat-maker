@@ -7,6 +7,7 @@ import { SCENARIOS } from '../templates/scenarios';
 import { isAiPlatform } from '../parser/types';
 import { trackChatGenerated, trackTemplateLoaded } from '../track';
 import { defaultStorySettings } from '../story/storyLayout';
+import { STORY_PLATFORMS } from '../parser/types';
 import type { ChatProject, Message, Participant, Reaction, StoryAspect, StoryBackground, StorySettings } from '../parser/types';
 
 const STORAGE_KEY = 'ecm:v1:project';
@@ -478,6 +479,11 @@ export const useEditorStore = create<EditorState>((set, get) => {
 
     setStoryEnabled: (on) => update((p) => ({
       ...p,
+      // Story mode only offers 4 platforms and is always dark — switch away
+      // from an unsupported platform / light theme rather than showing a
+      // toggle whose state no longer applies.
+      theme: on ? 'dark' : p.theme,
+      platform: on && !STORY_PLATFORMS.includes(p.platform) ? 'whatsapp' : p.platform,
       story: on
         ? p.story
           ? { ...p.story, enabled: true }

@@ -39,7 +39,7 @@ export const VoicePanel: React.FC<Props> = ({ project }) => {
         />
         <span className="flex items-center gap-1.5 text-[11.5px] font-medium text-white/80">
           <Mic size={12} className="text-[#60EFFF]" />
-          AI voiceover (free, runs on your device)
+          AI voiceover (free)
         </span>
       </label>
 
@@ -50,7 +50,7 @@ export const VoicePanel: React.FC<Props> = ({ project }) => {
       {cap.ok && enabled && (
         <div className="space-y-3 pt-1">
           <p className="text-[10px] text-white/30">
-            First use downloads a ~90MB voice model, cached after that. Generating narration can take a little while on export.
+            Preview here uses your device's built-in voice instantly — no download. Exporting bakes in real narration for the video; the first export downloads a one-time voice model (cached after that, so later exports are instant).
           </p>
 
           {speakers.length === 0 && (

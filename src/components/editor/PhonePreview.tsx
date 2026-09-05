@@ -7,6 +7,9 @@ import { buildFramePlan, FPS } from '../../lib/video/chatTimeline';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { playMessageSound } from '../../lib/media/messageSounds';
 import { storyStage } from '../../lib/story/storyLayout';
+import { normalizeCycleCount, windowForPreview } from '../../lib/story/storyCycle';
+import { speakPreview, stopPreviewVoice } from '../../lib/tts/previewVoice';
+import { normalizeForSpeech } from '../../lib/tts/voiceClips';
 import type { Message } from '../../lib/parser/types';
 
 const SPEED_OPTIONS = [1, 1.5, 2, 0.75];
@@ -33,6 +36,23 @@ export const PhonePreview: React.FC = () => {
   const groupAvatarInputRef = useRef<HTMLInputElement>(null);
   const pendingAvatarParticipantId = useRef<string | null>(null);
   const musicRef = useRef<HTMLAudioElement>(null);
+  const previewWrapRef = useRef<HTMLDivElement>(null);
+  const [wrapSize, setWrapSize] = useState({ w: 360, h: 780 });
+
+  // The story stage (540x960 or 960x540 CSS px) is fit to whatever space is
+  // actually available in the editor column, instead of the old fixed
+  // phone-sized footprint — otherwise a 16:9 stage in particular got shrunk
+  // to a fraction of its size and its text along with it.
+  useEffect(() => {
+    const el = previewWrapRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) setWrapSize({ w: entry.contentRect.width, h: entry.contentRect.height });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // Story mode's background music preview — plays only while the timeline is
   // actually playing, so scrubbing/editing the script doesn't leave it running.
@@ -123,6 +143,15 @@ export const PhonePreview: React.FC = () => {
           const isSelf = project.participants.find((p) => p.id === revealed.participantId)?.isSelf;
           playMessageSound(isSelf ? 'send' : 'receive', project.platform);
         }
+        // Free, instant preview narration (Web Speech API — see
+        // lib/tts/previewVoice.ts) so voice can be heard while editing,
+        // without downloading anything. The exported video bakes in real
+        // Kokoro-generated audio instead.
+        if (revealed && revealed.kind === 'text' && project.story?.enabled && project.story.voice?.enabled) {
+          const idx = project.participants.findIndex((p) => p.id === revealed.participantId);
+          const isSelf = project.participants[idx]?.isSelf ?? false;
+          speakPreview(normalizeForSpeech(revealed.text), Math.max(0, idx), isSelf, project.story.voice.speed);
+        }
       }
       if (reactions > prev.reactions) {
         playMessageSound('reaction', project.platform);
@@ -130,7 +159,13 @@ export const PhonePreview: React.FC = () => {
     }
 
     prevSoundStateRef.current = { visible, reactions };
-  }, [currentPlan, isPlaying, muted, project.messages, project.participants, project.platform]);
+  }, [currentPlan, isPlaying, muted, project.messages, project.participants, project.platform, project.story?.enabled, project.story?.voice]);
+
+  // Stop any in-flight narration the moment playback pauses/mutes, and on unmount.
+  useEffect(() => {
+    if (!isPlaying || muted) stopPreviewVoice();
+  }, [isPlaying, muted]);
+  useEffect(() => () => stopPreviewVoice(), []);
 
   const handleAvatarClick = useCallback((participantId: string) => {
     pendingAvatarParticipantId.current = participantId;
@@ -151,9 +186,22 @@ export const PhonePreview: React.FC = () => {
   const story = project.story;
   const isStory = story?.enabled ?? false;
   const stage = isStory ? storyStage(story!.aspect) : null;
-  // Fit the story stage into the same footprint the phone frame occupies, so
-  // switching modes doesn't reflow the rest of the editor layout.
-  const storyFit = stage ? Math.min(PHONE_W / stage.w, PHONE_H / stage.h) : 1;
+  // Fit the story stage to whatever space the editor column actually has
+  // (measured via ResizeObserver above) rather than the old fixed phone
+  // footprint, which crushed a 16:9 stage — and its text — down to ~37%.
+  // The mobile "Preview" tab's wrapper has no explicit height, so a
+  // flex-grown measurement there can collapse toward 0 — fall back to the
+  // old phone-sized footprint rather than fitting into a bogus tiny box.
+  const fitW = wrapSize.w > 100 ? wrapSize.w : PHONE_W;
+  const fitH = wrapSize.h > 100 ? wrapSize.h : PHONE_H;
+  const storyFit = stage ? Math.max(0.35, Math.min(fitW / stage.w, fitH / stage.h, 1.6)) : 1;
+
+  const cycleCount = isStory && story!.feedStyle === 'cycle' ? normalizeCycleCount(story!.cycleCount) : 0;
+  // Only windows while actually playing — editing always shows every
+  // message so nothing becomes unreachable to click on.
+  const storyWindow = cycleCount && isPlaying && currentPlan
+    ? windowForPreview(project.messages, currentPlan.visibleCount, cycleCount)
+    : null;
 
   const chatPreviewProps = {
     project,
@@ -179,8 +227,12 @@ export const PhonePreview: React.FC = () => {
     feedRef,
   };
 
+  const storyChatPreviewProps = storyWindow
+    ? { ...chatPreviewProps, project: { ...project, messages: storyWindow.messages }, visibleCount: storyWindow.visibleCount }
+    : chatPreviewProps;
+
   return (
-    <div className="flex flex-col items-center gap-4 h-full">
+    <div className="flex flex-col items-center gap-4 h-full w-full min-h-0">
       {/* Play / Pause */}
       <div className="flex items-center gap-2">
         <button
@@ -214,15 +266,17 @@ export const PhonePreview: React.FC = () => {
         </span>
       </div>
 
-      {/* Preview: story stage or phone frame */}
+      {/* Preview: story stage or phone frame — measured so the story stage
+          can be fit to whatever space is actually available (see wrapSize). */}
+      <div ref={previewWrapRef} className="flex-1 min-h-0 w-full flex items-center justify-center">
       {isStory && stage ? (
         <div
-          className="relative flex-shrink-0 mx-auto overflow-hidden rounded-2xl shadow-2xl"
-          style={{ width: stage.w * storyFit, height: stage.h * storyFit, maxWidth: '100%' }}
+          className="relative flex-shrink-0 overflow-hidden rounded-2xl shadow-2xl"
+          style={{ width: stage.w * storyFit, height: stage.h * storyFit, maxWidth: '100%', maxHeight: '100%' }}
         >
           <div style={{ width: stage.w, height: stage.h, transform: `scale(${storyFit})`, transformOrigin: 'top left' }}>
             <StoryStage project={project} aspect={story!.aspect} renderBackground id="phone-screen">
-              <ChatPreview {...chatPreviewProps} mode="editor" chromeless showHeader={story!.showHeader} id="story-chat" />
+              <ChatPreview {...storyChatPreviewProps} mode="editor" chromeless showHeader={story!.showHeader} id="story-chat" />
             </StoryStage>
           </div>
         </div>
@@ -264,6 +318,7 @@ export const PhonePreview: React.FC = () => {
           <div className="absolute right-[-12px] top-32 w-1.5 h-16 rounded-r-full bg-gray-600" />
         </div>
       )}
+      </div>
 
       {/* Empty chat add button */}
       {project.messages.length === 0 && (

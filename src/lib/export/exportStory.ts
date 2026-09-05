@@ -3,9 +3,10 @@ import type { ChatProject } from '../parser/types';
 import { buildRevealSchedule, framePlansFromSchedule, FPS } from '../video/chatTimeline';
 import { tryEncodeStoryAudioTrack } from './exportAudio';
 import { drainEncoderQueue, getExportScale, negotiateVideoConfig, type ExportOptions, type ProgressCallback } from './exportMp4';
-import { captureChatSprites, createFeedComposer, openRenderIframe, sleep, triggerDownload } from './compositeCore';
+import { captureChatSprites, createFeedComposer, openRenderIframe, sleep, triggerDownload, type FeedComposer } from './compositeCore';
 import { createStoryBackgroundSource } from './storyBackground';
 import { storyStage } from '../story/storyLayout';
+import { buildStoryPages, normalizeCycleCount, pageIndexForRevealIdx } from '../story/storyCycle';
 import { ensureVoiceClips } from '../tts/voiceClips';
 import type { VoiceClip } from '../tts/kokoro';
 
@@ -72,25 +73,45 @@ export async function exportStoryMp4(
 
   const background = await createStoryBackgroundSource(story.background, VIDEO_W, VIDEO_H);
 
-  localStorage.setItem('ecm:v1:export-payload', JSON.stringify(project));
-  onProgress('preparing', 16);
-
-  const render = await openRenderIframe(
-    `${window.location.origin}/render/chat/?mode=video&story=1&w=${stage.w}&h=${stage.h}`,
-    stage.w,
-    stage.h,
-  );
+  // "Restart every few" feed style (see StorySettings): the chat column
+  // clears and starts fresh from the top every `cycleCount` bubbles instead
+  // of scrolling forever, like textingstory.app. Each page is an
+  // independent mini-chat, so it gets its own render pass and its own
+  // FeedComposer — the shared `schedule`/`plans` above (and therefore the
+  // background, music, voiceover and per-message timing) are completely
+  // unaffected and keep running across page boundaries; only which
+  // composer draws a given frame, and its bubbles resetting to empty at the
+  // top, changes.
+  const cycleCount = story.feedStyle === 'cycle' ? normalizeCycleCount(story.cycleCount) : 0;
+  const pages = cycleCount ? buildStoryPages(messages, cycleCount) : [{ messages, startRevealIdx: 0 }];
 
   try {
-    const { win, doc, root } = render;
-    // No page background — the story stage is captured transparent (scrim +
-    // name pill baked in, no phone chrome) so the canvas background painted
-    // below shows through everywhere the chat column doesn't cover.
-    const sprites = await captureChatSprites({
-      win, doc, root, messages, plans, scale: SCALE,
-      onProgress: (pct) => onProgress('preparing', pct),
-    });
-    const composer = createFeedComposer(sprites, SCALE);
+    const composers: FeedComposer[] = [];
+    for (let i = 0; i < pages.length; i++) {
+      const page = pages[i];
+      localStorage.setItem('ecm:v1:export-payload', JSON.stringify({ ...project, messages: page.messages }));
+      const render = await openRenderIframe(
+        `${window.location.origin}/render/chat/?mode=video&story=1&w=${stage.w}&h=${stage.h}`,
+        stage.w,
+        stage.h,
+      );
+      try {
+        const { win, doc, root } = render;
+        const pagePlans = framePlansFromSchedule(
+          buildRevealSchedule(page.messages, project.participants, { speed: project.playbackSpeed }),
+        );
+        // No page background — the story stage is captured transparent (scrim +
+        // name pill baked in, no phone chrome) so the canvas background painted
+        // below shows through everywhere the chat column doesn't cover.
+        const sprites = await captureChatSprites({
+          win, doc, root, messages: page.messages, plans: pagePlans, scale: SCALE,
+          onProgress: (pct) => onProgress('preparing', 16 + Math.round(((i + pct / 100) / pages.length) * 2)),
+        });
+        composers.push(createFeedComposer(sprites, SCALE));
+      } finally {
+        render.close();
+      }
+    }
 
     onProgress('encoding', 18);
     const outCanvas = document.createElement('canvas');
@@ -117,7 +138,14 @@ export async function exportStoryMp4(
     for (let f = 0; f < plans.length; f++) {
       if (encoderError) throw encoderError;
       await background.drawAt(ctx, f / FPS);
-      composer.drawFrame(ctx, plans[f], f);
+      const plan = plans[f];
+      if (cycleCount) {
+        const pIdx = Math.min(pageIndexForRevealIdx(plan.visibleCount, cycleCount), composers.length - 1);
+        const relativePlan = { ...plan, visibleCount: plan.visibleCount - pages[pIdx].startRevealIdx };
+        composers[pIdx].drawFrame(ctx, relativePlan, f);
+      } else {
+        composers[0].drawFrame(ctx, plan, f);
+      }
 
       const videoFrame = new VideoFrame(outCanvas, {
         timestamp: Math.round((f / FPS) * 1_000_000),
@@ -141,7 +169,6 @@ export async function exportStoryMp4(
     triggerDownload(new Blob([buffer], { type: 'video/mp4' }), filename);
     onProgress('idle', 100);
   } finally {
-    render.close();
     background.close();
   }
 }

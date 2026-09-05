@@ -5,6 +5,9 @@ export const AI_PLATFORMS: Platform[] = ['chatgpt', 'claude', 'gemini'];
 export function isAiPlatform(p: Platform): boolean {
   return AI_PLATFORMS.includes(p);
 }
+
+/** Story mode only offers the 4 most-used "chat story" apps — kept simple on purpose. */
+export const STORY_PLATFORMS: Platform[] = ['whatsapp', 'instagram', 'messenger', 'telegram'];
 export type Theme = 'light' | 'dark';
 export type DeviceOS = 'ios' | 'android';
 
@@ -194,6 +197,15 @@ export interface StorySettings {
    */
   showHeader?: boolean;
   anchor?: 'top' | 'bottom';
+  /**
+   * 'scroll' (default/undefined) keeps scrolling forever, like the phone
+   * exporter. 'cycle' clears the chat column and restarts from the top every
+   * `cycleCount` bubbles — the "restart from top" rhythm used by
+   * textingstory.app and similar chat-story videos.
+   */
+  feedStyle?: 'scroll' | 'cycle';
+  /** Bubbles shown per page before restarting, when feedStyle is 'cycle'. Default 5. */
+  cycleCount?: number;
 }
 
 export interface ParsedChatResult {
