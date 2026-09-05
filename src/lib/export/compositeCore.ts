@@ -494,6 +494,17 @@ export interface FeedComposerScrim {
   maxContentHPx: number;
   /** 'top' grows the box downward from a fixed top edge; 'bottom' grows it upward from a fixed bottom edge. */
   anchor: 'top' | 'bottom';
+  /**
+   * Root-relative CSS px of the box's FIXED edge (its top edge for
+   * anchor='top', bottom edge for anchor='bottom') — same coordinate space
+   * as `feedX`/`feedY` above. When the platform's own header is kept, it
+   * sits inside this box ABOVE the feed, so this can sit well above (or, for
+   * 'bottom', below) the feed's own geometry; the scrim must start from
+   * here, not from the feed's position, or it leaves the header floating
+   * against the unscrimmed background with a visible seam where it meets
+   * the feed's own scrim rectangle.
+   */
+  fixedEdgeRootY: number;
 }
 
 /**
@@ -564,16 +575,27 @@ export function createFeedComposer(sprites: ChatSprites, scale: number, opts?: {
       const feedTopS = Math.round((feedY + layerOffY - scroll) * scale); // snapped once per frame
 
       if (opts?.scrim) {
-        const { color, padPx, radiusPx, maxContentHPx, anchor } = opts.scrim;
+        const { color, padPx, radiusPx, maxContentHPx, anchor, fixedEdgeRootY } = opts.scrim;
         const contentHPx = Math.min(Math.max(contentBottom, 0), maxContentHPx);
         const padS = Math.round(padPx * scale);
         const radiusS = Math.round(radiusPx * scale);
         const boxXS = Math.round(feedX * scale) - padS;
         const boxWS = Math.round(feedW * scale) + padS * 2;
-        const boxHS = Math.round(contentHPx * scale) + padS * 2;
-        const boxYS = anchor === 'bottom'
-          ? Math.round((feedY + feedH) * scale) - boxHS + padS
-          : feedTopS - padS;
+        const fixedEdgeS = Math.round(fixedEdgeRootY * scale);
+        let boxYS: number;
+        let boxHS: number;
+        if (anchor === 'bottom') {
+          // Not reachable via the UI today (nothing sets story.anchor away
+          // from 'top') — kept simple rather than fully header-aware.
+          boxHS = Math.round(contentHPx * scale) + padS * 2;
+          boxYS = fixedEdgeS - boxHS;
+        } else {
+          // Spans from the box's true top (covers the header, when kept)
+          // down to this frame's actual content bottom + padding — NOT
+          // from the feed's own top, which sits below any header.
+          boxYS = fixedEdgeS;
+          boxHS = feedTopS + Math.round(contentHPx * scale) + padS - fixedEdgeS;
+        }
         ctx.fillStyle = color;
         ctx.beginPath();
         if (typeof ctx.roundRect === 'function') {

@@ -134,7 +134,16 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
     const onProgress = (state: ProgressState, pct: number, msg?: string) => {
       simulatedPct = Math.max(simulatedPct, pct);
       customMsg = msg;
-      setMp4Progress({ state, pct, msg: msg ?? getLoadingMsg(pct) });
+      // Never let the displayed percentage move backward — a story export
+      // reports several real progress values clustered in a narrow range
+      // while preparing each "restart" page's capture, which can arrive
+      // after the simulated timer above has already ticked the display
+      // past them, and setting the raw incoming pct directly (as this used
+      // to) made the bar visibly jump back down each time.
+      setMp4Progress((prev) => {
+        const nextPct = Math.max(prev?.pct ?? 0, pct);
+        return { state, pct: nextPct, msg: msg ?? getLoadingMsg(nextPct) };
+      });
     };
 
     // Which renderer produced the file, reported alongside the completed event

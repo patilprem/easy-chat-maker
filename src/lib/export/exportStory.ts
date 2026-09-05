@@ -111,13 +111,21 @@ export async function exportStoryMp4(
           win, doc, root, messages: page.messages, plans: pagePlans, scale: SCALE,
           onProgress: (pct) => onProgress('preparing', 16 + Math.round(((i + pct / 100) / pages.length) * 2)),
         });
+        const scrimAnchor = story.anchor ?? 'top';
+        // Same fixed edge StoryStage.tsx positions the CSS box at — the
+        // box's top for 'top' (covers the header, when kept, which sits
+        // above the feed inside it), or its bottom for 'bottom'.
+        const fixedEdgeRootY = scrimAnchor === 'bottom'
+          ? stage.column.y + stage.column.h + STORY_SCRIM_PAD
+          : stage.column.y - STORY_SCRIM_PAD;
         composers.push(createFeedComposer(sprites, SCALE, {
           scrim: {
             color: `rgba(0, 0, 0, ${story.scrim})`,
             padPx: STORY_SCRIM_PAD,
             radiusPx: 22,
-            maxContentHPx: maxStoryContentH(stage, story.anchor ?? 'top'),
-            anchor: story.anchor ?? 'top',
+            maxContentHPx: maxStoryContentH(stage, scrimAnchor),
+            anchor: scrimAnchor,
+            fixedEdgeRootY,
           },
         }));
       } finally {
