@@ -16,6 +16,7 @@ pnpm-debug.log*
 # local temp/debug artifacts
 .tmp/
 .tmp-*
+.scratch_playwright/
 
 # wrangler local dev state
 .wrangler/
