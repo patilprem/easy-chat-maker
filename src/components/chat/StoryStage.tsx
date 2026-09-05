@@ -27,6 +27,16 @@ interface Props {
    * ever contains the header and bubbles.
    */
   bakeScrim?: boolean;
+  /**
+   * Editor preview only: cap the box at its ~60% target height and let the
+   * chat feed scroll internally instead of growing to fit every bubble —
+   * reuses the same fixed-height-ancestor + `.phone-chat-scroll` mechanism
+   * phone mode already relies on (PhonePreview's feedRef auto-scrolls it to
+   * the latest bubble). Export capture leaves this off: a baked video can't
+   * be scrolled by the viewer, so it still needs the box to grow up to
+   * `maxStoryContentH` rather than cropping.
+   */
+  scrollable?: boolean;
   children: React.ReactNode;
   style?: React.CSSProperties;
 }
@@ -47,7 +57,7 @@ interface Props {
  * more room grows the box taller (up to a generous safety-net ceiling)
  * rather than cropping a bubble's text.
  */
-export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackground, bakeScrim = true, children, style }) => {
+export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackground, bakeScrim = true, scrollable = false, children, style }) => {
   const stage = storyStage(aspect);
   const story = project.story;
   const anchor = story?.anchor ?? 'top';
@@ -68,9 +78,12 @@ export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackgro
         <StoryBackgroundLayer background={story?.background ?? FALLBACK_BACKGROUND} />
       )}
 
-      {/* Rounded dark backdrop + chat column — targets ~60% of the stage's
-          height (min-height) but grows with content up to a generous cap
-          (max-height) instead of cropping. `bakeScrim=false` (export
+      {/* Rounded dark backdrop + chat column. In export capture (scrollable
+          false), it targets ~60% of the stage's height (min-height) but
+          grows with content up to a generous cap (max-height) instead of
+          cropping. In the editor preview (scrollable true), it's pinned to
+          that same ~60% target and the chat feed scrolls internally instead
+          — see the fixed inner height below. `bakeScrim=false` (export
           capture) skips painting the backdrop here, since the exporter
           draws the equivalent shape on the canvas instead. */}
       <div
@@ -78,8 +91,7 @@ export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackgro
         style={{
           left: stage.column.x - STORY_SCRIM_PAD,
           width: stage.column.w + STORY_SCRIM_PAD * 2,
-          minHeight: minBoxH,
-          maxHeight: maxBoxH,
+          ...(scrollable ? { height: minBoxH } : { minHeight: minBoxH, maxHeight: maxBoxH }),
           padding: STORY_SCRIM_PAD,
           background: bakeScrim ? `rgba(0, 0, 0, ${STORY_SCRIM})` : 'transparent',
           ...boxPositionStyle,
@@ -89,9 +101,18 @@ export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackgro
             video compositor's DOM measurements (getBoundingClientRect) pick
             up the enlarged bubble text automatically — the pre-zoom size is
             shrunk by the same factor so the POST-zoom box matches the CSS
-            px values above. No explicit height here — it stays intrinsic so
-            the box can grow with it (see min/max-height above). */}
-        <div style={{ width: stage.column.w / STORY_FONT_ZOOM, zoom: STORY_FONT_ZOOM }}>
+            px values above. Export capture leaves height intrinsic so the
+            box above can grow with it; the editor preview instead pins a
+            fixed height here so ChatPreview's own `h-full` flex chain gets
+            a real bound and its `.phone-chat-scroll` feed scrolls instead
+            of pushing the box taller. */}
+        <div
+          style={{
+            width: stage.column.w / STORY_FONT_ZOOM,
+            zoom: STORY_FONT_ZOOM,
+            ...(scrollable ? { height: stage.column.h / STORY_FONT_ZOOM, overflow: 'hidden' } : {}),
+          }}
+        >
           {children}
         </div>
       </div>

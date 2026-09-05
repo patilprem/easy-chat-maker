@@ -345,7 +345,7 @@ export const PhonePreview: React.FC = () => {
           style={{ width: stage.w * storyFit, height: stage.h * storyFit, maxWidth: '100%', maxHeight: '100%' }}
         >
           <div style={{ width: stage.w, height: stage.h, transform: `scale(${storyFit})`, transformOrigin: 'top left' }}>
-            <StoryStage project={project} aspect={story!.aspect} renderBackground id="phone-screen">
+            <StoryStage project={project} aspect={story!.aspect} renderBackground scrollable id="phone-screen">
               <ChatPreview {...storyChatPreviewProps} mode="editor" chromeless showHeader={STORY_SHOW_HEADER} id="story-chat" />
             </StoryStage>
           </div>
