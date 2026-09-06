@@ -33,10 +33,19 @@ function revealEligible(messages: Message[]): Message[] {
 /**
  * Splits `messages` into pages of `cycleCount` bubbles each — the "restart
  * from top" story style (like textingstory.app) instead of scrolling
- * forever. Mirrors how the un-paged timeline already works: each page's
- * `messages` runs from its start message to the end of the chat, and the
- * page's own visibleCount (see pageIndexForRevealIdx) caps how many are ever
- * shown, so nothing needs an explicit end-slice.
+ * forever.
+ *
+ * Each page is sliced to EXACTLY its own messages, not "from here to the end
+ * of the chat". The page's own visibleCount would cap what's ever *shown*
+ * either way, but the exporter renders `page.messages` into a real DOM to
+ * capture sprites from (see compositeCore's captureChatSprites) — so trailing
+ * messages still lay out there, overflowing the story box's max-height and
+ * turning its feed into a bounded scroller. That silently changes every
+ * measurement the compositor takes (feed height, row geometry, scroll), and
+ * the captured sprite then stops matching where the composer thinks rows are
+ * — bubbles go missing inside a correctly-sized box. Keeping each page's DOM
+ * to just its own bubbles keeps the layout the compositor measures identical
+ * to the one it draws.
  */
 export function buildStoryPages(messages: Message[], cycleCount: number): StoryPage[] {
   const eligible = revealEligible(messages);
@@ -47,7 +56,11 @@ export function buildStoryPages(messages: Message[], cycleCount: number): StoryP
   return starts.map((startRevealIdx) => {
     const startMsg = eligible[startRevealIdx];
     const rawStart = startMsg ? messages.indexOf(startMsg) : 0;
-    return { messages: messages.slice(rawStart), startRevealIdx };
+    // First message of the NEXT page, in raw (un-filtered) message indices —
+    // absent for the last page, which just runs to the end.
+    const nextStartMsg = eligible[startRevealIdx + cycleCount];
+    const rawEnd = nextStartMsg ? messages.indexOf(nextStartMsg) : messages.length;
+    return { messages: messages.slice(rawStart, rawEnd), startRevealIdx };
   });
 }
 
