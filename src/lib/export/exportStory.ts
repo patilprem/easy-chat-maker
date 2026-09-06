@@ -5,7 +5,7 @@ import { tryEncodeStoryAudioTrack } from './exportAudio';
 import { drainEncoderQueue, getExportScale, negotiateVideoConfig, type ExportOptions, type ProgressCallback } from './exportMp4';
 import { captureChatSprites, createFeedComposer, openRenderIframe, sleep, triggerDownload, type FeedComposer } from './compositeCore';
 import { createStoryBackgroundSource } from './storyBackground';
-import { storyStage, maxStoryContentH, STORY_SCRIM, STORY_SCRIM_PAD } from '../story/storyLayout';
+import { storyStage, STORY_SCRIM, STORY_SCRIM_PAD } from '../story/storyLayout';
 import { buildStoryPages, normalizeCycleCount, pageIndexForRevealIdx } from '../story/storyCycle';
 import { ensureVoiceClips } from '../tts/voiceClips';
 import type { VoiceClip } from '../tts/kokoro';
@@ -110,22 +110,16 @@ export async function exportStoryMp4(
           win, doc, root, messages: page.messages, plans: pagePlans, scale: SCALE,
           onProgress: (pct) => onProgress('preparing', 16 + Math.round(((i + pct / 100) / pages.length) * 2)),
         });
-        const scrimAnchor = story.anchor ?? 'top';
-        // Same fixed edge StoryStage.tsx positions the CSS box at — the
-        // box's top for 'top' (covers the header, when kept, which sits
-        // above the feed inside it), or its bottom for 'bottom'.
-        const fixedEdgeRootY = scrimAnchor === 'bottom'
-          ? stage.column.y + stage.column.h + STORY_SCRIM_PAD
-          : stage.column.y - STORY_SCRIM_PAD;
         composers.push(createFeedComposer(sprites, SCALE, {
           scrim: {
             color: `rgba(0, 0, 0, ${STORY_SCRIM})`,
             padPx: STORY_SCRIM_PAD,
             radiusPx: 22,
-            minContentHPx: stage.column.h,
-            maxContentHPx: maxStoryContentH(stage, scrimAnchor),
-            anchor: scrimAnchor,
-            fixedEdgeRootY,
+            maxBoxHPx: stage.maxBoxH,
+            // StoryStage pins the box to the stage's top for the capture
+            // (bakeScrim=false), so the header's offset above the feed is a
+            // known constant the composer can move the box by.
+            boxTopRootY: 0,
           },
         }));
       } finally {

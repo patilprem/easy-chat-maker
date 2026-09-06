@@ -476,10 +476,14 @@ export interface FeedComposer {
 }
 
 /**
- * A rounded backdrop drawn behind the feed, sized to that frame's actual
- * visible content — clamped between a floor (so a short page still looks
- * like it fills a reasonable chunk of the stage) and a ceiling (so an
- * unusually long page grows the box instead of cropping a bubble's text).
+ * A rounded backdrop drawn behind the feed that HUGS the frame's actual
+ * visible content — it grows as bubbles appear, stops at `maxBoxHPx`, and
+ * stays vertically centred on the stage. Because the box moves and resizes
+ * per frame while the captured DOM is a single fixed layout, the composer
+ * shifts everything it draws (the root's chrome — the chat header — the
+ * bubble rows, and the clip) by the same offset, so the header stays glued
+ * to the top of the box wherever the box ends up.
+ *
  * Nothing here is story-specific: the composer just draws a rect around
  * whatever content height it already computed for scrolling, so this stays
  * meaningless — and unused — for the phone exporter.
@@ -491,23 +495,17 @@ export interface FeedComposerScrim {
   padPx: number;
   /** CSS px corner radius. */
   radiusPx: number;
-  /** CSS px floor on content height (excluding padding) — the box never shrinks below this even for very few bubbles. */
-  minContentHPx: number;
-  /** CSS px ceiling on content height (excluding padding) — the box grows to fit unusually long content instead of cropping it, up to this safety-net cap. */
-  maxContentHPx: number;
-  /** 'top' anchors the box's top edge; 'bottom' anchors its bottom edge. */
-  anchor: 'top' | 'bottom';
+  /** Tallest the box may grow, its own padding included (CSS px). Content past this is clipped rather than drawn outside the box. */
+  maxBoxHPx: number;
   /**
-   * Root-relative CSS px of the box's FIXED edge (its top edge for
-   * anchor='top', bottom edge for anchor='bottom') — same coordinate space
-   * as `feedX`/`feedY` above. When the platform's own header is kept, it
-   * sits inside this box ABOVE the feed, so this can sit well above (or, for
-   * 'bottom', below) the feed's own geometry; the scrim must start from
-   * here, not from the feed's position, or it leaves the header floating
-   * against the unscrimmed background with a visible seam where it meets
-   * the feed's own scrim rectangle.
+   * Root-relative CSS px of the box's top edge IN THE CAPTURED LAYOUT — the
+   * capture pins the box at a known, content-independent position (see
+   * StoryStage's `bakeScrim=false` branch) purely so this offset is
+   * knowable. Everything between here and the feed's own top (`feedY`) is
+   * the box's top padding plus the platform's header, which must ride along
+   * with the box as it resizes.
    */
-  fixedEdgeRootY: number;
+  boxTopRootY: number;
 }
 
 /**
@@ -574,44 +572,41 @@ export function createFeedComposer(sprites: ChatSprites, scale: number, opts?: {
       scroll = scroll < 0 ? targetScroll : scroll + (targetScroll - scroll) * (1 - Math.exp(-(1 / FPS) / SCROLL_SMOOTHING_S));
       // Row/typing/badge positions are layer-relative, so the layer's own
       // offset inside the feed rides along with the scroll offset here.
-      // Hoisted above the scrim draw below, which needs it too.
       const feedTopS = Math.round((feedY + layerOffY - scroll) * scale); // snapped once per frame
 
-      // Set when a scrim is drawn below, and reused to cap the bubble clip
-      // rect further down — the box and the bubbles composited over it must
-      // never disagree about where content is allowed to end, or an
-      // unusually tall page (content taller than maxContentHPx, which is
-      // already sized to almost the entire stage below the header — there's
-      // essentially no more room to grow into) draws its last bubble(s)
-      // past the box's bottom edge, bleeding onto the plain background
-      // instead of being contained by it.
-      let scrimBoxBottomS: number | null = null;
+      // How far this frame's box (and everything inside it) is shifted from
+      // where the captured layout put it — the box hugs the content, so it
+      // resizes and re-centres every frame while the capture stayed still.
+      // Zero without a scrim (phone mode draws the captured layout as-is).
+      let shiftY = 0;
+      // How much of the feed, measured down from its own top, this frame is
+      // allowed to paint — the box's inner height. Bubbles past it are
+      // clipped rather than drawn outside the box.
+      let feedPaintH = feedH;
 
       if (opts?.scrim) {
-        const { color, padPx, radiusPx, minContentHPx, maxContentHPx, anchor, fixedEdgeRootY } = opts.scrim;
-        const contentHPx = Math.min(Math.max(contentBottom, minContentHPx), maxContentHPx);
+        const { color, padPx, radiusPx, maxBoxHPx, boxTopRootY } = opts.scrim;
+        // Box top padding + the platform's header, which sit above the feed
+        // inside the box and must ride along as the box moves.
+        const chromeAboveFeed = feedY - boxTopRootY;
+        // Content, measured from the feed's own top: the layer's padding
+        // plus this frame's stacked rows, minus whatever has scrolled away.
+        const contentBelowFeed = Math.max(0, layerOffY - scroll + contentBottom);
+        const maxContentBelowFeed = Math.max(0, maxBoxHPx - chromeAboveFeed - padPx);
+        feedPaintH = Math.min(contentBelowFeed, maxContentBelowFeed);
+
+        const boxH = chromeAboveFeed + feedPaintH + padPx;
+        const boxY = (rootH - boxH) / 2;
+        shiftY = boxY + chromeAboveFeed - feedY;
+
         const padS = Math.round(padPx * scale);
-        const radiusS = Math.round(radiusPx * scale);
-        const boxXS = Math.round(feedX * scale) - padS;
-        const boxWS = Math.round(feedW * scale) + padS * 2;
-        const fixedEdgeS = Math.round(fixedEdgeRootY * scale);
-        let boxYS: number;
-        let boxHS: number;
-        if (anchor === 'bottom') {
-          // Not reachable via the UI today (nothing sets story.anchor away
-          // from 'top') — kept simple rather than fully header-aware.
-          boxHS = Math.round(contentHPx * scale) + padS * 2;
-          boxYS = fixedEdgeS - boxHS;
-        } else {
-          // Spans from the box's true top (covers the header, when kept)
-          // down to this frame's actual content bottom + padding — NOT
-          // from the feed's own top, which sits below any header.
-          boxYS = fixedEdgeS;
-          boxHS = feedTopS + Math.round(contentHPx * scale) + padS - fixedEdgeS;
-        }
-        scrimBoxBottomS = boxYS + boxHS - padS; // inner edge, before the box's own padding
         ctx.fillStyle = color;
         ctx.beginPath();
+        const boxXS = Math.round(feedX * scale) - padS;
+        const boxWS = Math.round(feedW * scale) + padS * 2;
+        const boxYS = Math.round(boxY * scale);
+        const boxHS = Math.round(boxH * scale);
+        const radiusS = Math.round(radiusPx * scale);
         if (typeof ctx.roundRect === 'function') {
           ctx.roundRect(boxXS, boxYS, boxWS, boxHS, radiusS);
         } else {
@@ -620,24 +615,18 @@ export function createFeedComposer(sprites: ChatSprites, scale: number, opts?: {
         ctx.fill();
       }
 
-      ctx.drawImage(k > 0 ? baseConv : baseEmpty, 0, 0, rootWS, rootHS);
+      const shiftYS = Math.round(shiftY * scale);
+      ctx.drawImage(k > 0 ? baseConv : baseEmpty, 0, shiftYS, rootWS, rootHS);
       ctx.save();
       ctx.beginPath();
-      // The stacked bubble content can, in rare cases (an unusually long
-      // page or message), be taller than the scrim box's own ceiling —
-      // clip to whichever is shorter so bubbles are always fully contained
-      // by the box drawn behind them, never spilling past its bottom edge.
-      const feedClipHS = scrimBoxBottomS !== null
-        ? Math.max(0, Math.min(feedH * scale, scrimBoxBottomS - feedY * scale))
-        : feedH * scale;
-      ctx.rect(feedX * scale, feedY * scale, feedW * scale, feedClipHS);
+      ctx.rect(feedX * scale, feedY * scale + shiftYS, feedW * scale, feedPaintH * scale);
       ctx.clip();
 
       const destX = Math.round((feedX + layerOffX) * scale);
       const layerWS = Math.round(layerW * scale);
 
       for (const pl of placed) {
-        const dTop = feedTopS + pl.yS;
+        const dTop = feedTopS + shiftYS + pl.yS;
         if (dTop + pl.shS < 0 || dTop > rootHS) continue; // culled
         ctx.drawImage(tallPlain, 0, pl.stS, layerWS, pl.shS, destX, dTop, layerWS, pl.shS);
       }
@@ -651,13 +640,13 @@ export function createFeedComposer(sprites: ChatSprites, scale: number, opts?: {
         const by = Math.round(b.yTop * scale);
         const bw = Math.round(b.w * scale);
         const bh = Math.round(b.h * scale);
-        ctx.drawImage(tallReacted, bx, by, bw, bh, destX + bx, feedTopS + pl.yS + (by - reactTopS), bw, bh);
+        ctx.drawImage(tallReacted, bx, by, bw, bh, destX + bx, feedTopS + shiftYS + pl.yS + (by - reactTopS), bw, bh);
       }
 
       if (typing) {
         const phase = Math.floor((f - typingSince) / TYPING_PHASE_FRAMES) % typing.canvases.length;
         const sprite = typing.canvases[phase];
-        ctx.drawImage(sprite, Math.round((feedX + typing.offX) * scale), feedTopS + Math.round(typingTop * scale));
+        ctx.drawImage(sprite, Math.round((feedX + typing.offX) * scale), feedTopS + shiftYS + Math.round(typingTop * scale));
       }
       ctx.restore();
 
@@ -666,7 +655,7 @@ export function createFeedComposer(sprites: ChatSprites, scale: number, opts?: {
       if (plan.typingParticipantId && typingOverlay) {
         const t = (f - typingSince) / FPS;
         ctx.globalAlpha = 0.7 + 0.15 * Math.sin((t / 2.2) * 2 * Math.PI);
-        ctx.drawImage(typingOverlay.canvas, Math.round(typingOverlay.x * scale), Math.round(typingOverlay.y * scale));
+        ctx.drawImage(typingOverlay.canvas, Math.round(typingOverlay.x * scale), Math.round(typingOverlay.y * scale) + shiftYS);
         ctx.globalAlpha = 1;
       }
     },
