@@ -97,6 +97,23 @@ export function isPreviewVoiceSupported(): boolean {
   return typeof speechSynthesis !== 'undefined';
 }
 
+/**
+ * Whether THIS device/browser actually offers a voice we can positively tell
+ * apart as male vs. female — many Android phones expose Chrome only one or
+ * two generic system voices, so the preview can't sound different per
+ * participant no matter what's picked (a device limitation, not a bug in
+ * the assignment logic above). Surfaced in VoicePanel so that's visible
+ * instead of looking like a broken "voice change didn't apply".
+ */
+export function getVoiceDiagnostics(): { total: number; hasDistinctMale: boolean; hasDistinctFemale: boolean } {
+  const voices = loadVoices().filter((v) => v.lang.toLowerCase().startsWith('en'));
+  return {
+    total: voices.length,
+    hasDistinctMale: voices.some((v) => MALE_HINTS.test(v.name)),
+    hasDistinctFemale: voices.some((v) => FEMALE_HINTS.test(v.name)),
+  };
+}
+
 // Generous ceiling in case a browser/voice combo never fires 'end' (seen
 // occasionally on some platforms) — without this, playback could freeze
 // forever waiting for a callback that's never coming.

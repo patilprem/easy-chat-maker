@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Mic, Volume2 } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { ttsCapability } from '../../lib/tts/capability';
 import { TTS_VOICES, assignVoicesForParticipants, findVoice } from '../../lib/tts/voices';
-import { speakPreview } from '../../lib/tts/previewVoice';
+import { speakPreview, getVoiceDiagnostics } from '../../lib/tts/previewVoice';
 import type { ChatProject } from '../../lib/parser/types';
 
 interface Props {
@@ -31,6 +31,19 @@ export const VoicePanel: React.FC<Props> = ({ project }) => {
   // with someone else in the same chat (see assignVoicesForParticipants).
   const defaultVoices = useMemo(() => assignVoicesForParticipants(speakers), [speakers]);
 
+  // Browser voice lists load asynchronously — recompute once they're ready,
+  // not just on mount, or this can under-report on browsers (mobile Chrome
+  // especially) that fire 'voiceschanged' after an initial empty list.
+  const [voiceDiag, setVoiceDiag] = useState(() => getVoiceDiagnostics());
+  useEffect(() => {
+    if (typeof speechSynthesis === 'undefined') return;
+    const update = () => setVoiceDiag(getVoiceDiagnostics());
+    update();
+    speechSynthesis.addEventListener('voiceschanged', update);
+    return () => speechSynthesis.removeEventListener('voiceschanged', update);
+  }, []);
+  const previewCantTellGendersApart = !(voiceDiag.hasDistinctMale && voiceDiag.hasDistinctFemale);
+
   return (
     <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
       <label className="flex cursor-pointer items-center gap-2">
@@ -56,6 +69,12 @@ export const VoicePanel: React.FC<Props> = ({ project }) => {
           <p className="text-[10px] text-white/30">
             Preview here uses your device's built-in voice instantly — no download. Exporting bakes in real narration for the video; the first export downloads a one-time voice model (cached after that, so later exports are instant).
           </p>
+
+          {previewCantTellGendersApart && (
+            <p className="text-[10.5px] text-amber-300/80">
+              ⚠️ Your device only offers {voiceDiag.total || 'a'} built-in system voice{voiceDiag.total === 1 ? '' : 's'} to Chrome, so this preview may sound the same regardless of which voice you pick — that's a device limitation, not a bug. The exported video always uses the correct, distinct AI voice for each person.
+            </p>
+          )}
 
           {speakers.length === 0 && (
             <p className="text-[10.5px] text-white/35">Add some text messages to choose voices.</p>
