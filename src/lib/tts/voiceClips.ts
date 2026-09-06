@@ -6,11 +6,7 @@ import { assignVoicesForParticipants } from './voices';
 
 export type VoiceClipProgress = (msg: string, pct: number) => void;
 
-/**
- * Kokoro mispronounces emoji and reads out full URLs — normalize before
- * synthesis. Exported so the live-preview voice (lib/tts/previewVoice.ts)
- * reads messages the same way the real export does.
- */
+/** Kokoro mispronounces emoji and reads out full URLs — normalize before synthesis. */
 export function normalizeForSpeech(text: string): string {
   return text
     .replace(/https?:\/\/\S+/g, 'link')

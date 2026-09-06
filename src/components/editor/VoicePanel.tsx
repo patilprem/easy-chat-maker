@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Mic, Volume2 } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Loader2, Mic, Volume2 } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { ttsCapability } from '../../lib/tts/capability';
-import { TTS_VOICES, assignVoicesForParticipants, findVoice } from '../../lib/tts/voices';
-import { speakPreview, getVoiceDiagnostics } from '../../lib/tts/previewVoice';
+import { TTS_VOICES, assignVoicesForParticipants } from '../../lib/tts/voices';
+import { speak } from '../../lib/tts/kokoro';
+import { playClip } from '../../lib/tts/clipPlayback';
 import type { ChatProject } from '../../lib/parser/types';
 
 interface Props {
@@ -31,18 +32,27 @@ export const VoicePanel: React.FC<Props> = ({ project }) => {
   // with someone else in the same chat (see assignVoicesForParticipants).
   const defaultVoices = useMemo(() => assignVoicesForParticipants(speakers), [speakers]);
 
-  // Browser voice lists load asynchronously — recompute once they're ready,
-  // not just on mount, or this can under-report on browsers (mobile Chrome
-  // especially) that fire 'voiceschanged' after an initial empty list.
-  const [voiceDiag, setVoiceDiag] = useState(() => getVoiceDiagnostics());
-  useEffect(() => {
-    if (typeof speechSynthesis === 'undefined') return;
-    const update = () => setVoiceDiag(getVoiceDiagnostics());
-    update();
-    speechSynthesis.addEventListener('voiceschanged', update);
-    return () => speechSynthesis.removeEventListener('voiceschanged', update);
-  }, []);
-  const previewCantTellGendersApart = !(voiceDiag.hasDistinctMale && voiceDiag.hasDistinctFemale);
+  // Generates the SAME Kokoro clip the export would produce for this voice
+  // and plays it back — so "test" answers "is this really what will be in
+  // my video?" instead of approximating it with the device's own TTS.
+  const [testingId, setTestingId] = useState<string | null>(null);
+  const [testPct, setTestPct] = useState<number | null>(null);
+  const handleTest = async (name: string, participantId: string, voiceId: string) => {
+    if (testingId) return;
+    setTestingId(participantId);
+    setTestPct(null);
+    try {
+      const clip = await speak(cap.device, `Hi, this is ${name}.`, voiceId, voice?.speed ?? 1, (p) => {
+        if (p.status === 'downloading') setTestPct(p.pct);
+      });
+      await playClip(clip);
+    } catch (err) {
+      console.error('Voice test failed', err);
+    } finally {
+      setTestingId(null);
+      setTestPct(null);
+    }
+  };
 
   return (
     <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
@@ -67,14 +77,8 @@ export const VoicePanel: React.FC<Props> = ({ project }) => {
       {cap.ok && enabled && (
         <div className="space-y-3 pt-1">
           <p className="text-[10px] text-white/30">
-            Preview here uses your device's built-in voice instantly — no download. Exporting bakes in real narration for the video; the first export downloads a one-time voice model (cached after that, so later exports are instant).
+            Preview and 🔊 test both generate the exact same AI audio that gets baked into the exported video — not an approximation. The first time (per device) downloads a one-time voice model; every clip is cached after that, so repeats are instant.
           </p>
-
-          {previewCantTellGendersApart && (
-            <p className="text-[10.5px] text-amber-300/80">
-              ⚠️ Your device only offers {voiceDiag.total || 'a'} built-in system voice{voiceDiag.total === 1 ? '' : 's'} to Chrome, so this preview may sound the same regardless of which voice you pick — that's a device limitation, not a bug. The exported video always uses the correct, distinct AI voice for each person.
-            </p>
-          )}
 
           {speakers.length === 0 && (
             <p className="text-[10.5px] text-white/35">Add some text messages to choose voices.</p>
@@ -82,7 +86,7 @@ export const VoicePanel: React.FC<Props> = ({ project }) => {
 
           {speakers.map((p) => {
             const value = voice?.voices[p.id] ?? defaultVoices[p.id];
-            const participantIndex = project.participants.findIndex((pp) => pp.id === p.id);
+            const isTesting = testingId === p.id;
             return (
               <label key={p.id} className="flex items-center gap-2">
                 <span className="w-16 flex-shrink-0 truncate text-[11px] text-white/50">{p.name}</span>
@@ -104,17 +108,24 @@ export const VoicePanel: React.FC<Props> = ({ project }) => {
                 </select>
                 <button
                   type="button"
-                  title="Hear this voice now"
-                  onClick={() => speakPreview(`Hi, this is ${p.name}.`, participantIndex, findVoice(value).gender, voice?.speed ?? 1)}
-                  className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-white/50 transition-colors hover:border-white/25 hover:text-white"
+                  title="Generate and hear the exact exported voice"
+                  disabled={testingId !== null}
+                  onClick={() => handleTest(p.name, p.id, value)}
+                  className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-white/50 transition-colors hover:border-white/25 hover:text-white disabled:opacity-40"
                 >
-                  <Volume2 size={13} />
+                  {isTesting ? (
+                    testPct !== null
+                      ? <span className="text-[8.5px] tabular-nums leading-none">{testPct}%</span>
+                      : <Loader2 size={13} className="animate-spin" />
+                  ) : (
+                    <Volume2 size={13} />
+                  )}
                 </button>
               </label>
             );
           })}
           <p className="text-white/25 text-[10px] -mt-1">
-            Tap 🔊 to hear a voice instantly with your device's built-in voice — confirms a change took effect without waiting for playback.
+            Tap 🔊 to generate that line for real and hear it — confirms a voice change took effect with the actual export audio, not a guess.
           </p>
 
           <label className="flex items-center gap-2">

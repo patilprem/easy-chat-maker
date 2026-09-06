@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useCallback, useState } from 'react';
-import { Play, Pause, Plus, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, Plus, Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { ChatPreview } from '../chat/ChatPreview';
 import { StoryStage } from '../chat/StoryStage';
 import { OnboardingHint } from './OnboardingHint';
@@ -8,9 +8,9 @@ import { useEditorStore } from '../../lib/state/editorStore';
 import { playMessageSound } from '../../lib/media/messageSounds';
 import { storyStage, STORY_SHOW_HEADER } from '../../lib/story/storyLayout';
 import { normalizeCycleCount, windowForPreview } from '../../lib/story/storyCycle';
-import { speakPreview, stopPreviewVoice, resetPreviewVoiceAssignments } from '../../lib/tts/previewVoice';
-import { normalizeForSpeech } from '../../lib/tts/voiceClips';
-import { assignVoicesForParticipants, findVoice } from '../../lib/tts/voices';
+import { ensureVoiceClips, VoiceUnsupportedError } from '../../lib/tts/voiceClips';
+import { playClip, stopClipPlayback } from '../../lib/tts/clipPlayback';
+import type { VoiceClip } from '../../lib/tts/kokoro';
 import type { Message, Participant } from '../../lib/parser/types';
 
 const SPEED_OPTIONS = [1, 1.5, 2, 0.75];
@@ -44,12 +44,6 @@ export const PhonePreview: React.FC = () => {
     () => (isStory ? project.messages.filter((m) => m.kind !== 'system' && m.kind !== 'date') : project.messages),
     [isStory, project.messages],
   );
-  // Same default assignment the real export uses (assignVoicesForParticipants)
-  // so the live preview's gender always matches whichever voice is actually
-  // selected — an explicit per-participant override in story.voice.voices
-  // takes precedence over this default, exactly like the export.
-  const defaultVoices = useMemo(() => assignVoicesForParticipants(project.participants), [project.participants]);
-
   const [isPlaying, setIsPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
   const [frame, setFrame] = useState(0);
@@ -59,6 +53,16 @@ export const PhonePreview: React.FC = () => {
   const lastTimeRef = useRef<number>(0);
   const frameRef = useRef(0);
   const speechActiveRef = useRef(false);
+  // Real Kokoro clips for the current chat/voice settings — the exact same
+  // audio ensureVoiceClips produces for export, keyed by message id.
+  // Populated on Play (see handleTogglePlay) rather than eagerly, so
+  // opening the editor never triggers the one-time model download by
+  // itself; regenerated whenever the underlying text/voices/speed change,
+  // since ensureVoiceClips' own per-clip cache makes a repeat call for
+  // unchanged lines cheap.
+  const voiceClipsRef = useRef<Map<string, VoiceClip>>(new Map());
+  const [voicePrep, setVoicePrep] = useState<{ msg: string; pct: number } | null>(null);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
   const feedRef = useRef<HTMLDivElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const groupAvatarInputRef = useRef<HTMLInputElement>(null);
@@ -188,20 +192,20 @@ export const PhonePreview: React.FC = () => {
           const isSelf = project.participants.find((p) => p.id === revealed.participantId)?.isSelf;
           playMessageSound(isSelf ? 'send' : 'receive', project.platform);
         }
-        // Free, instant preview narration (Web Speech API — see
-        // lib/tts/previewVoice.ts) so voice can be heard while editing,
-        // without downloading anything. The exported video bakes in real
-        // Kokoro-generated audio instead. Gates the animation loop (via
-        // speechActiveRef) until this line finishes speaking, so the next
-        // bubble never appears while this one is still being read out.
+        // Plays the actual Kokoro clip generated for this message (see
+        // handleTogglePlay, which prepares voiceClipsRef before playback
+        // starts) — the literal audio the export bakes in, not a
+        // lookalike. Gates the animation loop (via speechActiveRef) until
+        // playback finishes, so the next bubble never appears while this
+        // one is still being read out. A missing clip (generation failed,
+        // or a message was edited after prep) is skipped silently rather
+        // than blocking the bubble forever.
         if (revealed && revealed.kind === 'text' && story?.enabled && story.voice?.enabled) {
-          const idx = project.participants.findIndex((p) => p.id === revealed.participantId);
-          const voiceId = story.voice.voices[revealed.participantId] ?? defaultVoices[revealed.participantId];
-          const gender = findVoice(voiceId).gender;
-          speechActiveRef.current = true;
-          speakPreview(normalizeForSpeech(revealed.text), Math.max(0, idx), gender, story.voice.speed, () => {
-            speechActiveRef.current = false;
-          });
+          const clip = voiceClipsRef.current.get(revealed.id);
+          if (clip) {
+            speechActiveRef.current = true;
+            playClip(clip).finally(() => { speechActiveRef.current = false; });
+          }
         }
       }
       if (reactions > prev.reactions) {
@@ -210,21 +214,39 @@ export const PhonePreview: React.FC = () => {
     }
 
     prevSoundStateRef.current = { visible, reactions };
-  }, [currentPlan, isPlaying, muted, previewMessages, project.participants, project.platform, story?.enabled, story?.voice, defaultVoices]);
+  }, [currentPlan, isPlaying, muted, previewMessages, project.participants, project.platform, story?.enabled, story?.voice]);
 
   // Stop any in-flight narration the moment playback pauses/mutes, and on unmount.
   useEffect(() => {
-    if (!isPlaying || muted) stopPreviewVoice();
+    if (!isPlaying || muted) stopClipPlayback();
   }, [isPlaying, muted]);
-  useEffect(() => () => stopPreviewVoice(), []);
+  useEffect(() => () => stopClipPlayback(), []);
 
-  // Re-assign preview voices from scratch whenever the cast changes (a
-  // different chat loaded, someone added/removed/renamed) — otherwise a
-  // stale per-index assignment from a previous chat could linger and
-  // collide with this one's.
-  useEffect(() => {
-    resetPreviewVoiceAssignments();
-  }, [project.participants]);
+  // Prepares the real Kokoro clips (see ensureVoiceClips — the exact same
+  // function the exporter calls) before starting playback, so the preview
+  // narrates with the literal audio that will be exported rather than a
+  // device-dependent approximation. ensureVoiceClips' own per-clip cache
+  // makes a repeat call for unchanged text/voice/speed cheap, so this runs
+  // on every Play press rather than trying to track when it's stale.
+  const handleTogglePlay = useCallback(async () => {
+    if (isPlaying) {
+      setIsPlaying(false);
+      return;
+    }
+    if (isStory && story?.voice?.enabled) {
+      setVoiceError(null);
+      setVoicePrep({ msg: 'Preparing voices…', pct: 0 });
+      try {
+        voiceClipsRef.current = await ensureVoiceClips(project, (msg, pct) => setVoicePrep({ msg, pct }));
+      } catch (err) {
+        voiceClipsRef.current = new Map();
+        setVoiceError(err instanceof VoiceUnsupportedError ? err.message : 'Could not generate voiceover — playing without narration.');
+      } finally {
+        setVoicePrep(null);
+      }
+    }
+    setIsPlaying(true);
+  }, [isPlaying, isStory, story?.voice?.enabled, project]);
 
   const handleAvatarClick = useCallback((participantId: string) => {
     pendingAvatarParticipantId.current = participantId;
@@ -302,11 +324,12 @@ export const PhonePreview: React.FC = () => {
       {/* Play / Pause */}
       <div className="flex items-center gap-2">
         <button
-          onClick={() => setIsPlaying(!isPlaying)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-[#00FF87]/15 text-white text-xs font-medium transition-colors"
+          onClick={handleTogglePlay}
+          disabled={!!voicePrep}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-[#00FF87]/15 text-white text-xs font-medium transition-colors disabled:opacity-50"
         >
-          {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-          {isPlaying ? 'Pause' : 'Play'}
+          {voicePrep ? <Loader2 size={14} className="animate-spin" /> : isPlaying ? <Pause size={14} /> : <Play size={14} />}
+          {voicePrep ? `${voicePrep.msg}${voicePrep.pct ? ` ${voicePrep.pct}%` : ''}` : isPlaying ? 'Pause' : 'Play'}
         </button>
         <button
           onClick={() => setMuted(!muted)}
@@ -335,6 +358,9 @@ export const PhonePreview: React.FC = () => {
           {currentPlan ? `${currentPlan.visibleCount} / ${previewMessages.length} messages` : ''}
         </span>
       </div>
+      {voiceError && (
+        <p className="-mt-2 text-[10.5px] text-amber-300/80">{voiceError}</p>
+      )}
 
       {/* Preview: story stage or phone frame — measured so the story stage
           can be fit to whatever space is actually available (see wrapSize). */}

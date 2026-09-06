@@ -36,9 +36,9 @@ export async function getKokoro(device: TtsCapability['device'], onProgress?: (p
   ttsPromise = (async () => {
     const { KokoroTTS } = await import('kokoro-js');
     // q4 trades a little voice quality for a much smaller one-time download
-    // than q8 — this only ever runs when the user chooses to export with
-    // voiceover baked in, never for the free instant preview (see
-    // lib/tts/previewVoice.ts), which uses the browser's built-in voices.
+    // than q8 — the editor preview generates the same clips through this
+    // same path (see clipPlayback.ts), so there's only one model tier to
+    // download, not a cheap-preview/real-export split.
     const dtype = device === 'webgpu' ? 'fp32' : 'q4';
 
     // transformers.js reports progress per file (weights, tokenizer, config,
