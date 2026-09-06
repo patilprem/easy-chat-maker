@@ -1,9 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Loader2, Mic, Volume2 } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { ttsCapability } from '../../lib/tts/capability';
 import { TTS_VOICES, assignVoicesForParticipants } from '../../lib/tts/voices';
-import { speak } from '../../lib/tts/kokoro';
+import { speak, getKokoro, type ModelProgress } from '../../lib/tts/kokoro';
 import { playClip } from '../../lib/tts/clipPlayback';
 import type { ChatProject } from '../../lib/parser/types';
 
@@ -31,6 +31,23 @@ export const VoicePanel: React.FC<Props> = ({ project }) => {
   // Assigned once across every speaker so nobody silently shares a voice
   // with someone else in the same chat (see assignVoicesForParticipants).
   const defaultVoices = useMemo(() => assignVoicesForParticipants(speakers), [speakers]);
+
+  // Start the one-time model download the moment voiceover is turned on,
+  // instead of waiting for the first "test" tap or the Preview's Play
+  // button — that download (a real one-time cost, no way around it) then
+  // overlaps with the user picking per-participant voices instead of
+  // blocking the exact moment they want to hear something. getKokoro()
+  // caches its promise internally, so the later speak() calls from "test"
+  // and Preview's Play just reuse this same in-flight/completed download.
+  const [modelPrefetch, setModelPrefetch] = useState<ModelProgress | null>(null);
+  useEffect(() => {
+    if (!cap.ok || !enabled) return;
+    let cancelled = false;
+    getKokoro(cap.device, (p) => { if (!cancelled) setModelPrefetch(p); })
+      .catch(() => { /* surfaced properly when "test" or Play actually call speak() */ })
+      .finally(() => { if (!cancelled) setModelPrefetch(null); });
+    return () => { cancelled = true; };
+  }, [cap.ok, cap.device, enabled]);
 
   // Generates the SAME Kokoro clip the export would produce for this voice
   // and plays it back — so "test" answers "is this really what will be in
@@ -79,6 +96,13 @@ export const VoicePanel: React.FC<Props> = ({ project }) => {
           <p className="text-[10px] text-white/30">
             Preview and 🔊 test both generate the exact same AI audio that gets baked into the exported video — not an approximation. The first time (per device) downloads a one-time voice model; every clip is cached after that, so repeats are instant.
           </p>
+
+          {modelPrefetch && modelPrefetch.status === 'downloading' && (
+            <p className="flex items-center gap-1.5 text-[10.5px] text-[#60EFFF]/80">
+              <Loader2 size={11} className="animate-spin flex-shrink-0" />
+              Downloading voice model in the background ({modelPrefetch.pct}%) — carry on picking voices, it'll be ready by the time you preview.
+            </p>
+          )}
 
           {speakers.length === 0 && (
             <p className="text-[10.5px] text-white/35">Add some text messages to choose voices.</p>

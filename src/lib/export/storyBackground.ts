@@ -143,6 +143,18 @@ async function createVideoSource(bg: StoryBackground, w: number, h: number): Pro
   let frameCounter = -1;
   let lastPaintedTime = -1;
 
+  // A long-GOP upload (the common case — most phone/stock footage isn't
+  // re-encoded with the short-GOP recipe this feature was designed around)
+  // can take a real decode pass to seek to an arbitrary position, sometimes
+  // 100s of ms. Waiting out the full 'seeked' event on every one of these
+  // (previously up to a 2s timeout each, dozens of times per second of
+  // output) is what made exports with an uploaded background video take
+  // minutes. A short, bounded wait keeps the background reasonably in sync
+  // with the timeline while capping the worst case per seek — painting
+  // whatever's currently decoded (the previous frame, briefly) beats
+  // stalling the whole export on one slow keyframe.
+  const SEEK_WAIT_MS = 180;
+
   async function seekTo(t: number): Promise<void> {
     if (Math.abs(video.currentTime - t) < 1 / 240) return;
     await Promise.race([
@@ -151,7 +163,7 @@ async function createVideoSource(bg: StoryBackground, w: number, h: number): Pro
         video.addEventListener('seeked', done);
         video.currentTime = t;
       }),
-      sleep(2000),
+      sleep(SEEK_WAIT_MS),
     ]);
   }
 
