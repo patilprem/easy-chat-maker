@@ -577,6 +577,16 @@ export function createFeedComposer(sprites: ChatSprites, scale: number, opts?: {
       // Hoisted above the scrim draw below, which needs it too.
       const feedTopS = Math.round((feedY + layerOffY - scroll) * scale); // snapped once per frame
 
+      // Set when a scrim is drawn below, and reused to cap the bubble clip
+      // rect further down — the box and the bubbles composited over it must
+      // never disagree about where content is allowed to end, or an
+      // unusually tall page (content taller than maxContentHPx, which is
+      // already sized to almost the entire stage below the header — there's
+      // essentially no more room to grow into) draws its last bubble(s)
+      // past the box's bottom edge, bleeding onto the plain background
+      // instead of being contained by it.
+      let scrimBoxBottomS: number | null = null;
+
       if (opts?.scrim) {
         const { color, padPx, radiusPx, minContentHPx, maxContentHPx, anchor, fixedEdgeRootY } = opts.scrim;
         const contentHPx = Math.min(Math.max(contentBottom, minContentHPx), maxContentHPx);
@@ -599,6 +609,7 @@ export function createFeedComposer(sprites: ChatSprites, scale: number, opts?: {
           boxYS = fixedEdgeS;
           boxHS = feedTopS + Math.round(contentHPx * scale) + padS - fixedEdgeS;
         }
+        scrimBoxBottomS = boxYS + boxHS - padS; // inner edge, before the box's own padding
         ctx.fillStyle = color;
         ctx.beginPath();
         if (typeof ctx.roundRect === 'function') {
@@ -612,7 +623,14 @@ export function createFeedComposer(sprites: ChatSprites, scale: number, opts?: {
       ctx.drawImage(k > 0 ? baseConv : baseEmpty, 0, 0, rootWS, rootHS);
       ctx.save();
       ctx.beginPath();
-      ctx.rect(feedX * scale, feedY * scale, feedW * scale, feedH * scale);
+      // The stacked bubble content can, in rare cases (an unusually long
+      // page or message), be taller than the scrim box's own ceiling —
+      // clip to whichever is shorter so bubbles are always fully contained
+      // by the box drawn behind them, never spilling past its bottom edge.
+      const feedClipHS = scrimBoxBottomS !== null
+        ? Math.max(0, Math.min(feedH * scale, scrimBoxBottomS - feedY * scale))
+        : feedH * scale;
+      ctx.rect(feedX * scale, feedY * scale, feedW * scale, feedClipHS);
       ctx.clip();
 
       const destX = Math.round((feedX + layerOffX) * scale);

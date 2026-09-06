@@ -7,11 +7,18 @@ export interface StoryPage {
   startRevealIdx: number;
 }
 
-const DEFAULT_CYCLE_COUNT_PORTRAIT = 5;
-// 16:9's stage is much shorter than 9:16's, so the same 5-bubble default
-// leaves each bubble less room before the auto-height box hits its cap and
-// clips — a lower default gives landscape bubbles more breathing room.
-const DEFAULT_CYCLE_COUNT_LANDSCAPE = 3;
+// Measured empirically against a realistic 5-participant group chat (with
+// each incoming bubble's sender-name label, which adds real height beyond
+// just the bubble text): 5 stacked portrait bubbles need ~764px, but the
+// box's ceiling — already sized to almost the ENTIRE stage below the
+// header, see maxStoryContentH — only has ~744px to give before it hits the
+// stage's own bottom edge. There's no more room to grow into, so the fix is
+// fewer bubbles per page rather than a taller ceiling.
+const DEFAULT_CYCLE_COUNT_PORTRAIT = 4;
+// 16:9's stage is much shorter than 9:16's — the SAME bubbles (same 390px
+// column width, so identical wrapping/height) leave much less headroom
+// before the box's ceiling, which is a smaller fraction of a shorter stage.
+const DEFAULT_CYCLE_COUNT_LANDSCAPE = 2;
 
 /** Fixed per-aspect default — not user-adjustable, kept simple on purpose. */
 export function normalizeCycleCount(aspect?: StoryAspect): number {
