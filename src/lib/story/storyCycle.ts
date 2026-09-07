@@ -26,14 +26,20 @@ export interface StoryPage {
  * where pages break without either having to measure a rendered DOM.
  */
 // Calibrated against real rendered bubbles (Inter, story text sizes, the
-// 420px column): a wrapped line measures ~20px and ~46 characters, the chat
-// header plus the box's top padding measure ~72.5px. Each constant here
-// keeps a little margin over its measured value so the packer still errs
-// toward under-filling.
+// 420px column): a wrapped line measures ~20px tall, the chat header plus
+// the box's top padding measure ~72.5px, and text wraps at ~41 characters.
+// Each constant keeps a little margin over its measured value so the packer
+// still errs toward under-filling — a page that closes early only restarts
+// the chat a bubble sooner, while one that overfills crops a bubble.
+//
+// CHARS_PER_LINE in particular must stay BELOW the real wrap point, not at
+// it: at 46 the ceil() rounds a line off at a dozen common lengths, the
+// estimate turns optimistic, and medium-length 1:1 messages overflow the
+// box by ~100px. At 40 it never under-counts.
 const LINE_H = 21;          // one wrapped line of story-sized bubble text
 const BUBBLE_CHROME = 34;   // bubble padding + the gap to the next row
 const NAME_LABEL_H = 22;    // sender label above an incoming bubble (group chats only)
-const CHARS_PER_LINE = 46;  // ~320px of text width in the 420px column
+const CHARS_PER_LINE = 40;  // conservative: real wrap is ~41 (see above)
 const NON_TEXT_H = 150;     // images/voice notes/etc — a generous fixed guess
 
 /** Chat header + the box's own padding, which eat into the box before any bubble does. */
