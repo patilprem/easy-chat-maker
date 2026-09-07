@@ -303,3 +303,58 @@ html {
   content: attr(data-placeholder);
   opacity: 0.45;
 }
+
+/* ---------------------------------------------------------------------------
+   Story mode: bigger chat text
+   ---------------------------------------------------------------------------
+   Bubbles are read on a phone-sized video, not a phone screen, so story mode
+   sizes its text up ~12% from each platform's own sizes. Every platform
+   preview hardcodes its sizes as Tailwind arbitrary utilities (text-[14.5px],
+   leading-[19px], ...) rather than inheriting them, so a font-size on the
+   container can't cascade — these override the specific utilities instead,
+   line-heights included so the bigger text doesn't crowd its own line box.
+
+   Deliberately REAL font sizes: an earlier version scaled the column with CSS
+   `zoom`, which made getBoundingClientRect() (zoomed) disagree with
+   offsetWidth/scrollHeight and html-to-image's capture (both unzoomed). The
+   video compositor measures with one and captures with the other, so every
+   bubble slice was sampled ~7.4% too deep — sender labels drifted off their
+   bubbles and the next message bled in. Real font sizes keep every
+   measurement truthful, so nothing downstream has to compensate.
+   Keep this list in sync when a preview introduces a new size. */
+.story-text .text-\[10px\]    { font-size: 11px; }
+.story-text .text-\[10\.5px\] { font-size: 12px; }
+.story-text .text-\[11px\]    { font-size: 12.5px; }
+.story-text .text-\[11\.5px\] { font-size: 13px; }
+.story-text .text-\[12px\]    { font-size: 13.5px; }
+.story-text .text-\[12\.5px\] { font-size: 14px; }
+.story-text .text-\[13px\]    { font-size: 14.5px; }
+.story-text .text-\[13\.5px\] { font-size: 15px; }
+.story-text .text-\[14px\]    { font-size: 15.5px; }
+.story-text .text-\[14\.5px\] { font-size: 16px; }
+.story-text .text-\[15px\]    { font-size: 17px; }
+.story-text .text-\[15\.5px\] { font-size: 17.5px; }
+.story-text .text-\[16px\]    { font-size: 18px; }
+.story-text .text-\[16\.5px\] { font-size: 18.5px; }
+.story-text .text-\[17px\]    { font-size: 19px; }
+.story-text .text-\[19px\]    { font-size: 21px; }
+.story-text .text-\[21px\]    { font-size: 23.5px; }
+.story-text .text-\[22px\]    { font-size: 24.5px; }
+.story-text .text-\[25px\]    { font-size: 28px; }
+
+.story-text .leading-\[14px\]    { line-height: 15.5px; }
+.story-text .leading-\[15px\]    { line-height: 17px; }
+.story-text .leading-\[16px\]    { line-height: 18px; }
+.story-text .leading-\[16\.5px\] { line-height: 18.5px; }
+.story-text .leading-\[17px\]    { line-height: 19px; }
+.story-text .leading-\[17\.5px\] { line-height: 19.5px; }
+.story-text .leading-\[18px\]    { line-height: 20px; }
+.story-text .leading-\[18\.5px\] { line-height: 20.5px; }
+.story-text .leading-\[19px\]    { line-height: 21px; }
+.story-text .leading-\[19\.5px\] { line-height: 22px; }
+.story-text .leading-\[20px\]    { line-height: 22.5px; }
+.story-text .leading-\[21px\]    { line-height: 23.5px; }
+.story-text .leading-\[22px\]    { line-height: 24.5px; }
+.story-text .leading-\[23px\]    { line-height: 26px; }
+.story-text .leading-\[24px\]    { line-height: 27px; }
+.story-text .leading-\[30px\]    { line-height: 33.5px; }

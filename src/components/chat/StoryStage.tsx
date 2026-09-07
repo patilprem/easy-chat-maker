@@ -90,11 +90,16 @@ export const StoryStage: React.FC<Props> = ({ project, aspect, id, renderBackgro
           ...boxStyle,
         }}
       >
-        {/* Fixed height only when the feed is meant to scroll (editor
-            preview) — ChatPreview's own `h-full` flex chain needs a bounded
-            ancestor for its `.phone-chat-scroll` to become a real scroller.
-            Everywhere else the height stays intrinsic so the box hugs it. */}
+        {/* `story-text` sizes the platform's own text up ~12% for story mode
+            (see global.css) — real font sizes, so every measurement the video
+            compositor takes stays truthful, unlike the CSS `zoom` this
+            replaced. Fixed height only when the feed is meant to scroll
+            (editor preview) — ChatPreview's own `h-full` flex chain needs a
+            bounded ancestor for its `.phone-chat-scroll` to become a real
+            scroller. Everywhere else the height stays intrinsic so the box
+            hugs it. */}
         <div
+          className="story-text"
           style={{
             width: stage.column.w,
             ...(scrollable ? { height: stage.maxBoxH - STORY_SCRIM_PAD * 2, overflow: 'hidden' } : {}),
