@@ -139,7 +139,11 @@ async function createVideoSource(bg: StoryBackground, w: number, h: number): Pro
   const blur = bg.blur ?? 0;
   const dim = bg.dim ?? 0;
 
-  const BG_STEP = typeof navigator !== 'undefined' && navigator.hardwareConcurrency >= 8 ? 1 : 2;
+  // One decode per drawn frame. The story exporter now encodes at 15fps
+  // (see exportStory's STORY_FRAME_STEP), so this is already the ~15
+  // seeks/second the old every-other-frame step was there to enforce back
+  // when every one of 30 frames called in.
+  const BG_STEP = 1;
   let frameCounter = -1;
   let lastPaintedTime = -1;
 

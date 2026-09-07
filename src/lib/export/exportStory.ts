@@ -28,6 +28,15 @@ import type { VoiceClip } from '../tts/kokoro';
 // tall capture.
 const MAX_TALL_CAPTURE_AREA = 60_000_000;
 
+/**
+ * Encode one output frame per this many timeline frames — 2, so a 30fps
+ * timeline becomes a 15fps video. Bubbles are static between reveals and the
+ * background source only decodes ~15 new frames a second either way, so the
+ * skipped frames were near-duplicates that cost a composite, an encode and
+ * their share of the bitrate for nothing visible.
+ */
+const STORY_FRAME_STEP = 2;
+
 export async function exportStoryMp4(
   project: ChatProject,
   onProgress: ProgressCallback,
@@ -71,7 +80,10 @@ export async function exportStoryMp4(
   if (stage.w * stage.h * SCALE * SCALE > MAX_TALL_CAPTURE_AREA) SCALE = 1;
   const VIDEO_W = Math.round(stage.w * SCALE);
   const VIDEO_H = Math.round(stage.h * SCALE);
-  const { config, muxerCodec } = await negotiateVideoConfig(VIDEO_W, VIDEO_H, FPS);
+  // Negotiated at the OUTPUT framerate, not the timeline's — the bitrate
+  // budget scales with framerate, so a 15fps video asks for half the bits a
+  // 30fps one would.
+  const { config, muxerCodec } = await negotiateVideoConfig(VIDEO_W, VIDEO_H, FPS / STORY_FRAME_STEP);
 
   const background = await createStoryBackgroundSource(story.background, VIDEO_W, VIDEO_H);
 
@@ -149,8 +161,18 @@ export async function exportStoryMp4(
     });
     encoder.configure(config);
 
-    for (let f = 0; f < plans.length; f++) {
+    // Encode every other timeline frame. The chat itself is static between
+    // reveals and the background source only decodes a new frame every
+    // ~15/sec anyway (see storyBackground's BG_STEP), so the dropped frames
+    // were near-duplicates — but they cost a full composite + encode each,
+    // and their bits. Halving them roughly halves both export time and file
+    // size for no visible difference.
+    const outputFps = FPS / STORY_FRAME_STEP;
+    const totalOutFrames = Math.ceil(plans.length / STORY_FRAME_STEP);
+
+    for (let out = 0; out < totalOutFrames; out++) {
       if (encoderError) throw encoderError;
+      const f = Math.min(out * STORY_FRAME_STEP, plans.length - 1);
       await background.drawAt(ctx, f / FPS);
       const plan = plans[f];
       const pIdx = Math.min(pageIndexForRevealIdx(plan.visibleCount, cycleCount), composers.length - 1);
@@ -158,24 +180,33 @@ export async function exportStoryMp4(
       composers[pIdx].drawFrame(ctx, relativePlan, f);
 
       const videoFrame = new VideoFrame(outCanvas, {
-        timestamp: Math.round((f / FPS) * 1_000_000),
-        duration: Math.round((1 / FPS) * 1_000_000),
+        timestamp: Math.round((out / outputFps) * 1_000_000),
+        duration: Math.round((1 / outputFps) * 1_000_000),
       });
-      encoder.encode(videoFrame, { keyFrame: f % (FPS * 2) === 0 });
+      encoder.encode(videoFrame, { keyFrame: out % Math.round(outputFps * 2) === 0 });
       videoFrame.close();
       await drainEncoderQueue(encoder);
-      if (f % 3 === 0) onProgress('encoding', 18 + (f / plans.length) * 72);
-      if (f % 30 === 0) await sleep(0);
+      if (out % 3 === 0) onProgress('encoding', 18 + (out / totalOutFrames) * 70);
+      if (out % 30 === 0) await sleep(0);
     }
 
+    // Everything past here works on the whole movie at once and can take a
+    // while on a long export, so it reports its own steps rather than
+    // sitting on one number — flush drains the encoder's queue, finalize
+    // rewrites the file with its index at the front, and the Blob copies the
+    // result out.
+    onProgress('muxing', 88, 'Finishing the video…');
     await encoder.flush();
-    onProgress('muxing', 92);
     if (audioTrack) {
+      onProgress('muxing', 92, 'Adding the audio…');
       for (const { chunk, meta } of audioTrack.chunks) muxer.addAudioChunk(chunk, meta);
     }
+    onProgress('muxing', 94, 'Packaging the MP4…');
+    await sleep(0); // let the progress paint before finalize blocks the thread
     muxer.finalize();
     const { buffer } = muxer.target as ArrayBufferTarget;
-    onProgress('downloading', 98);
+    onProgress('downloading', 98, 'Saving…');
+    await sleep(0);
     triggerDownload(new Blob([buffer], { type: 'video/mp4' }), filename);
     onProgress('idle', 100);
   } finally {

@@ -8,17 +8,17 @@ export interface StoryPage {
 }
 
 // Sized so a page's bubbles actually FIT the box's ceiling (stage.maxBoxH —
-// ~60% of a portrait stage), since the box hugs its content and stops there
+// 70% of a portrait stage), since the box hugs its content and stops there
 // rather than growing on forever. Measured against a realistic
 // 5-participant group chat, where each incoming bubble also carries a
-// sender-name label: a portrait bubble runs ~140px, leaving room for three
-// under the ~484px of content the box's 60% allows once its padding and the
+// sender-name label: a portrait bubble runs ~90px at the story text size,
+// against the ~590px of content 70% leaves once the box's padding and the
 // chat header are taken out.
-const DEFAULT_CYCLE_COUNT_PORTRAIT = 3;
+const DEFAULT_CYCLE_COUNT_PORTRAIT = 5;
 // 16:9's stage is barely half as tall, and the SAME bubbles go in it (the
-// column is 390px wide either way, so wrapping and heights are identical) —
-// even at a more generous share of its stage there's only room for two.
-const DEFAULT_CYCLE_COUNT_LANDSCAPE = 2;
+// column is the same width either way, so wrapping and heights are
+// identical), so it fits proportionally fewer.
+const DEFAULT_CYCLE_COUNT_LANDSCAPE = 3;
 
 /** Fixed per-aspect default — not user-adjustable, kept simple on purpose. */
 export function normalizeCycleCount(aspect?: StoryAspect): number {

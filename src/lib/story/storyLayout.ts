@@ -1,12 +1,12 @@
 import type { StoryAspect, StorySettings } from '../parser/types';
 
 /**
- * Story mode keeps the chat column at the SAME width as the phone feed
- * (390px) so every bubble component, its wrapping, and the video
- * compositor's sprite/geometry logic (built around that 390px feed) work
- * completely unchanged — only the stage around the column grows.
+ * Story mode's chat column is a little wider than the phone feed's 390px so
+ * the bubbles fill more of the frame. Every bubble component is width-driven
+ * (and the compositor measures whatever the DOM reports), so this is just a
+ * number — nothing downstream is hardcoded to the phone's width.
  */
-export const STORY_COLUMN_W = 390;
+export const STORY_COLUMN_W = 420;
 
 /** CSS px inset between the dark backdrop's edge and the bubbles inside it. */
 export const STORY_SCRIM_PAD = 12;
@@ -36,7 +36,7 @@ export interface StoryStageGeometry {
  * same fraction there would leave room for about one bubble; landscape gets
  * a bigger share of its (much shorter) stage instead.
  */
-const BOX_MAX_FRAC: Record<StoryAspect, number> = { '9:16': 0.6, '16:9': 0.8 };
+const BOX_MAX_FRAC: Record<StoryAspect, number> = { '9:16': 0.7, '16:9': 0.8 };
 
 function makeStage(w: number, h: number, aspect: StoryAspect): StoryStageGeometry {
   return {

@@ -371,7 +371,11 @@ export const PhonePreview: React.FC = () => {
           style={{ width: stage.w * storyFit, height: stage.h * storyFit, maxWidth: '100%', maxHeight: '100%' }}
         >
           <div style={{ width: stage.w, height: stage.h, transform: `scale(${storyFit})`, transformOrigin: 'top left' }}>
-            <StoryStage project={project} aspect={story!.aspect} renderBackground scrollable id="phone-screen">
+            {/* Playing: the box hugs its bubbles and grows with them, exactly
+                like the exported video. Paused: pinned at full height with the
+                feed scrolling inside, so every message stays reachable to
+                click and edit. */}
+            <StoryStage project={project} aspect={story!.aspect} renderBackground scrollable={!isPlaying} id="phone-screen">
               <ChatPreview {...storyChatPreviewProps} mode="editor" chromeless showHeader={STORY_SHOW_HEADER} id="story-chat" />
             </StoryStage>
           </div>
