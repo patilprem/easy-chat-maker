@@ -26,21 +26,23 @@ export interface StoryPage {
  * where pages break without either having to measure a rendered DOM.
  */
 // Calibrated against real rendered bubbles (Inter, story text sizes, the
-// 420px column): a wrapped line measures ~20px tall, the chat header plus
-// the box's top padding measure ~72.5px, and text wraps at ~41 characters.
+// 420px column): a wrapped line measures ~20px tall, text wraps at ~300px
+// wide, and the chat header plus the box's top padding measure ~72.5px.
 // Each constant keeps a little margin over its measured value so the packer
-// still errs toward under-filling — a page that closes early only restarts
-// the chat a bubble sooner, while one that overfills crops a bubble.
-//
-// CHARS_PER_LINE in particular must stay BELOW the real wrap point, not at
-// it: at 46 the ceil() rounds a line off at a dozen common lengths, the
-// estimate turns optimistic, and medium-length 1:1 messages overflow the
-// box by ~100px. At 40 it never under-counts.
+// errs toward under-filling — a page that closes early only restarts the
+// chat a bubble sooner, while one that overfills crops a bubble.
 const LINE_H = 21;          // one wrapped line of story-sized bubble text
 const BUBBLE_CHROME = 34;   // bubble padding + the gap to the next row
 const NAME_LABEL_H = 22;    // sender label above an incoming bubble (group chats only)
-const CHARS_PER_LINE = 40;  // conservative: real wrap is ~41 (see above)
+const TEXT_W = 300;         // px of text a bubble fits before wrapping
 const NON_TEXT_H = 150;     // images/voice notes/etc — a generous fixed guess
+
+/**
+ * Measured a size ABOVE the real bubble text (15px) so every width comes
+ * back a few percent long — margin baked into the measurement itself, and
+ * cover for the platforms whose bubbles run a little larger than WhatsApp's.
+ */
+const MEASURE_FONT = '16px Inter, system-ui, sans-serif';
 
 /** Chat header + the box's own padding, which eat into the box before any bubble does. */
 const BOX_CHROME_H = 78;
@@ -48,16 +50,70 @@ const BOX_CHROME_H = 78;
 /** Hard ceiling regardless of how short the messages are, so a page still reads as a page. */
 const MAX_PER_PAGE = 6;
 
+/**
+ * Counting CHARACTERS to guess how many lines a message wraps to cannot be
+ * made safe: how many fit a line depends entirely on which characters they
+ * are — ~41 for English prose, but ~36 for emoji or digits, ~32 in ALL CAPS,
+ * ~24 for a long unbreakable token like a URL, ~21 for m/w-heavy text. Any
+ * single constant is either wrong for most text (wasting half the box) or
+ * optimistic for some of it (cropping a bubble). So measure the text instead,
+ * with the browser's own text metrics.
+ */
+let measureCtx: CanvasRenderingContext2D | null | undefined;
+function getMeasureCtx(): CanvasRenderingContext2D | null {
+  if (measureCtx === undefined) {
+    const ctx = typeof document !== 'undefined' ? document.createElement('canvas').getContext('2d') : null;
+    if (ctx) ctx.font = MEASURE_FONT;
+    measureCtx = ctx;
+  }
+  return measureCtx;
+}
+
+/** How many lines `text` wraps to in a `maxW`-wide bubble, by real text metrics. */
+function countWrappedLines(text: string, maxW: number): number {
+  const ctx = getMeasureCtx();
+  let lines = 0;
+
+  for (const paragraph of text.split('\n')) {
+    const words = paragraph.split(/\s+/).filter(Boolean);
+    if (words.length === 0) { lines += 1; continue; }
+    if (!ctx) {
+      // No canvas (server-side render, or a browser that refuses a 2D
+      // context). Fall back to the character heuristic at its universally
+      // safe width — wasteful, but this path never runs where it'd show.
+      lines += Math.max(1, Math.ceil(paragraph.length / 21));
+      continue;
+    }
+
+    const spaceW = ctx.measureText(' ').width;
+    let lineW = 0;
+    for (const word of words) {
+      const wordW = ctx.measureText(word).width;
+      // A single token wider than the line (a URL, say) breaks mid-word
+      // across as many lines as it needs.
+      if (wordW > maxW) {
+        if (lineW > 0) { lines += 1; lineW = 0; }
+        lines += Math.ceil(wordW / maxW);
+        continue;
+      }
+      const withWord = lineW === 0 ? wordW : lineW + spaceW + wordW;
+      if (withWord <= maxW) {
+        lineW = withWord;
+      } else {
+        lines += 1;
+        lineW = wordW;
+      }
+    }
+    if (lineW > 0) lines += 1;
+  }
+
+  return Math.max(1, lines);
+}
+
 function estimateMessageH(msg: Message, showsNameLabel: boolean): number {
   const label = showsNameLabel ? NAME_LABEL_H : 0;
   if (msg.kind !== 'text') return NON_TEXT_H + label;
-  const text = msg.text ?? '';
-  // Honour explicit line breaks too — they wrap independently of length.
-  const lines = text.split('\n').reduce(
-    (n, line) => n + Math.max(1, Math.ceil(line.length / CHARS_PER_LINE)),
-    0,
-  );
-  return label + BUBBLE_CHROME + Math.max(1, lines) * LINE_H;
+  return label + BUBBLE_CHROME + countWrappedLines(msg.text ?? '', TEXT_W) * LINE_H;
 }
 
 /** Same subset chatTimeline's reveal schedule counts — every message except calls. */
