@@ -6,7 +6,7 @@ import { drainEncoderQueue, getExportScale, negotiateVideoConfig, type ExportOpt
 import { captureChatSprites, createFeedComposer, openRenderIframe, sleep, triggerDownload, type FeedComposer } from './compositeCore';
 import { createStoryBackgroundSource } from './storyBackground';
 import { storyStage, STORY_SCRIM, STORY_SCRIM_PAD } from '../story/storyLayout';
-import { buildStoryPages, normalizeCycleCount, pageIndexForRevealIdx } from '../story/storyCycle';
+import { buildStoryPages, pageIndexForRevealIdx } from '../story/storyCycle';
 import { ensureVoiceClips } from '../tts/voiceClips';
 import type { VoiceClip } from '../tts/kokoro';
 
@@ -87,7 +87,7 @@ export async function exportStoryMp4(
 
   const background = await createStoryBackgroundSource(story.background, VIDEO_W, VIDEO_H);
 
-  // The chat column always restarts from the top every `cycleCount` bubbles
+  // The chat column always restarts from the top once a page's bubbles
   // instead of scrolling forever, like textingstory.app. Each page is an
   // independent mini-chat, so it gets its own render pass and its own
   // FeedComposer — the shared `schedule`/`plans` above (and therefore the
@@ -95,8 +95,7 @@ export async function exportStoryMp4(
   // unaffected and keep running across page boundaries; only which
   // composer draws a given frame, and its bubbles resetting to empty at the
   // top, changes.
-  const cycleCount = normalizeCycleCount(story.aspect);
-  const pages = buildStoryPages(messages, cycleCount);
+  const pages = buildStoryPages(messages, story.aspect);
 
   try {
     const composers: FeedComposer[] = [];
@@ -175,7 +174,7 @@ export async function exportStoryMp4(
       const f = Math.min(out * STORY_FRAME_STEP, plans.length - 1);
       await background.drawAt(ctx, f / FPS);
       const plan = plans[f];
-      const pIdx = Math.min(pageIndexForRevealIdx(plan.visibleCount, cycleCount), composers.length - 1);
+      const pIdx = Math.min(pageIndexForRevealIdx(pages, plan.visibleCount), composers.length - 1);
       const relativePlan = { ...plan, visibleCount: plan.visibleCount - pages[pIdx].startRevealIdx };
       composers[pIdx].drawFrame(ctx, relativePlan, f);
 

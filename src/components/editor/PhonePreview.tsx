@@ -7,7 +7,7 @@ import { buildFramePlan, buildRevealSchedule, framePlansFromSchedule, FPS } from
 import { useEditorStore } from '../../lib/state/editorStore';
 import { playMessageSound } from '../../lib/media/messageSounds';
 import { storyStage, STORY_SHOW_HEADER } from '../../lib/story/storyLayout';
-import { normalizeCycleCount, windowForPreview } from '../../lib/story/storyCycle';
+import { windowForPreview } from '../../lib/story/storyCycle';
 import { ensureVoiceClips, VoiceUnsupportedError } from '../../lib/tts/voiceClips';
 import { playClip, stopClipPlayback } from '../../lib/tts/clipPlayback';
 import type { VoiceClip } from '../../lib/tts/kokoro';
@@ -279,13 +279,12 @@ export const PhonePreview: React.FC = () => {
     ? Math.max(0.35, Math.min(fitW / stage.w, fitH / stage.h, PHONE_W / stage.w, PHONE_H / stage.h))
     : 1;
 
-  // Story mode always restarts from the top every `cycleCount` bubbles
+  // Story mode always restarts from the top once a page's bubbles
   // (see exportStory.ts) rather than scrolling forever — there's no manual
   // choice for this any more. Only windows while actually playing — editing
   // always shows every message so nothing becomes unreachable to click on.
-  const cycleCount = isStory ? normalizeCycleCount(story!.aspect) : 0;
-  const storyWindow = cycleCount && isPlaying && currentPlan
-    ? windowForPreview(previewMessages, currentPlan.visibleCount, cycleCount)
+  const storyWindow = isStory && isPlaying && currentPlan
+    ? windowForPreview(previewMessages, currentPlan.visibleCount, story!.aspect)
     : null;
 
   const chatPreviewProps = {

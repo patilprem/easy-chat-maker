@@ -1,28 +1,52 @@
 import type { Message, StoryAspect } from '../parser/types';
+import { storyStage, STORY_SCRIM_PAD } from './storyLayout';
 
 export interface StoryPage {
-  /** Messages for this page — a slice from where the page starts to the end of the chat; the page's own visibleCount caps how many of those actually show. */
+  /** Exactly this page's own messages. */
   messages: Message[];
   /** Reveal-index (same units as FramePlan.visibleCount) at which this page begins. */
   startRevealIdx: number;
+  /** How many reveal-eligible messages this page holds. */
+  count: number;
 }
 
-// Sized so a page's bubbles actually FIT the box's ceiling (stage.maxBoxH —
-// 70% of a portrait stage), since the box hugs its content and stops there
-// rather than growing on forever. Measured against a realistic
-// 5-participant group chat, where each incoming bubble also carries a
-// sender-name label: a portrait bubble runs ~90px at the story text size,
-// against the ~590px of content 70% leaves once the box's padding and the
-// chat header are taken out.
-const DEFAULT_CYCLE_COUNT_PORTRAIT = 5;
-// 16:9's stage is barely half as tall, and the SAME bubbles go in it (the
-// column is the same width either way, so wrapping and heights are
-// identical), so it fits proportionally fewer.
-const DEFAULT_CYCLE_COUNT_LANDSCAPE = 3;
+/**
+ * A page holds as many bubbles as actually FIT the box's ceiling, rather than
+ * a fixed count. A fixed count can't be right for both a chat of one-liners
+ * and one of paragraphs: tuned for short messages it slices long ones in
+ * half (the box stops at its cap, so anything past it is simply cut), and
+ * tuned for long ones it wastes most of the frame on short chats. So pages
+ * are packed by estimated height instead — short messages get more bubbles
+ * per page, long ones fewer, automatically.
+ *
+ * The estimate below is deliberately a little PESSIMISTIC (it reads ~10-20%
+ * taller than bubbles actually measure), because under-filling a page just
+ * restarts the chat a bubble early, while over-filling it crops a bubble —
+ * and it's shared by the preview and the exporter so both agree on exactly
+ * where pages break without either having to measure a rendered DOM.
+ */
+const LINE_H = 24;          // one wrapped line of story-sized bubble text
+const BUBBLE_CHROME = 34;   // bubble padding + the gap to the next row
+const NAME_LABEL_H = 22;    // sender label above an incoming bubble
+const CHARS_PER_LINE = 40;  // ~320px of text width in the 420px column
+const NON_TEXT_H = 150;     // images/voice notes/etc — a generous fixed guess
 
-/** Fixed per-aspect default — not user-adjustable, kept simple on purpose. */
-export function normalizeCycleCount(aspect?: StoryAspect): number {
-  return aspect === '16:9' ? DEFAULT_CYCLE_COUNT_LANDSCAPE : DEFAULT_CYCLE_COUNT_PORTRAIT;
+/** Chat header + the box's own padding, which eat into the box before any bubble does. */
+const BOX_CHROME_H = 84;
+
+/** Hard ceiling regardless of how short the messages are, so a page still reads as a page. */
+const MAX_PER_PAGE = 6;
+
+function estimateMessageH(msg: Message, showsNameLabel: boolean): number {
+  const label = showsNameLabel ? NAME_LABEL_H : 0;
+  if (msg.kind !== 'text') return NON_TEXT_H + label;
+  const text = msg.text ?? '';
+  // Honour explicit line breaks too — they wrap independently of length.
+  const lines = text.split('\n').reduce(
+    (n, line) => n + Math.max(1, Math.ceil(line.length / CHARS_PER_LINE)),
+    0,
+  );
+  return label + BUBBLE_CHROME + Math.max(1, lines) * LINE_H;
 }
 
 /** Same subset chatTimeline's reveal schedule counts — every message except calls. */
@@ -31,9 +55,8 @@ function revealEligible(messages: Message[]): Message[] {
 }
 
 /**
- * Splits `messages` into pages of `cycleCount` bubbles each — the "restart
- * from top" story style (like textingstory.app) instead of scrolling
- * forever.
+ * Splits `messages` into pages that each fit the story box — the "restart
+ * from top" story style (like textingstory.app) instead of scrolling forever.
  *
  * Each page is sliced to EXACTLY its own messages, not "from here to the end
  * of the chat". The page's own visibleCount would cap what's ever *shown*
@@ -47,26 +70,55 @@ function revealEligible(messages: Message[]): Message[] {
  * to just its own bubbles keeps the layout the compositor measures identical
  * to the one it draws.
  */
-export function buildStoryPages(messages: Message[], cycleCount: number): StoryPage[] {
+export function buildStoryPages(messages: Message[], aspect: StoryAspect = '9:16'): StoryPage[] {
   const eligible = revealEligible(messages);
-  const starts: number[] = [];
-  for (let i = 0; i < eligible.length; i += cycleCount) starts.push(i);
-  if (starts.length === 0) starts.push(0);
+  const budget = Math.max(LINE_H, storyStage(aspect).maxBoxH - BOX_CHROME_H - STORY_SCRIM_PAD);
 
-  return starts.map((startRevealIdx) => {
+  const pages: StoryPage[] = [];
+  let startRevealIdx = 0;
+  let used = 0;
+  let count = 0;
+  let lastSenderId: string | undefined;
+
+  const flush = () => {
     const startMsg = eligible[startRevealIdx];
     const rawStart = startMsg ? messages.indexOf(startMsg) : 0;
-    // First message of the NEXT page, in raw (un-filtered) message indices —
-    // absent for the last page, which just runs to the end.
-    const nextStartMsg = eligible[startRevealIdx + cycleCount];
-    const rawEnd = nextStartMsg ? messages.indexOf(nextStartMsg) : messages.length;
-    return { messages: messages.slice(rawStart, rawEnd), startRevealIdx };
-  });
+    const nextMsg = eligible[startRevealIdx + count];
+    const rawEnd = nextMsg ? messages.indexOf(nextMsg) : messages.length;
+    pages.push({ messages: messages.slice(rawStart, rawEnd), startRevealIdx, count });
+    startRevealIdx += count;
+    used = 0;
+    count = 0;
+    lastSenderId = undefined;
+  };
+
+  for (const msg of eligible) {
+    // A run of messages from one sender only labels the first of them.
+    // System/date rows have no sender at all, which is fine — they just
+    // never match the previous one.
+    const senderId = 'participantId' in msg ? msg.participantId : undefined;
+    const showsNameLabel = senderId !== lastSenderId;
+    const h = estimateMessageH(msg, showsNameLabel);
+    // Always take at least one message, however long it is — a single bubble
+    // taller than the whole box has nowhere better to go, and the compositor
+    // clips it rather than letting it spill outside the box.
+    if (count > 0 && (used + h > budget || count >= MAX_PER_PAGE)) flush();
+    used += h;
+    count += 1;
+    lastSenderId = senderId;
+  }
+  if (count > 0 || pages.length === 0) flush();
+
+  return pages;
 }
 
 /** Which page an absolute reveal-index (FramePlan.visibleCount) falls on. */
-export function pageIndexForRevealIdx(absoluteRevealIdx: number, cycleCount: number): number {
-  return Math.floor(Math.max(0, absoluteRevealIdx - 1) / cycleCount);
+export function pageIndexForRevealIdx(pages: StoryPage[], absoluteRevealIdx: number): number {
+  const idx = Math.max(0, absoluteRevealIdx - 1);
+  for (let i = pages.length - 1; i >= 0; i--) {
+    if (idx >= pages[i].startRevealIdx) return i;
+  }
+  return 0;
 }
 
 /**
@@ -77,10 +129,9 @@ export function pageIndexForRevealIdx(absoluteRevealIdx: number, cycleCount: num
 export function windowForPreview(
   messages: Message[],
   absoluteVisibleCount: number,
-  cycleCount: number,
+  aspect: StoryAspect = '9:16',
 ): { messages: Message[]; visibleCount: number } {
-  const pages = buildStoryPages(messages, cycleCount);
-  const idx = Math.min(pageIndexForRevealIdx(absoluteVisibleCount, cycleCount), pages.length - 1);
-  const page = pages[Math.max(0, idx)] ?? pages[0];
+  const pages = buildStoryPages(messages, aspect);
+  const page = pages[pageIndexForRevealIdx(pages, absoluteVisibleCount)] ?? pages[0];
   return { messages: page.messages, visibleCount: absoluteVisibleCount - page.startRevealIdx };
 }
