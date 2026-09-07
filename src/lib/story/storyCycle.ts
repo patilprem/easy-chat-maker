@@ -25,14 +25,19 @@ export interface StoryPage {
  * and it's shared by the preview and the exporter so both agree on exactly
  * where pages break without either having to measure a rendered DOM.
  */
-const LINE_H = 24;          // one wrapped line of story-sized bubble text
+// Calibrated against real rendered bubbles (Inter, story text sizes, the
+// 420px column): a wrapped line measures ~20px and ~46 characters, the chat
+// header plus the box's top padding measure ~72.5px. Each constant here
+// keeps a little margin over its measured value so the packer still errs
+// toward under-filling.
+const LINE_H = 21;          // one wrapped line of story-sized bubble text
 const BUBBLE_CHROME = 34;   // bubble padding + the gap to the next row
-const NAME_LABEL_H = 22;    // sender label above an incoming bubble
-const CHARS_PER_LINE = 40;  // ~320px of text width in the 420px column
+const NAME_LABEL_H = 22;    // sender label above an incoming bubble (group chats only)
+const CHARS_PER_LINE = 46;  // ~320px of text width in the 420px column
 const NON_TEXT_H = 150;     // images/voice notes/etc — a generous fixed guess
 
 /** Chat header + the box's own padding, which eat into the box before any bubble does. */
-const BOX_CHROME_H = 84;
+const BOX_CHROME_H = 78;
 
 /** Hard ceiling regardless of how short the messages are, so a page still reads as a page. */
 const MAX_PER_PAGE = 6;
@@ -70,7 +75,7 @@ function revealEligible(messages: Message[]): Message[] {
  * to just its own bubbles keeps the layout the compositor measures identical
  * to the one it draws.
  */
-export function buildStoryPages(messages: Message[], aspect: StoryAspect = '9:16'): StoryPage[] {
+export function buildStoryPages(messages: Message[], aspect: StoryAspect = '9:16', isGroup = false): StoryPage[] {
   const eligible = revealEligible(messages);
   const budget = Math.max(LINE_H, storyStage(aspect).maxBoxH - BOX_CHROME_H - STORY_SCRIM_PAD);
 
@@ -96,8 +101,10 @@ export function buildStoryPages(messages: Message[], aspect: StoryAspect = '9:16
     // A run of messages from one sender only labels the first of them.
     // System/date rows have no sender at all, which is fine — they just
     // never match the previous one.
+    // Only group chats label their incoming bubbles at all — charging a
+    // 1:1 chat for a label it never renders costs a bubble a page.
     const senderId = 'participantId' in msg ? msg.participantId : undefined;
-    const showsNameLabel = senderId !== lastSenderId;
+    const showsNameLabel = isGroup && senderId !== lastSenderId;
     const h = estimateMessageH(msg, showsNameLabel);
     // Always take at least one message, however long it is — a single bubble
     // taller than the whole box has nowhere better to go, and the compositor
@@ -130,8 +137,9 @@ export function windowForPreview(
   messages: Message[],
   absoluteVisibleCount: number,
   aspect: StoryAspect = '9:16',
+  isGroup = false,
 ): { messages: Message[]; visibleCount: number } {
-  const pages = buildStoryPages(messages, aspect);
+  const pages = buildStoryPages(messages, aspect, isGroup);
   const page = pages[pageIndexForRevealIdx(pages, absoluteVisibleCount)] ?? pages[0];
   return { messages: page.messages, visibleCount: absoluteVisibleCount - page.startRevealIdx };
 }

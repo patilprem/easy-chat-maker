@@ -284,7 +284,7 @@ export const PhonePreview: React.FC = () => {
   // choice for this any more. Only windows while actually playing — editing
   // always shows every message so nothing becomes unreachable to click on.
   const storyWindow = isStory && isPlaying && currentPlan
-    ? windowForPreview(previewMessages, currentPlan.visibleCount, story!.aspect)
+    ? windowForPreview(previewMessages, currentPlan.visibleCount, story!.aspect, project.isGroup)
     : null;
 
   const chatPreviewProps = {

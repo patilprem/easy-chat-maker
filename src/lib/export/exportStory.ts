@@ -95,7 +95,7 @@ export async function exportStoryMp4(
   // unaffected and keep running across page boundaries; only which
   // composer draws a given frame, and its bubbles resetting to empty at the
   // top, changes.
-  const pages = buildStoryPages(messages, story.aspect);
+  const pages = buildStoryPages(messages, story.aspect, project.isGroup);
 
   try {
     const composers: FeedComposer[] = [];
