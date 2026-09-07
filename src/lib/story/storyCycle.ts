@@ -166,12 +166,20 @@ export function buildStoryPages(messages: Message[], aspect: StoryAspect = '9:16
     // Only group chats label their incoming bubbles at all — charging a
     // 1:1 chat for a label it never renders costs a bubble a page.
     const senderId = 'participantId' in msg ? msg.participantId : undefined;
-    const showsNameLabel = isGroup && senderId !== lastSenderId;
-    const h = estimateMessageH(msg, showsNameLabel);
+    let showsNameLabel = isGroup && senderId !== lastSenderId;
+    let h = estimateMessageH(msg, showsNameLabel);
     // Always take at least one message, however long it is — a single bubble
     // taller than the whole box has nowhere better to go, and the compositor
     // clips it rather than letting it spill outside the box.
-    if (count > 0 && (used + h > budget || count >= MAX_PER_PAGE)) flush();
+    if (count > 0 && (used + h > budget || count >= MAX_PER_PAGE)) {
+      flush();
+      // Each page is rendered as its own little chat, so a page break
+      // restarts the sender run: this bubble now DOES carry its label, even
+      // though it followed one from the same sender before the break. Left
+      // uncharged, a break mid-run under-counts the new page by that label.
+      showsNameLabel = isGroup;
+      h = estimateMessageH(msg, showsNameLabel);
+    }
     used += h;
     count += 1;
     lastSenderId = senderId;

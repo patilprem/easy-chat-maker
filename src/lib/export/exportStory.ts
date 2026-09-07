@@ -95,6 +95,11 @@ export async function exportStoryMp4(
   // unaffected and keep running across page boundaries; only which
   // composer draws a given frame, and its bubbles resetting to empty at the
   // top, changes.
+  // Page sizes come from measuring the real text (see buildStoryPages), so
+  // the real font has to be loaded before measuring — a fallback font
+  // measures ALL CAPS slightly narrower, the one direction that could
+  // under-count a line and overfill a page.
+  await document.fonts?.ready;
   const pages = buildStoryPages(messages, story.aspect, project.isGroup);
 
   try {
