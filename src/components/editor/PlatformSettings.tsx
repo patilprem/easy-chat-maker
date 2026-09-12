@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { Bot, ImagePlus, Moon, RotateCcw, Settings2, Sun, X } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
+import { isStoryEnabled } from '../../lib/story/storyFlags';
 import {
   presetSwatch,
   presetsForPlatform,
@@ -102,7 +103,7 @@ export const PlatformSettings: React.FC = () => {
   const activePresetId = project.background?.presetId;
   const bgImageUrl = project.background?.imageUrl;
   const isThemedPlatform = project.platform === 'instagram' || project.platform === 'messenger';
-  const storyEnabled = project.story?.enabled ?? false;
+  const storyEnabled = isStoryEnabled(project);
 
   const allPlatformGroups: Array<{
     label: string;

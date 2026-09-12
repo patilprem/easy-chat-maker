@@ -8,6 +8,7 @@ import { useEditorStore } from '../../lib/state/editorStore';
 import { playMessageSound } from '../../lib/media/messageSounds';
 import { storyStage, STORY_SHOW_HEADER } from '../../lib/story/storyLayout';
 import { windowForPreview } from '../../lib/story/storyCycle';
+import { isStoryEnabled } from '../../lib/story/storyFlags';
 import { ensureVoiceClips, VoiceUnsupportedError } from '../../lib/tts/voiceClips';
 import { playClip, stopClipPlayback } from '../../lib/tts/clipPlayback';
 import type { VoiceClip } from '../../lib/tts/kokoro';
@@ -32,7 +33,7 @@ export const PhonePreview: React.FC = () => {
 
   const speed = project.playbackSpeed ?? 1;
   const story = project.story;
-  const isStory = story?.enabled ?? false;
+  const isStory = isStoryEnabled(project);
   // System/date messages ("X created group", "Monday") are chrome that
   // doesn't belong in the chrome-less story look — drop them entirely
   // rather than giving them a reveal slot, in both the preview and (see
@@ -200,7 +201,7 @@ export const PhonePreview: React.FC = () => {
         // one is still being read out. A missing clip (generation failed,
         // or a message was edited after prep) is skipped silently rather
         // than blocking the bubble forever.
-        if (revealed && revealed.kind === 'text' && story?.enabled && story.voice?.enabled) {
+        if (revealed && revealed.kind === 'text' && isStory && story?.voice?.enabled) {
           const clip = voiceClipsRef.current.get(revealed.id);
           if (clip) {
             speechActiveRef.current = true;
@@ -214,7 +215,7 @@ export const PhonePreview: React.FC = () => {
     }
 
     prevSoundStateRef.current = { visible, reactions };
-  }, [currentPlan, isPlaying, muted, previewMessages, project.participants, project.platform, story?.enabled, story?.voice]);
+  }, [currentPlan, isPlaying, muted, previewMessages, project.participants, project.platform, isStory, story?.voice]);
 
   // Stop any in-flight narration the moment playback pauses/mutes, and on unmount.
   useEffect(() => {

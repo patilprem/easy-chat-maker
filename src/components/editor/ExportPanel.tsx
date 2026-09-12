@@ -6,6 +6,7 @@ import { exportPng, type PngScope } from '../../lib/export/exportPng';
 import { exportMp4, type ProgressState } from '../../lib/export/exportMp4';
 import { exportCompositeMp4 } from '../../lib/export/exportComposite';
 import { exportStoryMp4 } from '../../lib/export/exportStory';
+import { isStoryEnabled } from '../../lib/story/storyFlags';
 import { exportPlaywrightVideo, RecorderUnavailableError } from '../../lib/export/exportPlaywrightVideo';
 import {
   trackConsentAccepted,
@@ -151,7 +152,7 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
     let renderer: 'recorder' | 'composite' | 'frames' | 'story' = 'recorder';
 
     try {
-      if (project.story?.enabled) {
+      if (isStoryEnabled(project)) {
         // Story mode has no phone chrome and a moving background to paint,
         // so it always uses the sprite compositor — the local recorder
         // records the phone frame, and the legacy per-frame capturer has no
@@ -324,7 +325,7 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
               </span>
             ) : (
               <>
-                <Clapperboard size={14} /> {project.story?.enabled ? 'Export Story Video' : 'Export Video'}
+                <Clapperboard size={14} /> {isStoryEnabled(project) ? 'Export Story Video' : 'Export Video'}
               </>
             )}
           </button>
