@@ -227,8 +227,8 @@ export const WhatsAppBubble: React.FC<Props> = ({
         isSelf ? 'flex-row-reverse' : 'flex-row'
       }`}
     >
-      {/* Avatar — left side only, last in group */}
-      {!isSelf && (
+      {/* Avatar — group chats only, left side, last in group */}
+      {!isSelf && project.isGroup && (
         <div className="w-7 h-7 flex-shrink-0 mt-[1px]">
           {isLastInGroup && participant && (
             <img

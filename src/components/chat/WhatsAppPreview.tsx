@@ -51,7 +51,7 @@ const WhatsAppCallCard: React.FC<{
 
   return (
     <div className={`flex items-start gap-1.5 px-3 py-0.5 group relative ${isSelf ? 'flex-row-reverse' : 'flex-row'}`}>
-      {!isSelf && (
+      {!isSelf && project.isGroup && (
         <div className="w-7 h-7 flex-shrink-0 mt-[1px]">
           {isLastInGroup && participant && (
             <img
@@ -136,7 +136,7 @@ const WhatsAppVoiceNoteCard: React.FC<{
 
   return (
     <div className={`flex items-start gap-1.5 px-3 py-0.5 group relative ${isSelf ? 'flex-row-reverse' : 'flex-row'}`}>
-      {!isSelf && (
+      {!isSelf && project.isGroup && (
         <div className="w-7 h-7 flex-shrink-0 mt-[1px]">
           {isLastInGroup && participant && (
             <img
@@ -507,11 +507,13 @@ export const WhatsAppPreview: React.FC<Props> = ({
         {/* Typing indicator */}
         {typingParticipant && (
           <div data-typing-row className="flex items-end gap-1.5 px-3 py-0.5 relative z-10">
-            <img
-              src={typingParticipant.avatarUrl}
-              alt={typingParticipant.name}
-              className="w-7 h-7 rounded-full object-cover flex-shrink-0"
-            />
+            {project.isGroup && (
+              <img
+                src={typingParticipant.avatarUrl}
+                alt={typingParticipant.name}
+                className="w-7 h-7 rounded-full object-cover flex-shrink-0"
+              />
+            )}
             <div className={`${isDark ? 'bg-[#202c33]' : 'bg-white'} rounded-[12px_12px_12px_2px] shadow-sm`}>
               <TypingIndicator />
             </div>
