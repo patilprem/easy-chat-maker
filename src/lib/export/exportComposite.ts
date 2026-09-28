@@ -2,7 +2,7 @@ import { Muxer, ArrayBufferTarget } from 'mp4-muxer';
 import type { ChatProject } from '../parser/types';
 import { buildFramePlan, FPS } from '../video/chatTimeline';
 import { tryEncodeMessageSoundTrack } from './exportAudio';
-import { drainEncoderQueue, getExportScale, negotiateVideoConfig, type ExportOptions, type ProgressCallback } from './exportMp4';
+import { drainEncoderQueue, flushEncoder, getExportScale, negotiateVideoConfig, type ExportOptions, type ProgressCallback } from './exportMp4';
 import {
   captureChatSprites, createFeedComposer, openRenderIframe, sleep, triggerDownload,
 } from './compositeCore';
@@ -97,7 +97,7 @@ export async function exportCompositeMp4(
       if (f % 30 === 0) await sleep(0);
     }
 
-    await encoder.flush();
+    await flushEncoder(encoder);
     onProgress('muxing', 92);
     if (audioTrack) {
       for (const { chunk, meta } of audioTrack.chunks) muxer.addAudioChunk(chunk, meta);

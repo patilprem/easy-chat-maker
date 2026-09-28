@@ -116,15 +116,31 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
     setError(null);
     setMp4Progress({ state: 'preparing', pct: 0, msg: getLoadingMsg(0) });
     trackExportStarted('mp4', project.platform);
+
+    // The bar shows the exporter's real progress. Only the opening
+    // "preparing" stage (loading fonts, audio and the hidden renderer, which
+    // report few steps) gets a small simulated creep so the bar isn't frozen
+    // at 0 — capped at `simCeiling`, below where every exporter's real
+    // encoding progress starts. It used to creep all the way to 96% no
+    // matter what the exporter was doing, so any slow or stuck export sat
+    // at "96%".
+    const SIM_CEILING = 15;
+    let simCeiling = SIM_CEILING;
     let simulatedPct = 0;
+    let stage: ProgressState = 'preparing';
     // A story export's voiceover/model-loading step reports its own message
     // (e.g. "Generating voice 3/12") — once one arrives, prefer it over the
     // generic rotation until the exporter moves past that step (pct advances
     // without a message, e.g. once encoding starts).
     let customMsg: string | undefined;
+    // Set once this export has finished (or been abandoned by the watchdog)
+    // so a late callback from a stalled exporter can't revive the bar.
+    let settled = false;
+    let lastProgressAt = Date.now();
+
     const progressTimer = window.setInterval(() => {
-      const step = simulatedPct < 84 ? 2 : 0.75;
-      simulatedPct = Math.min(simulatedPct + step, 96);
+      if (settled || stage !== 'preparing' || simulatedPct >= simCeiling) return;
+      simulatedPct = Math.min(simulatedPct + 0.5, simCeiling);
       setMp4Progress((prev) => {
         if (!prev) return prev;
         const pct = Math.max(prev.pct, simulatedPct);
@@ -133,25 +149,55 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
     }, 900);
 
     const onProgress = (state: ProgressState, pct: number, msg?: string) => {
+      if (settled) return;
+      lastProgressAt = Date.now();
+      stage = state;
       simulatedPct = Math.max(simulatedPct, pct);
       customMsg = msg;
-      // Never let the displayed percentage move backward — a story export
-      // reports several real progress values clustered in a narrow range
-      // while preparing each "restart" page's capture, which can arrive
-      // after the simulated timer above has already ticked the display
-      // past them, and setting the raw incoming pct directly (as this used
-      // to) made the bar visibly jump back down each time.
+      // Never let the displayed percentage move backward within one
+      // renderer — a story export reports several real progress values
+      // clustered in a narrow range while preparing each "restart" page's
+      // capture, which can arrive after the simulated creep above has
+      // already moved the display past them.
       setMp4Progress((prev) => {
         const nextPct = Math.max(prev?.pct ?? 0, pct);
         return { state, pct: nextPct, msg: msg ?? getLoadingMsg(nextPct) };
       });
     };
 
+    // Falling back to another renderer starts its work from scratch, so the
+    // bar starts over too instead of sitting at the failed attempt's value.
+    const restartProgress = (ceiling = SIM_CEILING) => {
+      if (settled) return;
+      simulatedPct = 0;
+      simCeiling = ceiling;
+      stage = 'preparing';
+      customMsg = undefined;
+      lastProgressAt = Date.now();
+      setMp4Progress({ state: 'preparing', pct: 0, msg: 'Trying another way to make your video...' });
+    };
+
+    // Watchdog: if the exporter reports nothing for STALL_MS while the tab
+    // is visible, fail with a message instead of spinning forever. Time
+    // spent hidden doesn't count — browsers pause background tabs.
+    const STALL_MS = 120_000;
+    let stallTimer = 0;
+    const onVisibility = () => { if (!document.hidden) lastProgressAt = Date.now(); };
+    document.addEventListener('visibilitychange', onVisibility);
+    const stalled = new Promise<never>((_, reject) => {
+      stallTimer = window.setInterval(() => {
+        if (document.hidden) { lastProgressAt = Date.now(); return; }
+        if (Date.now() - lastProgressAt > STALL_MS) {
+          reject(new Error('The export stopped responding. Please keep this tab open and try again — shorter chats export faster.'));
+        }
+      }, 2000);
+    });
+
     // Which renderer produced the file, reported alongside the completed event
     // so a silent slide down the fallback chain is visible in the data.
     let renderer: 'recorder' | 'composite' | 'frames' | 'story' = 'recorder';
 
-    try {
+    const runExport = async () => {
       if (isStoryEnabled(project)) {
         // Story mode has no phone chrome and a moving background to paint,
         // so it always uses the sprite compositor — the local recorder
@@ -160,32 +206,43 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
         // silently downgraded to a plain phone export.
         renderer = 'story';
         await exportStoryMp4(project, onProgress, { includeSounds });
-      } else {
-        // Prefer the local Playwright recorder (used by the desktop Run App.bat
-        // workflow). On the live site, render in-browser instead: the sprite
-        // compositor first (30fps, smooth scroll and typing animation), and the
-        // legacy per-frame capturer only if a platform layout defeats it.
+        return;
+      }
+      // Prefer the local Playwright recorder (used by the desktop Run App.bat
+      // workflow; skipped automatically on the live site). Otherwise render
+      // in-browser: the sprite compositor first (30fps, smooth scroll and
+      // typing animation), and the legacy per-frame capturer only if a
+      // platform layout defeats it.
+      try {
+        await exportPlaywrightVideo(project, onProgress, { includeSounds });
+      } catch (e) {
+        if (!(e instanceof RecorderUnavailableError)) throw e;
+        renderer = 'composite';
+        restartProgress();
         try {
-          await exportPlaywrightVideo(project, onProgress, { includeSounds });
-        } catch (e) {
-          if (!(e instanceof RecorderUnavailableError)) throw e;
-          try {
-            renderer = 'composite';
-            await exportCompositeMp4(project, onProgress, { includeSounds });
-          } catch (compositeError) {
-            console.warn('Composite export failed, using frame capture:', compositeError);
-            renderer = 'frames';
-            await exportMp4(project, onProgress, { includeSounds });
-          }
+          await exportCompositeMp4(project, onProgress, { includeSounds });
+        } catch (compositeError) {
+          console.warn('Composite export failed, using frame capture:', compositeError);
+          renderer = 'frames';
+          // The frame capturer starts encoding at 5%.
+          restartProgress(4);
+          await exportMp4(project, onProgress, { includeSounds });
         }
       }
+    };
+
+    try {
+      await Promise.race([runExport(), stalled]);
       trackExportCompleted('mp4', project.platform, renderer);
     } catch (e) {
       const message = e instanceof Error ? e.message : 'MP4 export failed';
       trackExportFailed('mp4', project.platform, `${renderer}: ${message}`);
       setError(message);
     } finally {
+      settled = true;
       window.clearInterval(progressTimer);
+      window.clearInterval(stallTimer);
+      document.removeEventListener('visibilitychange', onVisibility);
       setMp4Progress(null);
     }
   };
@@ -247,6 +304,7 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
                 style={{ width: `${mp4Progress.pct}%` }}
               />
             </div>
+            <p className="text-white/40 text-[10.5px]">Keep this tab open until the download starts — switching tabs or apps can pause the export.</p>
           </div>
         )}
 

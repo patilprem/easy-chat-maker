@@ -2,7 +2,7 @@ import { Muxer, ArrayBufferTarget } from 'mp4-muxer';
 import type { ChatProject } from '../parser/types';
 import { buildRevealSchedule, framePlansFromSchedule, FPS } from '../video/chatTimeline';
 import { tryEncodeStoryAudioTrack } from './exportAudio';
-import { drainEncoderQueue, getExportScale, negotiateVideoConfig, type ExportOptions, type ProgressCallback } from './exportMp4';
+import { drainEncoderQueue, flushEncoder, getExportScale, negotiateVideoConfig, type ExportOptions, type ProgressCallback } from './exportMp4';
 import { captureChatSprites, createFeedComposer, openRenderIframe, sleep, triggerDownload, type FeedComposer } from './compositeCore';
 import { createStoryBackgroundSource } from './storyBackground';
 import { storyStage, STORY_SCRIM, STORY_SCRIM_PAD } from '../story/storyLayout';
@@ -200,7 +200,7 @@ export async function exportStoryMp4(
     // rewrites the file with its index at the front, and the Blob copies the
     // result out.
     onProgress('muxing', 88, 'Finishing the video…');
-    await encoder.flush();
+    await flushEncoder(encoder);
     if (audioTrack) {
       onProgress('muxing', 92, 'Adding the audio…');
       for (const { chunk, meta } of audioTrack.chunks) muxer.addAudioChunk(chunk, meta);

@@ -31,9 +31,15 @@ export class CompositeUnsupportedError extends Error {
 export const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
 export function rafSettle(win: Window, count = 2): Promise<void> {
+  // requestAnimationFrame never fires in a background tab, which used to
+  // freeze the export until the user came back (or forever, on a mobile tab
+  // the OS suspended). Fall back to a timer so switching tabs only slows it.
   return new Promise((resolve) => {
-    const step = (n: number) => (n <= 0 ? resolve() : win.requestAnimationFrame(() => step(n - 1)));
+    let done = false;
+    const finish = () => { if (!done) { done = true; resolve(); } };
+    const step = (n: number) => (n <= 0 ? finish() : win.requestAnimationFrame(() => step(n - 1)));
     step(count);
+    setTimeout(finish, 50 * count + 100);
   });
 }
 

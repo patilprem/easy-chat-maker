@@ -3,6 +3,9 @@ import { Muxer, ArrayBufferTarget } from 'mp4-muxer';
 import type { ChatProject, FramePlan } from '../parser/types';
 import { buildFramePlan, FPS } from '../video/chatTimeline';
 import { tryEncodeMessageSoundTrack } from './exportAudio';
+import { ENCODER_STALLED_MSG, flushEncoder } from './encoderTimeouts';
+
+export { flushEncoder } from './encoderTimeouts';
 
 export type ProgressState = 'idle' | 'preparing' | 'encoding' | 'muxing' | 'downloading' | 'error';
 export type ProgressCallback = (state: ProgressState, pct: number, msg?: string) => void;
@@ -94,8 +97,20 @@ export function getExportScale(): number {
  * pile up until the tab is killed — the usual cause of "Aw, Snap!" during
  * export on phones.
  */
-export async function drainEncoderQueue(encoder: VideoEncoder, maxQueued = 4): Promise<void> {
+export async function drainEncoderQueue(encoder: VideoEncoder, maxQueued = 4, stallMs = 30_000): Promise<void> {
+  // A hung (usually hardware) encoder never shrinks its queue — give up
+  // after `stallMs` without progress instead of spinning forever, so the
+  // export fails with a message rather than freezing the progress bar.
+  let lastSize = encoder.encodeQueueSize;
+  let lastChange = Date.now();
   while (encoder.encodeQueueSize > maxQueued) {
+    if (encoder.state === 'closed') throw new Error(ENCODER_STALLED_MSG);
+    if (encoder.encodeQueueSize !== lastSize) {
+      lastSize = encoder.encodeQueueSize;
+      lastChange = Date.now();
+    } else if (Date.now() - lastChange > stallMs) {
+      throw new Error(ENCODER_STALLED_MSG);
+    }
     await new Promise((r) => setTimeout(r, 5));
   }
 }
@@ -258,7 +273,7 @@ export async function exportMp4(
       onProgress('encoding', pct, getMsgForProgress(pct));
     }
 
-    await encoder.flush();
+    await flushEncoder(encoder);
     onProgress('muxing', 90, CREATIVE_MSGS[3]);
     if (audioTrack) {
       for (const { chunk, meta } of audioTrack.chunks) muxer.addAudioChunk(chunk, meta);

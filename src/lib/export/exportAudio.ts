@@ -2,6 +2,7 @@ import type { ChatProject } from '../parser/types';
 import { buildRevealSchedule, soundEventsFromSchedule, type RevealSchedule } from '../video/chatTimeline';
 import { getMedia } from '../media/mediaStore';
 import type { VoiceClip } from '../tts/kokoro';
+import { flushEncoder } from './encoderTimeouts';
 
 /**
  * Browser-side audio track for the WebCodecs exporters: renders message
@@ -106,7 +107,7 @@ async function encodeRenderedBuffer(
     encoder.encode(audioData);
     audioData.close();
   }
-  await encoder.flush();
+  await flushEncoder(encoder, 30_000);
   if (encoderError) throw encoderError;
 
   return { muxerCodec, sampleRate, numberOfChannels: CHANNELS, chunks };
