@@ -315,7 +315,7 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
             <button
               onClick={() => handleExportPng('preview')}
               disabled={!project.exportConsentAccepted || pngLoading || isMp4Running}
-              className="flex flex-1 items-center justify-center gap-1.5 py-2 rounded-l-xl bg-[#00FF87] hover:bg-[#35FFA1] disabled:opacity-40 disabled:cursor-not-allowed text-[#061116] text-xs font-semibold transition-colors"
+              className="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap py-2 rounded-l-xl bg-[#00FF87] hover:bg-[#35FFA1] disabled:opacity-40 disabled:cursor-not-allowed text-[#061116] text-xs font-semibold transition-colors"
             >
               {pngLoading ? (
                 <span className="flex items-center gap-1.5">
@@ -324,7 +324,7 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
                 </span>
               ) : (
                 <>
-                  <ImageDown size={14} /> Export PNG
+                  <ImageDown size={14} className="flex-shrink-0" /> Export PNG
                 </>
               )}
             </button>
@@ -374,7 +374,7 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
           <button
             onClick={handleExportMp4}
             disabled={!project.exportConsentAccepted || pngLoading || isMp4Running}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#60EFFF] hover:bg-[#82F4FF] disabled:opacity-40 disabled:cursor-not-allowed text-[#061116] text-xs font-semibold transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 whitespace-nowrap py-2 rounded-xl bg-[#60EFFF] hover:bg-[#82F4FF] disabled:opacity-40 disabled:cursor-not-allowed text-[#061116] text-xs font-semibold transition-colors"
           >
             {isMp4Running ? (
               <span className="flex items-center gap-1.5">
@@ -383,7 +383,7 @@ export const ExportPanel: React.FC<{ hideDivider?: boolean }> = ({ hideDivider }
               </span>
             ) : (
               <>
-                <Clapperboard size={14} /> {isStoryEnabled(project) ? 'Export Story Video' : 'Export Video'}
+                <Clapperboard size={14} className="flex-shrink-0" /> {isStoryEnabled(project) ? 'Export Story Video' : 'Export Video'}
               </>
             )}
           </button>

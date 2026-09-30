@@ -69,7 +69,7 @@ export const ChatEditorApp: React.FC<{ mode?: EditorMode }> = ({ mode = 'chat' }
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0A0A1A] via-[#10172b] to-[#16213E] text-white">
       {/* Desktop layout: 3 columns */}
-      <div className="hidden md:grid md:grid-cols-[420px_minmax(420px,1fr)_280px] min-h-screen">
+      <div className="hidden md:grid md:grid-cols-[420px_minmax(420px,1fr)_340px] min-h-screen">
         {/* Left — Script */}
         <div className="border-r border-white/5 p-5 overflow-y-auto">
           <div className="mb-6">
