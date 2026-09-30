@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Clapperboard, Music, Smartphone, Upload, X } from 'lucide-react';
+import { Clapperboard, Music, Upload, X } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { STORY_COLOR_PRESETS, presetCss } from '../../lib/story/storyColors';
 import { VoicePanel } from './VoicePanel';
@@ -20,7 +20,7 @@ const segBtn = (active: boolean) =>
  */
 export const StorySettings: React.FC = () => {
   const {
-    project, setStoryEnabled, setStoryAspect, setStoryBackgroundPreset,
+    project, setStoryAspect, setStoryBackgroundPreset,
     setStoryBackgroundUpload, setStoryBackgroundOption,
     setStoryMusicUpload, setStoryMusicVolume, clearStoryMusic,
   } = useEditorStore();
@@ -30,7 +30,6 @@ export const StorySettings: React.FC = () => {
   const [musicError, setMusicError] = useState<string | null>(null);
 
   const story = project.story;
-  const enabled = story?.enabled ?? false;
   const aspect: StoryAspect = story?.aspect ?? '9:16';
   const activePresetId = story?.background.kind === 'color' ? story.background.presetId : undefined;
   const isUpload = story?.background.kind === 'upload' && !!story.background.mediaUrl;
@@ -40,24 +39,10 @@ export const StorySettings: React.FC = () => {
     <div className="flex flex-col gap-5">
       <div className="flex items-center gap-2">
         <Clapperboard size={16} className="text-[#60EFFF]" />
-        <span className="text-white font-semibold text-sm">Story mode</span>
+        <span className="text-white font-semibold text-sm">Story settings</span>
       </div>
 
-      <div className="space-y-1.5">
-        <label className="text-white/50 text-xs font-medium">Format</label>
-        <div className="flex bg-white/5 border border-white/10 rounded-xl p-1 gap-1">
-          <button onClick={() => setStoryEnabled(false)} className={segBtn(!enabled)}>
-            <Smartphone size={14} strokeWidth={2.5} />
-            Phone
-          </button>
-          <button onClick={() => setStoryEnabled(true)} className={segBtn(enabled)}>
-            <Clapperboard size={14} strokeWidth={2.5} />
-            Story
-          </button>
-        </div>
-      </div>
-
-      {enabled && story && (
+      {story && (
         <>
           <div className="space-y-1.5">
             <label className="text-white/50 text-xs font-medium">Aspect ratio</label>

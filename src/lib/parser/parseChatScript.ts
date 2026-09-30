@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid';
 import type { Participant, Message, ParsedChatResult, TextMessage } from './types';
 import { escapeXml, initialsFrom, svgDataUri } from '../svgText';
+import { parseToneToken } from '../story/tones';
 
 /**
  * `index` is the participant's stable position in the chat (e.g. the order
@@ -75,6 +76,23 @@ export function parseChatScript(input: string, selfSpeakerName?: string): Parsed
         return;
       }
       target.reaction = { emoji: text };
+      return;
+    }
+
+    // `Tone: sad` / `Tone: 😢` — story-mode voice tone for the previous
+    // text message (see lib/story/tones.ts).
+    if (command === 'tone') {
+      const target = [...messages].reverse().find((m) => m.kind === 'text');
+      const tone = parseToneToken(text);
+      if (!target || target.kind !== 'text') {
+        warnings.push(`Line ${idx + 1}: no message found for tone, skipped.`);
+        return;
+      }
+      if (!tone) {
+        warnings.push(`Line ${idx + 1}: unknown tone "${text}" (use happy, sad, romantic, angry or whisper), skipped.`);
+        return;
+      }
+      target.tone = tone;
       return;
     }
 

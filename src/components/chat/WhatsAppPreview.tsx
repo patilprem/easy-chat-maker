@@ -5,6 +5,7 @@ import { SystemChip } from './SystemChip';
 import { TypingIndicator } from './TypingIndicator';
 import { DeviceStatusBar } from './DeviceStatusBar';
 import { EditableTime } from './EditableTime';
+import type { Tone } from '../../lib/story/tones';
 import type { ChatProject, Message, Participant, TextMessage, ImageMessage, CallMessage, VoiceNoteMessage } from '../../lib/parser/types';
 import { DOODLE_IMG } from '../../lib/doodlePattern';
 import { ChatBackgroundLayer } from './ChatBackgroundLayer';
@@ -207,6 +208,7 @@ interface Props {
   activeReactionIds?: string[];
   onUpdateMessage?: (id: string, patch: Partial<Message>) => void;
   onSetReaction?: (id: string, emoji: string) => void;
+  onSetTone?: (id: string, tone: Tone | null) => void;
   onClearReaction?: (id: string) => void;
   onDeleteMessage?: (id: string) => void;
   onAddText?: (afterId: string, replyToId?: string) => void;
@@ -265,7 +267,7 @@ function computeAvatarAnchorIds(messages: Message[]): Set<string> {
 export const WhatsAppPreview: React.FC<Props> = ({
   project, mode,
   visibleCount, typingParticipantId, activeReactionIds = [],
-  onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage,
+  onUpdateMessage, onSetReaction, onSetTone, onClearReaction, onDeleteMessage,
   onAddText, onAddImage, onAddDate, onAddSystem, onAddCall, onAddVoiceNote,
   onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, onGroupAvatarClick, feedRef,
   chromeless = false,
@@ -491,6 +493,7 @@ export const WhatsAppPreview: React.FC<Props> = ({
                 onEdit={(id, text) => onUpdateMessage?.(id, { text } as Partial<Message>)}
                 onEditTime={handleEditTime}
                 onReaction={onSetReaction}
+                onSetTone={onSetTone}
                 onClearReaction={onClearReaction}
                 onDelete={onDeleteMessage}
                 onAddText={onAddText}

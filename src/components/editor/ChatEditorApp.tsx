@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { ScriptPanel } from './ScriptPanel';
 import { PlatformSettings } from './PlatformSettings';
 import { StorySettings } from './StorySettings';
-import { STORY_MODE_ENABLED } from '../../lib/story/storyFlags';
 import { ExportPanel } from './ExportPanel';
 import { PhonePreview } from './PhonePreview';
-import { useEditorStore } from '../../lib/state/editorStore';
+import { configureEditorStore, useEditorStore, type EditorMode } from '../../lib/state/editorStore';
 import { AI_PLATFORMS } from '../../lib/parser/types';
 import { trackEditorOpened } from '../../lib/track';
 import type { Platform } from '../../lib/parser/types';
@@ -14,11 +13,20 @@ type Tab = 'script' | 'preview';
 
 const VALID_PLATFORMS: Platform[] = ['whatsapp', 'instagram', 'messenger', 'slack', 'telegram', 'discord', ...AI_PLATFORMS];
 
-export const ChatEditorApp: React.FC = () => {
+/**
+ * `mode` picks which page this is: `/editor` (chat mockups, the default)
+ * or `/story-editor` (texting stories: chrome-less bubbles over a
+ * background, voiceover with per-message tones). Same layout either way;
+ * the right column swaps between the platform settings and the story
+ * settings, and each mode has its own saved project (see editorStore).
+ */
+export const ChatEditorApp: React.FC<{ mode?: EditorMode }> = ({ mode = 'chat' }) => {
+  const isStoryPage = mode === 'story';
   const hydrateFromStorage = useEditorStore((s) => s.hydrateFromStorage);
   const [mobileTab, setMobileTab] = useState<Tab>('script');
 
   useEffect(() => {
+    configureEditorStore({ mode });
     hydrateFromStorage();
     // Deep links from landing pages: /editor?platform=whatsapp or /editor?scenario=testimonial
     const params = new URLSearchParams(window.location.search);
@@ -26,9 +34,9 @@ export const ChatEditorApp: React.FC = () => {
     const requested = params.get('platform') as Platform | null;
     const isPlatformLink = !!requested && VALID_PLATFORMS.includes(requested);
 
-    if (scenario) {
+    if (scenario && !isStoryPage) {
       useEditorStore.getState().loadScenario(scenario);
-    } else if (isPlatformLink) {
+    } else if (isPlatformLink && !isStoryPage) {
       useEditorStore.getState().setPlatform(requested);
     }
 
@@ -36,9 +44,22 @@ export const ChatEditorApp: React.FC = () => {
     // actually lands on, not the stored default.
     trackEditorOpened(
       useEditorStore.getState().project.platform,
-      scenario ? 'scenario' : isPlatformLink ? 'platform_link' : 'direct'
+      isStoryPage ? 'story_editor' : scenario ? 'scenario' : isPlatformLink ? 'platform_link' : 'direct'
     );
-  }, [hydrateFromStorage]);
+  }, [hydrateFromStorage, mode, isStoryPage]);
+
+  const brandSubtitle = isStoryPage ? 'Texting story maker · beta' : 'Create realistic chat mockups';
+  const settingsColumn = (
+    <>
+      <PlatformSettings />
+      {isStoryPage && (
+        <>
+          <div className="h-px bg-white/10" />
+          <StorySettings />
+        </>
+      )}
+    </>
+  );
 
   const tabCls = (active: boolean) =>
     `flex-1 py-2 text-sm font-semibold transition-colors rounded-xl ${
@@ -58,9 +79,14 @@ export const ChatEditorApp: React.FC = () => {
                 <h1 className="brand-font text-xl font-bold bg-gradient-to-r from-[#00FF87] to-[#60EFFF] bg-clip-text text-transparent group-hover:brightness-110">
                   Easy Chat Maker
                 </h1>
-                <p className="text-white/40 text-xs mt-1 group-hover:text-white/60 transition-colors">Create realistic chat mockups</p>
+                <p className="text-white/40 text-xs mt-1 group-hover:text-white/60 transition-colors">{brandSubtitle}</p>
               </span>
             </a>
+            {isStoryPage && (
+              <a href="/editor" className="mt-3 inline-block text-xs font-medium text-white/45 hover:text-white/80 transition-colors">
+                ← Back to the chat mockup editor
+              </a>
+            )}
           </div>
           <ScriptPanel />
         </div>
@@ -72,13 +98,7 @@ export const ChatEditorApp: React.FC = () => {
 
         {/* Right — Settings + Export */}
         <div className="border-l border-white/5 p-5 flex flex-col gap-6 overflow-y-auto">
-          <PlatformSettings />
-          {STORY_MODE_ENABLED && (
-            <>
-              <div className="h-px bg-white/10" />
-              <StorySettings />
-            </>
-          )}
+          {settingsColumn}
           <ExportPanel />
         </div>
       </div>
@@ -93,6 +113,7 @@ export const ChatEditorApp: React.FC = () => {
               Easy Chat Maker
             </h1>
           </a>
+          {isStoryPage && <p className="mt-1 text-xs text-white/40">Texting story maker · beta · <a href="/editor" className="underline hover:text-white/70">chat mockup editor</a></p>}
         </div>
 
         {/* Tabs — pinned to the top while the page scrolls */}
@@ -112,13 +133,7 @@ export const ChatEditorApp: React.FC = () => {
           {mobileTab === 'script' ? (
             <div className="space-y-6">
               <ScriptPanel />
-              <PlatformSettings />
-              {STORY_MODE_ENABLED && (
-                <>
-                  <div className="h-px bg-white/10" />
-                  <StorySettings />
-                </>
-              )}
+              {settingsColumn}
             </div>
           ) : (
             <div className="flex justify-center pt-2">

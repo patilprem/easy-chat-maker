@@ -10,6 +10,7 @@ import { ClaudePreview } from './ClaudePreview';
 import { GeminiPreview } from './GeminiPreview';
 import { BackgroundTileProvider } from './ChatBackgroundLayer';
 import type { ChatProject, Message } from '../../lib/parser/types';
+import type { Tone } from '../../lib/story/tones';
 
 interface Props {
   project: ChatProject;
@@ -19,6 +20,7 @@ interface Props {
   activeReactionIds?: string[];
   onUpdateMessage?: (id: string, patch: Partial<Message>) => void;
   onSetReaction?: (id: string, emoji: string) => void;
+  onSetTone?: (id: string, tone: Tone | null) => void;
   onClearReaction?: (id: string) => void;
   onDeleteMessage?: (id: string) => void;
   onAddText?: (afterId: string, replyToId?: string) => void;

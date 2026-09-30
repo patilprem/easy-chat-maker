@@ -1,0 +1,8 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { ChatEditorApp } from '../components/editor/ChatEditorApp';
+import '../styles/global.css';
+---
+<Layout title="Texting Story Maker (beta) - Easy Chat Maker" description="Turn a text conversation into a story video: chat bubbles over a video background, free AI voiceover with per-message tones, no watermark.">
+  <ChatEditorApp mode="story" client:only="react" />
+</Layout>

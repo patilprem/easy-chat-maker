@@ -5,6 +5,7 @@ import { TypingIndicator } from './TypingIndicator';
 import { DeviceStatusBar } from './DeviceStatusBar';
 import { ChatBackgroundLayer } from './ChatBackgroundLayer';
 import { hasCustomBackground } from '../../lib/backgrounds';
+import type { Tone } from '../../lib/story/tones';
 import type { ChatProject, Message, Participant, TextMessage, ImageMessage } from '../../lib/parser/types';
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
   activeReactionIds?: string[];
   onUpdateMessage?: (id: string, patch: Partial<Message>) => void;
   onSetReaction?: (id: string, emoji: string) => void;
+  onSetTone?: (id: string, tone: Tone | null) => void;
   onClearReaction?: (id: string) => void;
   onDeleteMessage?: (id: string) => void;
   onAddText?: (afterId: string) => void;
@@ -34,7 +36,7 @@ interface Props {
 export const InstagramPreview: React.FC<Props> = ({
   project, mode,
   visibleCount, typingParticipantId, activeReactionIds = [],
-  onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage,
+  onUpdateMessage, onSetReaction, onSetTone, onClearReaction, onDeleteMessage,
   onAddText, onAddImage, onAddDate,
   onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, feedRef,
   chromeless = false,
@@ -225,6 +227,7 @@ export const InstagramPreview: React.FC<Props> = ({
               showSenderName={showSenderName}
               onEdit={(id, text) => onUpdateMessage?.(id, { text } as Partial<Message>)}
               onReaction={onSetReaction}
+              onSetTone={onSetTone}
               onClearReaction={onClearReaction}
               onDelete={onDeleteMessage}
               onAddText={onAddText}

@@ -3,6 +3,7 @@ import { Check, ChevronDown, Clipboard, PenLine, Play, X } from 'lucide-react';
 import { useEditorStore } from '../../lib/state/editorStore';
 import { YouTubeFacade } from '../shared/YouTubeFacade';
 import { TUTORIAL_VIDEO_ID, TUTORIAL_VIDEO_TITLE } from '../../lib/config/tutorialVideo';
+import { STORY_PREMADE_SCRIPTS, STORY_PROMPT_TEMPLATE } from '../../lib/templates/storyScripts';
 
 const PREMADE_SCRIPTS = [
   {
@@ -46,7 +47,7 @@ Mateo: This launch is starting to look real.`,
   },
 ];
 
-const RESERVED_SCRIPT_SPEAKERS = new Set(['system', 'date', 'day', 'reaction', 'react']);
+const RESERVED_SCRIPT_SPEAKERS = new Set(['system', 'date', 'day', 'reaction', 'react', 'tone']);
 
 const PROMPT_TEMPLATE = `Create a realistic chat script for Easy Chat Maker.
 
@@ -93,8 +94,11 @@ function getScriptCharacters(script: string): string[] {
 export const ScriptPanel: React.FC = () => {
   const {
     scriptInput, setScriptInput, parseAndLoad,
-    warnings,
+    warnings, mode,
   } = useEditorStore();
+  const isStory = mode === 'story';
+  const presets = isStory ? STORY_PREMADE_SCRIPTS : PREMADE_SCRIPTS;
+  const promptTemplate = isStory ? STORY_PROMPT_TEMPLATE : PROMPT_TEMPLATE;
 
   const [localScript, setLocalScript] = useState(scriptInput);
   const characters = useMemo(() => getScriptCharacters(localScript), [localScript]);
@@ -126,7 +130,7 @@ export const ScriptPanel: React.FC = () => {
 
   const handleCopyPrompt = async () => {
     try {
-      await navigator.clipboard.writeText(PROMPT_TEMPLATE);
+      await navigator.clipboard.writeText(promptTemplate);
       setCopiedPrompt(true);
       window.setTimeout(() => setCopiedPrompt(false), 1400);
     } catch {
@@ -223,11 +227,11 @@ export const ScriptPanel: React.FC = () => {
       <div className="space-y-2">
         <div>
           <h3 className="text-white font-semibold text-sm">Premade Scripts</h3>
-          <p className="text-white/40 text-xs mt-0.5">Pick one, then edit the script above.</p>
+          <p className="text-white/40 text-xs mt-0.5">{isStory ? 'Pick one — "Tone:" lines set how each message is read aloud.' : 'Pick one, then edit the script above.'}</p>
         </div>
 
         <div className="grid gap-2">
-          {PREMADE_SCRIPTS.map((preset) => (
+          {presets.map((preset) => (
             <button
               key={preset.id}
               onClick={() => updateScript(preset.script, preset.self)}
@@ -238,6 +242,23 @@ export const ScriptPanel: React.FC = () => {
             </button>
           ))}
         </div>
+
+        {!isStory && (
+          <a
+            href="/story-editor"
+            className="flex items-center gap-3 rounded-xl border border-[#60EFFF]/30 bg-[#60EFFF]/5 px-3 py-2.5 transition-colors hover:bg-[#60EFFF]/10"
+          >
+            <span className="text-xl leading-none">🎬</span>
+            <span className="min-w-0 flex-1">
+              <span className="flex items-center gap-1.5 text-sm font-semibold text-white">
+                Texting Story
+                <span className="rounded-full bg-[#60EFFF]/15 px-1.5 py-px text-[10px] font-bold uppercase tracking-wide text-[#60EFFF]">beta</span>
+              </span>
+              <span className="block text-xs text-white/45">Bubbles over a video background, free AI voiceover with tones</span>
+            </span>
+            <span className="text-white/40">→</span>
+          </a>
+        )}
       </div>
 
       {warnings.length > 0 && (

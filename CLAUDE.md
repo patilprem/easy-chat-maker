@@ -60,3 +60,16 @@
   hero, how-it-works, use-cases, platforms, why, faq — header anchor links
   scroll to them). Editor app: `src/pages/editor.astro` →
   `src/components/editor/ChatEditorApp.tsx`.
+- Texting-story editor (beta): `src/pages/story-editor.astro` renders the
+  same `ChatEditorApp` with `mode="story"`. The store (`editorStore.ts`) is
+  configured per page (`configureEditorStore`) and keeps a separate
+  localStorage key per mode (`ecm:v1:project` vs `ecm:v1:story-project`);
+  `normalizeForMode` forces story on/off, dark theme and a story platform.
+  Entry point is the "Texting Story (beta)" card under the pre-made scripts
+  on `/editor`; `/texting-story-maker` + `/chat-story-video-maker` link to it.
+- Per-message voice tone (story mode only): `TextMessage.tone`, set from the
+  🎭 button in a bubble's hover strip (`src/components/chat/ToneControl.tsx`)
+  or a `Tone: sad` script line. Kokoro has no emotion control, so a tone is
+  approximated (`src/lib/story/tones.ts`): speed multiplier + punctuation
+  hints at generation, then an offline Web Audio pass (`src/lib/tts/toneFx.ts`)
+  for pitch/gain/filters. Preview and export use the same processed clip.

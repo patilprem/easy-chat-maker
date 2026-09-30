@@ -60,7 +60,7 @@ function countExportOnWorker(format: ExportFormat, platform: string): void {
  * one deep-linked by a landing page, which is how we find out whether the
  * platform pages send people who go on to actually export.
  */
-export function trackEditorOpened(platform: string, entry: 'direct' | 'scenario' | 'platform_link'): void {
+export function trackEditorOpened(platform: string, entry: 'direct' | 'scenario' | 'platform_link' | 'story_editor'): void {
   ga('editor_opened', { platform, entry });
 }
 

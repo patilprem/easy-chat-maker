@@ -3,6 +3,8 @@ import { ttsCapability } from './capability';
 import { speak, type VoiceClip } from './kokoro';
 import { cacheKeyFor, getCachedClip, putCachedClip } from './voiceCache';
 import { assignVoicesForParticipants } from './voices';
+import { toneById } from '../story/tones';
+import { applyTone } from './toneFx';
 
 export type VoiceClipProgress = (msg: string, pct: number) => void;
 
@@ -55,23 +57,28 @@ export async function ensureVoiceClips(
     const msg = textMessages[i];
     if (msg.kind !== 'text') continue;
     const voiceId = voiceSettings.voices[msg.participantId] ?? defaultVoices[msg.participantId];
-    const spokenText = normalizeForSpeech(msg.text);
+    // A tone nudges the generation itself (speed + punctuation hints) and
+    // then post-processes the clip (see lib/story/tones.ts). The nudged
+    // speed/text make their own cache entry, so the base clip stays cached.
+    const tone = toneById(msg.tone);
+    const baseText = normalizeForSpeech(msg.text);
+    const spokenText = tone ? tone.hintText(baseText) : baseText;
     if (!spokenText) continue;
+    const msgSpeed = tone ? Math.min(2, Math.max(0.5, speed * tone.speedMul)) : speed;
 
-    const key = await cacheKeyFor(voiceId, speed, spokenText);
+    const key = await cacheKeyFor(voiceId, msgSpeed, spokenText);
     const cached = await getCachedClip(key);
+    let clip: VoiceClip;
     if (cached) {
-      clips.set(msg.id, { samples: cached.samples, sampleRate: cached.sampleRate, durationSec: cached.durationSec });
-      onProgress?.(`Generating voice ${i + 1}/${textMessages.length}`, 5 + Math.round((i / textMessages.length) * 90));
-      continue;
+      clip = { samples: cached.samples, sampleRate: cached.sampleRate, durationSec: cached.durationSec };
+    } else {
+      clip = await speak(cap.device, spokenText, voiceId, msgSpeed, (p) => {
+        if (!modelReady) onProgress?.(`Loading voice model… ${p.pct}%`, Math.round(p.pct * 0.3));
+        if (p.status === 'ready') modelReady = true;
+      });
+      await putCachedClip(key, clip);
     }
-
-    const clip = await speak(cap.device, spokenText, voiceId, speed, (p) => {
-      if (!modelReady) onProgress?.(`Loading voice model… ${p.pct}%`, Math.round(p.pct * 0.3));
-      if (p.status === 'ready') modelReady = true;
-    });
-    await putCachedClip(key, clip);
-    clips.set(msg.id, clip);
+    clips.set(msg.id, tone ? await applyTone(clip, tone) : clip);
     onProgress?.(`Generating voice ${i + 1}/${textMessages.length}`, 5 + Math.round((i / textMessages.length) * 90));
   }
 

@@ -2,6 +2,8 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Smile, EllipsisVertical, MessageSquarePlus, ImagePlus, CalendarPlus, Trash2 } from 'lucide-react';
 import { ReactionBadge } from './ReactionBadge';
+import { ToneBadge, ToneButton } from './ToneControl';
+import type { Tone } from '../../lib/story/tones';
 import { selfBubbleBackground } from '../../lib/backgrounds';
 import type { TextMessage, ImageMessage, Participant, ChatProject } from '../../lib/parser/types';
 
@@ -18,6 +20,7 @@ interface Props {
   onEdit?: (id: string, text: string) => void;
   onReaction?: (id: string, emoji: string) => void;
   onClearReaction?: (id: string) => void;
+  onSetTone?: (id: string, tone: Tone | null) => void;
   onDelete?: (id: string) => void;
   onAddText?: (afterId: string) => void;
   onAddImage?: (afterId: string, file: File) => void;
@@ -37,8 +40,7 @@ function getMenuOverlayStyle(anchor: DOMRect, alignRight: boolean): React.CSSPro
   return { position: 'fixed', top, left, width, zIndex: 9999 };
 }
 
-function getActionOverlayStyle(anchor: DOMRect, isSelf: boolean): React.CSSProperties {
-  const width = 62;
+function getActionOverlayStyle(anchor: DOMRect, isSelf: boolean, width = 62): React.CSSProperties {
   const height = 28;
   const gap = 4;
   const preferredLeft = isSelf ? anchor.left - width - gap : anchor.right + gap;
@@ -64,11 +66,12 @@ function getReactionOverlayStyle(anchor: DOMRect, isSelf: boolean): React.CSSPro
 export const InstagramBubble: React.FC<Props> = ({
   msg, participant, project, mode,
   isFirstInGroup, isLastInGroup, showSenderName = false,
-  onEdit, onReaction, onClearReaction, onDelete, onAddText, onAddImage, onAddDate,
+  onEdit, onReaction, onClearReaction, onSetTone, onDelete, onAddText, onAddImage, onAddDate,
 }) => {
   const isSelf = participant?.isSelf ?? false;
   const isEditor = mode === 'editor';
   const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const [showTonePicker, setShowTonePicker] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showActionStrip, setShowActionStrip] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null);
@@ -86,7 +89,7 @@ export const InstagramBubble: React.FC<Props> = ({
   }, []);
 
   useEffect(() => {
-    if (!showActionStrip && !showMenu && !showReactionPicker) return;
+    if (!showActionStrip && !showMenu && !showReactionPicker && !showTonePicker) return;
 
     updateActionAnchor();
     window.addEventListener('resize', updateActionAnchor);
@@ -96,10 +99,10 @@ export const InstagramBubble: React.FC<Props> = ({
       window.removeEventListener('resize', updateActionAnchor);
       window.removeEventListener('scroll', updateActionAnchor, true);
     };
-  }, [showActionStrip, showMenu, showReactionPicker, updateActionAnchor]);
+  }, [showActionStrip, showMenu, showReactionPicker, showTonePicker, updateActionAnchor]);
 
   useEffect(() => {
-    if (!showMenu && !showReactionPicker) return;
+    if (!showMenu && !showReactionPicker && !showTonePicker) return;
 
     const closeOverlays = () => {
       setShowMenu(false);
@@ -132,7 +135,7 @@ export const InstagramBubble: React.FC<Props> = ({
       document.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('scroll', closeOverlays, true);
     };
-  }, [showMenu, showReactionPicker]);
+  }, [showMenu, showReactionPicker, showTonePicker]);
 
   const handleBlur = useCallback((e: React.FocusEvent<HTMLDivElement>) => {
     const text = e.currentTarget.textContent ?? '';
@@ -170,15 +173,15 @@ export const InstagramBubble: React.FC<Props> = ({
 
   const editorActionStrip = isEditor ? (
     <div
-      style={actionAnchor ? getActionOverlayStyle(actionAnchor, isSelf) : undefined}
+      style={actionAnchor ? getActionOverlayStyle(actionAnchor, isSelf, onSetTone ? 92 : 62) : undefined}
       onMouseEnter={() => {
         setShowActionStrip(true);
         updateActionAnchor();
       }}
       onMouseLeave={() => {
-        if (!showMenu && !showReactionPicker) setShowActionStrip(false);
+        if (!showMenu && !showReactionPicker && !showTonePicker) setShowActionStrip(false);
       }}
-      className={`flex h-7 w-[62px] items-center gap-1 ${isSelf ? 'justify-end' : 'justify-start'}`}
+      className={`flex h-7 ${onSetTone ? 'w-[92px]' : 'w-[62px]'} items-center gap-1 ${isSelf ? 'justify-end' : 'justify-start'}`}
     >
       <button
         ref={reactionButtonRef}
@@ -193,6 +196,18 @@ export const InstagramBubble: React.FC<Props> = ({
       >
         <Smile size={15} />
       </button>
+      {onSetTone && msg.kind === 'text' && (
+        <ToneButton
+          msgId={msg.id}
+          value={msg.tone}
+          open={showTonePicker}
+          onOpenChange={(o) => { setShowTonePicker(o); if (o) { setShowMenu(false); setShowReactionPicker(false); } }}
+          onSetTone={onSetTone}
+          isDark={isDark}
+          isSelf={isSelf}
+          className={`h-7 w-7 rounded-full flex items-center justify-center transition-colors ${actionBtnBg}`}
+        />
+      )}
       <button
         ref={menuButtonRef}
         onClick={() => {
@@ -216,7 +231,7 @@ export const InstagramBubble: React.FC<Props> = ({
         updateActionAnchor();
       }}
       onMouseLeave={() => {
-        if (!showMenu && !showReactionPicker) setShowActionStrip(false);
+        if (!showMenu && !showReactionPicker && !showTonePicker) setShowActionStrip(false);
       }}
       className={`group/message relative flex items-end gap-2 px-4 ${reaction ? 'pb-4' : 'pb-1.5'} ${showSenderName ? 'pt-1.5' : 'pt-0.5'} ${isSelf ? 'flex-row-reverse' : 'flex-row'}`}
     >
@@ -319,6 +334,8 @@ export const InstagramBubble: React.FC<Props> = ({
             </div>
           ) : null}
         </div>
+
+        {isEditor && msg.kind === 'text' && <ToneBadge tone={msg.tone} isSelf={isSelf} isDark={isDark} />}
 
         {/* Reaction */}
         {reaction && (

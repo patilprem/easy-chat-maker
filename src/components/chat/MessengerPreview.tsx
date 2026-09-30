@@ -5,6 +5,8 @@ import { DeviceStatusBar } from './DeviceStatusBar';
 import { TypingIndicator } from './TypingIndicator';
 import { ChatBackgroundLayer } from './ChatBackgroundLayer';
 import { hasCustomBackground, selfBubbleBackground } from '../../lib/backgrounds';
+import { ToneBadge, ToneButton } from './ToneControl';
+import type { Tone } from '../../lib/story/tones';
 import type { ChatProject, ImageMessage, Message, Participant, TextMessage } from '../../lib/parser/types';
 
 interface Props {
@@ -15,6 +17,7 @@ interface Props {
   activeReactionIds?: string[];
   onUpdateMessage?: (id: string, patch: Partial<Message>) => void;
   onSetReaction?: (id: string, emoji: string) => void;
+  onSetTone?: (id: string, tone: Tone | null) => void;
   onClearReaction?: (id: string) => void;
   onDeleteMessage?: (id: string) => void;
   onAddText?: (afterId: string) => void;
@@ -65,8 +68,7 @@ function getReactionOverlayStyle(anchor: DOMRect, isSelf: boolean): React.CSSPro
   return { position: 'fixed', left, top, width, zIndex: 9999 };
 }
 
-function getActionOverlayStyle(anchor: DOMRect, isSelf: boolean): React.CSSProperties {
-  const width = 62;
+function getActionOverlayStyle(anchor: DOMRect, isSelf: boolean, width = 62): React.CSSProperties {
   const height = 28;
   const gap = 4;
   const preferredLeft = isSelf ? anchor.left - width - gap : anchor.right + gap;
@@ -160,18 +162,20 @@ const MessengerBubble: React.FC<{
   onEdit?: (id: string, text: string) => void;
   onReaction?: (id: string, emoji: string) => void;
   onClearReaction?: (id: string) => void;
+  onSetTone?: (id: string, tone: Tone | null) => void;
   onDelete?: (id: string) => void;
   onAddText?: (afterId: string) => void;
   onAddImage?: (afterId: string, file: File) => void;
   onAddDate?: (afterId: string, label?: string) => void;
 }> = ({
   msg, participant, project, isFirstInGroup, isLastInGroup, isEditor,
-  onEdit, onReaction, onClearReaction, onDelete, onAddText, onAddImage, onAddDate,
+  onEdit, onReaction, onClearReaction, onSetTone, onDelete, onAddText, onAddImage, onAddDate,
 }) => {
   const isSelf = participant?.isSelf ?? false;
   const isDark = project.theme === 'dark';
   const [showMenu, setShowMenu] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const [showTonePicker, setShowTonePicker] = useState(false);
   const [showActionStrip, setShowActionStrip] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null);
   const [reactionAnchor, setReactionAnchor] = useState<DOMRect | null>(null);
@@ -194,7 +198,7 @@ const MessengerBubble: React.FC<{
   }, []);
 
   useEffect(() => {
-    if (!showActionStrip && !showMenu && !showReactionPicker) return;
+    if (!showActionStrip && !showMenu && !showReactionPicker && !showTonePicker) return;
 
     updateActionAnchor();
     window.addEventListener('resize', updateActionAnchor);
@@ -204,10 +208,10 @@ const MessengerBubble: React.FC<{
       window.removeEventListener('resize', updateActionAnchor);
       window.removeEventListener('scroll', updateActionAnchor, true);
     };
-  }, [showActionStrip, showMenu, showReactionPicker, updateActionAnchor]);
+  }, [showActionStrip, showMenu, showReactionPicker, showTonePicker, updateActionAnchor]);
 
   useEffect(() => {
-    if (!showMenu && !showReactionPicker) return;
+    if (!showMenu && !showReactionPicker && !showTonePicker) return;
 
     const closeOverlays = () => {
       setShowMenu(false);
@@ -240,7 +244,7 @@ const MessengerBubble: React.FC<{
       document.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('scroll', closeOverlays, true);
     };
-  }, [showMenu, showReactionPicker]);
+  }, [showMenu, showReactionPicker, showTonePicker]);
 
   const radius = isSelf
     ? isFirstInGroup && isLastInGroup
@@ -270,15 +274,15 @@ const MessengerBubble: React.FC<{
 
   const editorActionStrip = isEditor ? (
     <div
-      style={actionAnchor ? getActionOverlayStyle(actionAnchor, isSelf) : undefined}
+      style={actionAnchor ? getActionOverlayStyle(actionAnchor, isSelf, onSetTone ? 92 : 62) : undefined}
       onMouseEnter={() => {
         setShowActionStrip(true);
         updateActionAnchor();
       }}
       onMouseLeave={() => {
-        if (!showMenu && !showReactionPicker) setShowActionStrip(false);
+        if (!showMenu && !showReactionPicker && !showTonePicker) setShowActionStrip(false);
       }}
-      className={`flex h-7 w-[62px] items-center gap-1 ${isSelf ? 'justify-end' : 'justify-start'}`}
+      className={`flex h-7 ${onSetTone ? 'w-[92px]' : 'w-[62px]'} items-center gap-1 ${isSelf ? 'justify-end' : 'justify-start'}`}
     >
       <button
         ref={reactionButtonRef}
@@ -294,6 +298,18 @@ const MessengerBubble: React.FC<{
       >
         <Smile size={15} />
       </button>
+      {onSetTone && msg.kind === 'text' && (
+        <ToneButton
+          msgId={msg.id}
+          value={msg.tone}
+          open={showTonePicker}
+          onOpenChange={(o) => { setShowTonePicker(o); if (o) { setShowMenu(false); setShowReactionPicker(false); } }}
+          onSetTone={onSetTone}
+          isDark={isDark}
+          isSelf={isSelf}
+          className={`h-7 w-7 rounded-full flex items-center justify-center transition-colors ${actionBtnClass}`}
+        />
+      )}
       <button
         ref={menuButtonRef}
         onClick={() => {
@@ -318,7 +334,7 @@ const MessengerBubble: React.FC<{
         updateActionAnchor();
       }}
       onMouseLeave={() => {
-        if (!showMenu && !showReactionPicker) setShowActionStrip(false);
+        if (!showMenu && !showReactionPicker && !showTonePicker) setShowActionStrip(false);
       }}
       className={`group/message flex items-end gap-2 px-3 ${isFirstInGroup ? 'pt-2.5' : 'pt-0.5'} ${msg.reaction ? 'pb-3' : 'pb-0'} ${isSelf ? 'justify-end' : 'justify-start'}`}
     >
@@ -355,6 +371,8 @@ const MessengerBubble: React.FC<{
             {msg.kind === 'text' ? msg.text : ''}
           </div>
         )}
+
+        {isEditor && msg.kind === 'text' && <ToneBadge tone={msg.tone} isSelf={isSelf} isDark={isDark} />}
 
         {msg.reaction && (
           <button
@@ -451,7 +469,7 @@ const MessengerBubble: React.FC<{
 
 export const MessengerPreview: React.FC<Props> = ({
   project, mode, visibleCount, typingParticipantId, activeReactionIds = [],
-  onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage, onAddText, onAddImage, onAddDate,
+  onUpdateMessage, onSetReaction, onSetTone, onClearReaction, onDeleteMessage, onAddText, onAddImage, onAddDate,
   onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, feedRef,
   chromeless = false,
   showHeader = false,
@@ -600,6 +618,7 @@ export const MessengerPreview: React.FC<Props> = ({
               isEditor={isEditor}
               onEdit={(id, text) => onUpdateMessage?.(id, { text } as Partial<Message>)}
               onReaction={onSetReaction}
+              onSetTone={onSetTone}
               onClearReaction={onClearReaction}
               onDelete={onDeleteMessage}
               onAddText={onAddText}

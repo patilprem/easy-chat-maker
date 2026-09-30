@@ -9,8 +9,38 @@ import { trackChatGenerated, trackTemplateLoaded } from '../track';
 import { defaultStorySettings } from '../story/storyLayout';
 import { STORY_PLATFORMS } from '../parser/types';
 import type { ChatProject, Message, Participant, Reaction, StoryAspect, StoryBackground, StorySettings } from '../parser/types';
+import type { Tone } from '../story/tones';
 
-const STORAGE_KEY = 'ecm:v1:project';
+/**
+ * Which editor page owns this store. `/editor` (chat) and `/story-editor`
+ * (story) are separate Astro routes, so each page load configures the
+ * store once before hydrating. Each mode has its own localStorage key so
+ * opening one page never touches what was left in the other.
+ */
+export type EditorMode = 'chat' | 'story';
+const STORAGE_KEYS: Record<EditorMode, string> = {
+  chat: 'ecm:v1:project',
+  story: 'ecm:v1:story-project',
+};
+let activeMode: EditorMode = 'chat';
+
+export function configureEditorStore(opts: { mode: EditorMode }): void {
+  activeMode = opts.mode;
+  useEditorStore.setState({ mode: opts.mode, project: defaultProject() });
+}
+
+/** Coerces a project into the active mode's invariants (story on/off, dark theme + story platform for stories). */
+function normalizeForMode(p: ChatProject): ChatProject {
+  if (activeMode === 'story') {
+    return {
+      ...p,
+      theme: 'dark',
+      platform: STORY_PLATFORMS.includes(p.platform) ? p.platform : 'whatsapp',
+      story: p.story ? { ...p.story, enabled: true } : defaultStorySettings(),
+    };
+  }
+  return p.story?.enabled ? { ...p, story: { ...p.story, enabled: false } } : p;
+}
 
 function debounce<T extends (...args: unknown[]) => void>(fn: T, ms: number): T {
   let timer: ReturnType<typeof setTimeout>;
@@ -21,6 +51,7 @@ function debounce<T extends (...args: unknown[]) => void>(fn: T, ms: number): T 
 }
 
 interface EditorState {
+  mode: EditorMode;
   project: ChatProject;
   scriptInput: string;
   warnings: string[];
@@ -49,6 +80,7 @@ interface EditorState {
   addVoiceNoteMessage: (afterId: string | null, participantId?: string, duration?: string) => void;
   deleteMessage: (id: string) => void;
   setReaction: (msgId: string, emoji: string) => void;
+  setMessageTone: (msgId: string, tone: Tone | null) => void;
   clearReaction: (msgId: string) => void;
   setExportConsent: (v: boolean) => void;
   setBackgroundPreset: (presetId: string | null) => void;
@@ -122,7 +154,7 @@ function alignFirstMessageToSelf(p: ChatProject): ChatProject {
   };
 }
 
-const defaultProject = (): ChatProject => ({
+const defaultProject = (): ChatProject => normalizeForMode({
   ...PRESETS.private,
   id: nanoid(),
   exportConsentAccepted: false,
@@ -150,16 +182,17 @@ export const useEditorStore = create<EditorState>((set, get) => {
             }
           : undefined,
       };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
+      localStorage.setItem(STORAGE_KEYS[activeMode], JSON.stringify(clean));
     } catch { /* ignore quota errors */ }
   }, 500) as () => void;
 
   const update = (updater: (p: ChatProject) => ChatProject) => {
-    set((s) => ({ project: updater(s.project) }));
+    set((s) => ({ project: normalizeForMode(updater(s.project)) }));
     persist();
   };
 
   return {
+    mode: activeMode,
     project: defaultProject(),
     scriptInput: '',
     warnings: [],
@@ -438,6 +471,15 @@ export const useEditorStore = create<EditorState>((set, get) => {
       }));
     },
 
+    setMessageTone: (msgId, tone) => {
+      update((p) => ({
+        ...p,
+        messages: p.messages.map((m) =>
+          m.id === msgId && m.kind === 'text' ? { ...m, tone: tone ?? undefined } : m
+        ),
+      }));
+    },
+
     clearReaction: (msgId) => {
       update((p) => ({
         ...p,
@@ -654,10 +696,10 @@ export const useEditorStore = create<EditorState>((set, get) => {
 
     hydrateFromStorage: () => {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = localStorage.getItem(STORAGE_KEYS[activeMode]);
         if (!raw) return;
         const saved = JSON.parse(raw) as ChatProject;
-        set({ project: { ...saved, exportConsentAccepted: false } });
+        set({ project: normalizeForMode({ ...saved, exportConsentAccepted: false }) });
         get().resolveImageUrls();
       } catch { /* ignore */ }
     },

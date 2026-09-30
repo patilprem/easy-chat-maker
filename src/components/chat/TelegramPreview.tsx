@@ -4,6 +4,8 @@ import { CalendarPlus, CheckCheck, ChevronLeft, EllipsisVertical, ImagePlus, Mes
 import { DeviceStatusBar } from './DeviceStatusBar';
 import { EditableTime } from './EditableTime';
 import { TypingIndicator } from './TypingIndicator';
+import { ToneBadge, ToneButton } from './ToneControl';
+import type { Tone } from '../../lib/story/tones';
 import type { ChatProject, ImageMessage, Message, Participant, TextMessage } from '../../lib/parser/types';
 import { TELEGRAM_DOODLE_IMG } from '../../lib/doodlePattern';
 import { ChatBackgroundLayer } from './ChatBackgroundLayer';
@@ -17,6 +19,7 @@ interface Props {
   activeReactionIds?: string[];
   onUpdateMessage?: (id: string, patch: Partial<Message>) => void;
   onSetReaction?: (id: string, emoji: string) => void;
+  onSetTone?: (id: string, tone: Tone | null) => void;
   onClearReaction?: (id: string) => void;
   onDeleteMessage?: (id: string) => void;
   onAddText?: (afterId: string, replyToId?: string) => void;
@@ -63,8 +66,7 @@ function getReactionOverlayStyle(anchor: DOMRect, isSelf: boolean): React.CSSPro
   return { position: 'fixed', left, top, width, zIndex: 9999 };
 }
 
-function getActionOverlayStyle(anchor: DOMRect, isSelf: boolean): React.CSSProperties {
-  const width = 62;
+function getActionOverlayStyle(anchor: DOMRect, isSelf: boolean, width = 62): React.CSSProperties {
   const height = 28;
   const gap = 4;
   const preferredLeft = isSelf ? anchor.left - width - gap : anchor.right + gap;
@@ -121,18 +123,20 @@ const TelegramBubble: React.FC<{
   onEditTime?: (id: string, time: string) => void;
   onReaction?: (id: string, emoji: string) => void;
   onClearReaction?: (id: string) => void;
+  onSetTone?: (id: string, tone: Tone | null) => void;
   onDelete?: (id: string) => void;
   onAddText?: (afterId: string, replyToId?: string) => void;
   onAddImage?: (afterId: string, file: File) => void;
   onAddDate?: (afterId: string, label?: string) => void;
 }> = ({
   msg, participant, project, isEditor, isFirstInGroup, isLastInGroup,
-  onEdit, onEditTime, onReaction, onClearReaction, onDelete, onAddText, onAddImage, onAddDate,
+  onEdit, onEditTime, onReaction, onClearReaction, onSetTone, onDelete, onAddText, onAddImage, onAddDate,
 }) => {
   const isSelf = participant?.isSelf ?? false;
   const isDark = project.theme === 'dark';
   const [showMenu, setShowMenu] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const [showTonePicker, setShowTonePicker] = useState(false);
   const [showActionStrip, setShowActionStrip] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null);
   const [reactionAnchor, setReactionAnchor] = useState<DOMRect | null>(null);
@@ -171,13 +175,13 @@ const TelegramBubble: React.FC<{
   const scheduleActionHide = useCallback(() => {
     clearActionHideTimer();
     actionHideTimerRef.current = window.setTimeout(() => {
-      if (!showMenu && !showReactionPicker) setShowActionStrip(false);
+      if (!showMenu && !showReactionPicker && !showTonePicker) setShowActionStrip(false);
       actionHideTimerRef.current = null;
     }, 120);
-  }, [clearActionHideTimer, showMenu, showReactionPicker]);
+  }, [clearActionHideTimer, showMenu, showReactionPicker, showTonePicker]);
 
   useEffect(() => {
-    if (!showActionStrip && !showMenu && !showReactionPicker) return;
+    if (!showActionStrip && !showMenu && !showReactionPicker && !showTonePicker) return;
 
     updateActionAnchor();
     window.addEventListener('resize', updateActionAnchor);
@@ -187,12 +191,12 @@ const TelegramBubble: React.FC<{
       window.removeEventListener('resize', updateActionAnchor);
       window.removeEventListener('scroll', updateActionAnchor, true);
     };
-  }, [showActionStrip, showMenu, showReactionPicker, updateActionAnchor]);
+  }, [showActionStrip, showMenu, showReactionPicker, showTonePicker, updateActionAnchor]);
 
   useEffect(() => () => clearActionHideTimer(), [clearActionHideTimer]);
 
   useEffect(() => {
-    if (!showMenu && !showReactionPicker) return;
+    if (!showMenu && !showReactionPicker && !showTonePicker) return;
     const closeOverlays = () => {
       setShowMenu(false);
       setShowReactionPicker(false);
@@ -220,7 +224,7 @@ const TelegramBubble: React.FC<{
       document.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('scroll', closeOverlays, true);
     };
-  }, [showMenu, showReactionPicker]);
+  }, [showMenu, showReactionPicker, showTonePicker]);
 
   const replied = (msg as any).replyToId
     ? project.messages.find((m) => m.id === (msg as any).replyToId)
@@ -320,6 +324,8 @@ const TelegramBubble: React.FC<{
           </div>
         </div>
 
+        {isEditor && msg.kind === 'text' && <ToneBadge tone={msg.tone} isSelf={isSelf} isDark={isDark} />}
+
         {msg.reaction && (
           <button
             onClick={() => isEditor && onClearReaction?.(msg.id)}
@@ -339,7 +345,7 @@ const TelegramBubble: React.FC<{
           <>
             {showActionStrip && actionAnchor && typeof document !== 'undefined' && createPortal(
               <div
-                style={getActionOverlayStyle(actionAnchor, isSelf)}
+                style={getActionOverlayStyle(actionAnchor, isSelf, onSetTone ? 92 : 62)}
                 onMouseEnter={() => {
                   clearActionHideTimer();
                   setShowActionStrip(true);
@@ -364,6 +370,30 @@ const TelegramBubble: React.FC<{
                 >
                   <Smile size={15} />
                 </button>
+
+                {onSetTone && msg.kind === 'text' && (
+
+                  <ToneButton
+
+                    msgId={msg.id}
+
+                    value={msg.tone}
+
+                    open={showTonePicker}
+
+                    onOpenChange={(o) => { setShowTonePicker(o); if (o) { setShowMenu(false); setShowReactionPicker(false); } }}
+
+                    onSetTone={onSetTone}
+
+                    isDark={isDark}
+
+                    isSelf={isSelf}
+
+                    className={`flex h-7 w-7 items-center justify-center rounded-full ${isDark ? 'bg-[#26384a] text-white hover:bg-[#30465d]' : 'bg-white text-[#64748b] shadow-sm hover:bg-[#f1f5f9]'}`}
+
+                  />
+
+                )}
 
                 <button
                   ref={menuButtonRef}
@@ -463,7 +493,7 @@ const TelegramBubble: React.FC<{
 
 export const TelegramPreview: React.FC<Props> = ({
   project, mode, visibleCount, typingParticipantId, activeReactionIds = [],
-  onUpdateMessage, onSetReaction, onClearReaction, onDeleteMessage, onAddText, onAddImage, onAddDate,
+  onUpdateMessage, onSetReaction, onSetTone, onClearReaction, onDeleteMessage, onAddText, onAddImage, onAddDate,
   onUpdateTitle, onUpdateSubtitle, onUpdateStatusTime, onAvatarClick, onGroupAvatarClick, feedRef,
   chromeless = false,
   showHeader = false,
@@ -644,6 +674,7 @@ export const TelegramPreview: React.FC<Props> = ({
               onEdit={(id, text) => onUpdateMessage?.(id, { text } as Partial<Message>)}
               onEditTime={(id, time) => onUpdateMessage?.(id, { time: time || undefined } as Partial<Message>)}
               onReaction={onSetReaction}
+              onSetTone={onSetTone}
               onClearReaction={onClearReaction}
               onDelete={onDeleteMessage}
               onAddText={onAddText}

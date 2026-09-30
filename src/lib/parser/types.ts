@@ -1,3 +1,5 @@
+import type { Tone } from '../story/tones';
+
 export type Platform = 'whatsapp' | 'instagram' | 'messenger' | 'slack' | 'telegram' | 'discord' | 'chatgpt' | 'claude' | 'gemini';
 
 /** AI assistant platforms: single-user chats, no group mode */
@@ -32,6 +34,8 @@ export interface TextMessage {
   time?: string;
   reaction?: Reaction;
   replyToId?: string; // ID of message being quoted
+  /** Story mode voiceover tone (see lib/story/tones.ts). */
+  tone?: Tone;
 }
 
 export interface ImageMessage {

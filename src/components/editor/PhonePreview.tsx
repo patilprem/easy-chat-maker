@@ -26,7 +26,7 @@ function buildPreviewFramePlan(messages: Message[], participants: Participant[],
 export const PhonePreview: React.FC = () => {
   const {
     project,
-    updateMessage, setReaction, clearReaction, deleteMessage,
+    updateMessage, setReaction, clearReaction, setMessageTone, deleteMessage,
     addTextMessage, addImageMessage, addDateMessage, addSystemMessage, addCallMessage, addVoiceNoteMessage,
     setTitle, setSubtitle, setParticipantAvatar, setGroupAvatar, setPlaybackSpeed, setStatusBarTime,
   } = useEditorStore();
@@ -295,6 +295,7 @@ export const PhonePreview: React.FC = () => {
     activeReactionIds: isPlaying ? currentPlan?.activeReactionIds : undefined,
     onUpdateMessage: (id: string, patch: Partial<Message>) => updateMessage(id, patch),
     onSetReaction: setReaction,
+    onSetTone: isStory ? setMessageTone : undefined,
     onClearReaction: clearReaction,
     onDeleteMessage: deleteMessage,
     onAddText: (afterId: string, replyToId?: string) => addTextMessage(afterId, undefined, replyToId),
